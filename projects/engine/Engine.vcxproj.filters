@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Framework\Engine.h">
+    <ClInclude Include="include\Engine\Framework\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Engine\Framework\Engine.h">
+    <ClInclude Include="src\ThirdParty\imgui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

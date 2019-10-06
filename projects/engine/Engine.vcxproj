@@ -73,6 +73,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Engine\Framework\Engine.h" />
+    <ClInclude Include="src\ThirdParty\imgui.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine\Framework\Engine.cpp" />

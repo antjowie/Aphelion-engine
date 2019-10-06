@@ -1,1 +1,3 @@
+imgui v1.73-docking - https://github.com/ocornut/imgui/commit/e0c0e53edfa892f7ec834dac7cce1a63bac18fea
+imgui-SFML v2.1 - https://github.com/eliasdaler/imgui-sfml/releases/tag/v2.1
 SFML 2.5.1 - https://github.com/SFML/SFML/releases/tag/2.5.1
