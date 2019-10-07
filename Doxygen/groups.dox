@@ -1,0 +1,5 @@
+/** \defgroup group_framework Framework 
+ * The Framework module contains the main system that the engine is build around.
+ * 
+ * In our case, it is the ECS.
+ */
