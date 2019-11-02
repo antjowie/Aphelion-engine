@@ -1,5 +1,1 @@
-/Binaries
-/Docs
-
-*.user
-.vs
+/build
