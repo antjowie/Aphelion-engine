@@ -1,0 +1,3 @@
+[submodule "Shinobu/thirdParty/spdlog"]
+	path = Shinobu/thirdParty/spdlog
+	url = https://github.com/gabime/spdlog

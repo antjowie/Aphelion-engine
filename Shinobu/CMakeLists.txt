@@ -4,6 +4,8 @@ project(Shinobu VERSION 1.0
                 LANGUAGES CXX
 )
 
+# add_subdirectory(thirdParty/spdlog)
+
 add_library(Shinobu
     src/Shinobu/Core/Core.h
     src/Shinobu/Core/Log.h
