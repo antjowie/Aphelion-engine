@@ -4,8 +4,6 @@ project(Shinobu VERSION 1.0
                 LANGUAGES CXX
 )
 
-# add_subdirectory(thirdParty/spdlog)
-
 add_library(Shinobu
     src/Shinobu/Core/Core.h
     src/Shinobu/Core/Log.h
@@ -20,3 +18,8 @@ endif()
 target_include_directories(Shinobu PUBLIC
     src
 )
+
+# Since we are building spdlog from scratch, we should just include it
+# I'm not sure if there is a better way of doing it
+add_subdirectory(thirdParty/spdlog)
+target_link_libraries(Shinobu PRIVATE spdlog)
