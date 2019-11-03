@@ -1,4 +1,4 @@
-#include <Shinobu/Core/Log.h>
+#include <Shinobu/Shinobu.h>
 #include <iostream>
 
 int main()
