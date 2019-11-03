@@ -1,7 +1,7 @@
 # Shinobu-engine
 A game engine written in C++, made as an educational passion project.
 
-I am using this project as a playground so nothing is really set in stone.
+I am using this project as a playground so nothing is really set in stone. This project heavily references [The Cherno his game engine series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT).
 
 ## How to build
 Simply do the following in a command prompt/terminal (on Windows):

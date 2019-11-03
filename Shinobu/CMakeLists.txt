@@ -42,4 +42,4 @@ endif()
 # Since we are building spdlog from scratch, we should just include it
 # I'm not sure if there is a better way of doing it
 add_subdirectory(thirdParty/spdlog)
-target_link_libraries(Shinobu PRIVATE spdlog)
+target_link_libraries(Shinobu PUBLIC spdlog)
