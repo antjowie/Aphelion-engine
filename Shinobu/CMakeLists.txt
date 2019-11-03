@@ -8,6 +8,7 @@ add_library(Shinobu
     src/Shinobu/Shinobu.h
     
     src/Shinobu/Core/Core.h
+    src/Shinobu/Core/EntryPoint.h
     src/Shinobu/Core/Log.h
     src/Shinobu/Core/Log.cpp
 )

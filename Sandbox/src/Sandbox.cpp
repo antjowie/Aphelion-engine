@@ -1,7 +1,9 @@
 #include <Shinobu/Shinobu.h>
 #include <iostream>
 
-int main()
+#include <Shinobu/Core/EntryPoint.h>
+
+void* sh::CreateApplication()
 {
     int val = 5;
     SH_WARN("Hello world with a random var{0}", 5);
@@ -9,5 +11,5 @@ int main()
 
     std::cin.get();
 
-    return 0;
+    return nullptr;
 }
