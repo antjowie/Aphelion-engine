@@ -1,16 +1,15 @@
 #pragma once
 
 #include "Shinobu/Core/Log.h"
-
-namespace sh
-{
-    extern void* CreateApplication();
-}
+#include "Shinobu/Core/Application.h"
 
 int main(int argc, char** argv)
 {
     sh::Log::Init();
     SH_CORE_INFO("Entrypoint is valid!");
 
-    sh::CreateApplication();
+    auto instance = sh::CreateApplication();
+    instance->Run();
+
+    return 0;
 }

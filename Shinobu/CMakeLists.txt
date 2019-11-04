@@ -6,7 +6,9 @@ project(Shinobu VERSION 1.0
 
 add_library(Shinobu
     src/Shinobu/Shinobu.h
-    
+
+    src/Shinobu/Core/Application.h
+    src/Shinobu/Core/Application.cpp
     src/Shinobu/Core/Core.h
     src/Shinobu/Core/EntryPoint.h
     src/Shinobu/Core/Log.h
