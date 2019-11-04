@@ -1,5 +1,5 @@
 #pragma once
-#include "Core.h"
+#include "Shinobu/Core/Core.h"
 
 namespace sh
 {

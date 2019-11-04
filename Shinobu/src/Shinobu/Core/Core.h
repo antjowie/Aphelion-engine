@@ -15,4 +15,4 @@
     #define SHINOBU_API
 #endif
 
-constexpr inline SHINOBU_API unsigned BITSET(unsigned bit) { return 1 << bit; }
+constexpr inline SHINOBU_API unsigned BIT(unsigned bit) { return 1 << bit; }

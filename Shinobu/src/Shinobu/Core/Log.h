@@ -3,15 +3,16 @@
  * The logger is a central place to log messages
  */
 
+#include "Shinobu/Core/Core.h"
+
+#include "spdlog/spdlog.h"
+#include "spdlog/fmt/ostr.h"
+
 // Ignore the warning about shared pointer needing a dll interface
 #ifdef _MSC_VER
     #pragma warning(push)
     #pragma warning(disable: 4251)
 #endif
-
-#include "Core.h"
-#include "spdlog/spdlog.h"
-#include "spdlog/fmt/ostr.h"
 
 namespace sh 
 {
