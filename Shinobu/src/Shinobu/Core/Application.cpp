@@ -1,4 +1,4 @@
-#include "Application.h"
+#include "Shinobu/Core/Application.h"
 
 namespace sh
 {
@@ -8,6 +8,8 @@ namespace sh
 
     void Application::Run()
     {
-        while(true);
+        while (true)
+        {
+        }
     }
 } // namespace sh

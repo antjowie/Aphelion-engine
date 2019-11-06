@@ -14,7 +14,10 @@ add_library(Shinobu
     src/Shinobu/Core/Log.h
     src/Shinobu/Core/Log.cpp
 
-    src/Shinobu/Events/Event.h
+    src/Shinobu/Event/ApplicationEvent.h
+    src/Shinobu/Event/Event.h
+    src/Shinobu/Event/KeyEvent.h
+    src/Shinobu/Event/MouseEvent.h
 )
 
 if(BUILD_SHARED_LIBS)
@@ -40,10 +43,9 @@ target_precompile_headers(Shinobu
         <unordered_map>
         <unordered_set>
 
-        src/Shinobu/Core/Application.h
         src/Shinobu/Core/Log.h
 
-        src/Shinobu/Events/Event.h
+        src/Shinobu/Event/Event.h
 )
 
 # Download submodules if needed
