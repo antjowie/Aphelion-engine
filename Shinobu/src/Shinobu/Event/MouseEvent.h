@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * This header has all the mouse related events
+ */
+
 #include "Shinobu/Core/Core.h"
 #include "Shinobu/Event/Event.h"
 

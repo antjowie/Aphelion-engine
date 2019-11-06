@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * This header contains the event base class that all events inherit from
+ */
+
 #include "Shinobu/Core/Core.h"
 
 namespace sh

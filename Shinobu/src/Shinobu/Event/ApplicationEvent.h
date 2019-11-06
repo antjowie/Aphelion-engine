@@ -1,4 +1,7 @@
 #pragma once
+/**
+ * This header contains all the Application type events
+ */
 #include "Shinobu/Core/Core.h"
 #include "Shinobu/Event/Event.h"
 

@@ -1,4 +1,9 @@
 #pragma once
+/**
+ * We supply the entry point of a program here since the user does not have to be 
+ * with it
+ */
+
 #include "Shinobu/Core/Log.h"
 
 int main(int argc, char** argv)

@@ -11,6 +11,10 @@ add_library(Shinobu
     src/Shinobu/Core/Application.cpp
     src/Shinobu/Core/Core.h
     src/Shinobu/Core/EntryPoint.h
+    src/Shinobu/Core/Layer.h
+    src/Shinobu/Core/Layer.cpp
+    src/Shinobu/Core/LayerStack.h
+    src/Shinobu/Core/LayerStack.cpp
     src/Shinobu/Core/Log.h
     src/Shinobu/Core/Log.cpp
 
@@ -44,8 +48,6 @@ target_precompile_headers(Shinobu
         <unordered_set>
 
         src/Shinobu/Core/Log.h
-
-        src/Shinobu/Event/Event.h
 )
 
 # Download submodules if needed
