@@ -34,7 +34,7 @@ target_include_directories(Shinobu PUBLIC
 )
 
 target_precompile_headers(Shinobu 
-    PRIVATE
+    PUBLIC
         <iostream>
         <memory>
         <utility>
