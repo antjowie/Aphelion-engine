@@ -1,4 +1,4 @@
-#include <Shinobu/Shinobu.h>
+#include <Shinobu/Common.h>
 
 std::unique_ptr<sh::Application> sh::CreateApplication()
 {

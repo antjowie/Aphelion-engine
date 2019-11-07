@@ -1,6 +1,6 @@
 #pragma once
 /**
- * A header that inlcudes most of the API that you will be using
+ * A collection of common header files that the client will use
  */ 
 
 #include "Shinobu/Core/Application.h"
