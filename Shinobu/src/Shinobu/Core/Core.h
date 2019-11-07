@@ -37,3 +37,5 @@
 /////////////////////////////////////////////////
 // Helper functions
 constexpr inline SHINOBU_API unsigned BIT(unsigned bit) { return 1 << bit; }
+
+#define SH_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)

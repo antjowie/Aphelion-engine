@@ -11,9 +11,8 @@ namespace sh
     class SHINOBU_API MouseButtonPressedEvent : public Event
     {
     public:
-        MouseButtonPressedEvent(int button, unsigned repeatCount)
-            : m_button(button)
-            , m_repeatCount(repeatCount) {}
+        MouseButtonPressedEvent(int button)
+            : m_button(button) {}
 
         inline int GetButton() const { return m_button; }
         inline unsigned GetRepeatCount() const { return m_repeatCount; }
@@ -21,7 +20,7 @@ namespace sh
         std::string ToString() const override
         {
             std::stringstream ss;
-            ss << "MouseButtonPressedEvent: button " << m_button << " repeat " << m_repeatCount;
+            ss << "MouseButtonPressedEvent: button " << m_button;
             return ss.str();
         }
 

@@ -18,6 +18,8 @@ namespace sh
         void Run();
     
     private:
+        void OnEvent(Event& event);
+
         std::unique_ptr<Window> m_window;
 
         LayerStack m_layerStack;
