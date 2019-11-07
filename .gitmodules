@@ -1,3 +1,6 @@
 [submodule "Shinobu/thirdParty/spdlog"]
 	path = Shinobu/thirdParty/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "Shinobu/thirdParty/glfw"]
+	path = Shinobu/thirdParty/glfw
+	url = https://github.com/glfw/glfw

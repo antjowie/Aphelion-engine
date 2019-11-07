@@ -63,6 +63,9 @@ if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
                         RESULT_VARIABLE GIT_SUBMOD_RESULT)
         if(NOT GIT_SUBMOD_RESULT EQUAL "0")
             message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+        else()
+            message(STATUS "Got correct submodules, turning off automatic pull")
+            set(GIT_SUBMODULE "OFF" CACHE BOOL "" FORCE)
         endif()
     endif()
 endif()
@@ -74,4 +77,7 @@ endif()
 # Since we are building spdlog from scratch, we should just include it
 # I'm not sure if there is a better way of doing it
 add_subdirectory(thirdParty/spdlog)
-target_link_libraries(Shinobu PUBLIC spdlog)
+set(GLFW_BUILD_DOCS "OFF" CACHE BOOL "")
+add_subdirectory(thirdParty/glfw)
+
+target_link_libraries(Shinobu PUBLIC spdlog glfw)
