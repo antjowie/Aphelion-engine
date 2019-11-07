@@ -8,14 +8,14 @@ add_executable(Sandbox
     src/Sandbox.cpp    
 )
 
-target_link_libraries(Sandbox PUBLIC Shinobu)
-
 # We don't need to copy a static lib to the executable directory
 if(BUILD_SHARED_LIBS)
-    add_custom_command(TARGET Sandbox 
-                       POST_BUILD 
-                       COMMAND ${CMAKE_COMMAND} -E copy
-                       $<TARGET_FILE:Shinobu>
-                       $<TARGET_FILE_DIR:Sandbox>
+    add_custom_target(CopyDLL 
+                      ALL COMMAND ${CMAKE_COMMAND} -E copy
+                      $<TARGET_FILE:Shinobu>
+                      $<TARGET_FILE_DIR:Sandbox>
+                      COMMENT "Copying Shinobu.dll to output dir"
     )
 endif()
+
+target_link_libraries(Sandbox PUBLIC Shinobu)
