@@ -11,6 +11,7 @@ namespace sh
     {
         while (true)
         {
+            m_window->OnUpdate();
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {
                 (*layer)->OnUpdate();

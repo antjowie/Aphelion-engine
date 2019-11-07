@@ -27,15 +27,6 @@ add_library(Shinobu
     src/Shinobu/Platform/Windows/WindowsWindow.cpp
 )
 
-if(BUILD_SHARED_LIBS)
-    target_compile_definitions(Shinobu PUBLIC SH_DYNAMIC_LINK)
-    target_compile_definitions(Shinobu PRIVATE SH_BUILD_DLL)
-endif()
-
-target_include_directories(Shinobu PUBLIC
-    src
-)
-
 target_precompile_headers(Shinobu 
     PUBLIC
         <iostream>
@@ -52,6 +43,15 @@ target_precompile_headers(Shinobu
 
         src/Shinobu/Core/Log.h
 )
+
+target_include_directories(Shinobu PUBLIC
+    src
+)
+
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(Shinobu PUBLIC SH_DYNAMIC_LINK)
+    target_compile_definitions(Shinobu PRIVATE SH_BUILD_DLL)
+endif()
 
 # Download submodules if needed
 find_package(Git QUIET)
@@ -79,8 +79,13 @@ endif()
 
 # Since we are building spdlog from scratch, we should just include it
 # I'm not sure if there is a better way of doing it
+set(BUILD_SHARED_LIBS_OLD ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS "OFF" CACHE BOOL "" FORCE)
+
 add_subdirectory(thirdParty/spdlog)
 set(GLFW_BUILD_DOCS "OFF" CACHE BOOL "")
 add_subdirectory(thirdParty/glfw)
 
+set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD} CACHE BOOL "" FORCE)
+  
 target_link_libraries(Shinobu PUBLIC spdlog glfw)
