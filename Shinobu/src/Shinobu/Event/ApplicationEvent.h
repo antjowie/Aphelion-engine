@@ -19,9 +19,7 @@ namespace sh
     public:
         WindowResizeEvent(unsigned width, unsigned height)
             : m_width(width)
-            , m_height(height)
-        {
-        }
+            , m_height(height) {}
 
         inline unsigned GetWidth() const { return m_width; }
         inline unsigned GetHeight() const { return m_height; }

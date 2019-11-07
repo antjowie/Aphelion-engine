@@ -11,13 +11,11 @@ namespace sh
     class SHINOBU_API KeyPressedEvent : public Event
     {
     public:
-        KeyPressedEvent(unsigned keyCode, unsigned repeatCount)
+        KeyPressedEvent(int keyCode, unsigned repeatCount)
             : m_keyCode(keyCode)
-            , m_repeatCount(repeatCount)
-        {
-        }
+            , m_repeatCount(repeatCount) {}
 
-        inline unsigned GetKeyCode() const { return m_keyCode; }
+        inline int GetKeyCode() const { return m_keyCode; }
         inline unsigned GetRepeatCount() const { return m_repeatCount; }
 
         std::string ToString() const override
@@ -31,19 +29,17 @@ namespace sh
         EVENT_CLASS_CATEGORY(EventCategoryInput | EventCategoryKeyboard)
 
     private:
-        unsigned m_keyCode;
+        int m_keyCode;
         unsigned m_repeatCount;
     };
 
     class SHINOBU_API KeyReleasedEvent : public Event
     {
     public:
-        KeyReleasedEvent(unsigned keyCode)
-            : m_keyCode(keyCode)
-        {
-        }
+        KeyReleasedEvent(int keyCode)
+            : m_keyCode(keyCode) {}
 
-        inline unsigned GetKeyCode() const { return m_keyCode; }
+        inline int GetKeyCode() const { return m_keyCode; }
 
         std::string ToString() const override
         {
@@ -56,6 +52,6 @@ namespace sh
         EVENT_CLASS_CATEGORY(EventCategoryInput | EventCategoryKeyboard)
 
     private:
-        unsigned m_keyCode;
+        int m_keyCode;
     };
 }
