@@ -17,11 +17,16 @@ add_library(Shinobu
     src/Shinobu/Core/LayerStack.cpp
     src/Shinobu/Core/Log.h
     src/Shinobu/Core/Log.cpp
+    src/Shinobu/Core/Window.h
 
     src/Shinobu/Event/ApplicationEvent.h
     src/Shinobu/Event/Event.h
     src/Shinobu/Event/KeyEvent.h
     src/Shinobu/Event/MouseEvent.h
+
+    # These depend on current platform so we should move them in the future
+    src/Shinobu/Platform/Windows/WindowsWindow.h
+    src/Shinobu/Platform/Windows/WindowsWindow.cpp
 )
 
 if(BUILD_SHARED_LIBS)
