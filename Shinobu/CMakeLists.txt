@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+################################
+# Set up this project
 project(Shinobu VERSION 1.0
                 LANGUAGES CXX
 )
@@ -48,11 +50,13 @@ target_include_directories(Shinobu PUBLIC
     src
 )
 
+# Set up target definitions
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(Shinobu PUBLIC SH_DYNAMIC_LINK)
     target_compile_definitions(Shinobu PRIVATE SH_BUILD_DLL)
 endif()
 
+################################
 # Download submodules if needed
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
@@ -73,10 +77,14 @@ if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
     endif()
 endif()
 
+# Verify if submodules are installed
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/thirdParty/spdlog/CMakeLists.txt")
     message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
+################################
+# Install libraries
+# 
 # Since we are building spdlog from scratch, we should just include it
 # I'm not sure if there is a better way of doing it
 set(BUILD_SHARED_LIBS_OLD ${BUILD_SHARED_LIBS})
