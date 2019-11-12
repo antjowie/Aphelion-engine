@@ -93,7 +93,8 @@ set(BUILD_SHARED_LIBS "OFF" CACHE BOOL "" FORCE)
 add_subdirectory(thirdParty/spdlog)
 set(GLFW_BUILD_DOCS "OFF" CACHE BOOL "")
 add_subdirectory(thirdParty/glfw)
+add_subdirectory(thirdParty/imgui)
 
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD} CACHE BOOL "" FORCE)
   
-target_link_libraries(Shinobu PUBLIC spdlog glfw)
+target_link_libraries(Shinobu PUBLIC spdlog glfw imgui)
