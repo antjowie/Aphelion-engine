@@ -1,4 +1,4 @@
-#include "WindowsWindow.h"
+#include "Shinobu/Platform/Windows/WindowsWindow.h"
 
 #include "Shinobu/Event/ApplicationEvent.h"
 #include "Shinobu/Event/MouseEvent.h"
@@ -75,13 +75,13 @@ namespace sh
             }
         });
 
-        //glfwSetCharCallback(m_window, [](GLFWwindow* window, unsigned int keycode)
-        //{
-        //    WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
-        //
-        //    KeyTypedEvent event(keycode);
-        //    data.EventCallback(event);
-        //});
+        glfwSetCharCallback(m_window, [](GLFWwindow* window, unsigned int keycode)
+        {
+           WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
+        
+           KeyTypedEvent event(keycode);
+           data.eventCallback(event);
+        });
 
         glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int mods)
         {
