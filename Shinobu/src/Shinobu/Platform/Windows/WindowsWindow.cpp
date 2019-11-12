@@ -4,6 +4,7 @@
 #include "Shinobu/Event/MouseEvent.h"
 #include "Shinobu/Event/KeyEvent.h"
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace sh
@@ -18,16 +19,11 @@ namespace sh
     {
         glfwInit();
         m_window = glfwCreateWindow(m_props.width, m_props.height, m_props.title.c_str(), nullptr, nullptr);
-        SH_CORE_ASSERT(m_window, "glfw window can't be created");
-        if (m_window)
-        {
-            glfwSetWindowUserPointer(m_window, &m_props);
-            SH_CORE_INFO("Created Windows window");
-        }
-        else
-        {
-            SH_CORE_ASSERT(false, "Could not create a glfw window");
-        }
+        SH_CORE_ASSERT(m_window, "GLFW window can't be created");
+        
+        glfwSetWindowUserPointer(m_window, &m_props);
+        glfwMakeContextCurrent(m_window);
+        gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
 
         // Set GLFW callbacks
         glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height)
@@ -119,6 +115,8 @@ namespace sh
             MouseMovedEvent event((float)xPos, (float)yPos);
             data.eventCallback(event);
         });
+    
+        SH_CORE_INFO("Created Windows window");
     }
 
     WindowsWindow::~WindowsWindow()

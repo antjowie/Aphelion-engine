@@ -85,9 +85,9 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/thirdParty/spdlog/CMakeLists.txt")
 endif()
 
 ################################
-# Install libraries
+# Build thirdparty libraries
 # 
-# Since we are building spdlog from scratch, we should just include it
+# Since we are building from source, we should just include it
 # I'm not sure if there is a better way of doing it
 set(BUILD_SHARED_LIBS_OLD ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS "OFF" CACHE BOOL "" FORCE)
@@ -96,7 +96,8 @@ add_subdirectory(thirdParty/spdlog)
 set(GLFW_BUILD_DOCS "OFF" CACHE BOOL "")
 add_subdirectory(thirdParty/glfw)
 add_subdirectory(thirdParty/imgui)
+add_subdirectory(thirdParty/Glad)
 
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD} CACHE BOOL "" FORCE)
   
-target_link_libraries(Shinobu PUBLIC spdlog glfw imgui)
+target_link_libraries(Shinobu PUBLIC spdlog glfw imgui Glad)
