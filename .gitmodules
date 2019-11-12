@@ -4,3 +4,6 @@
 [submodule "Shinobu/thirdParty/glfw"]
 	path = Shinobu/thirdParty/glfw
 	url = https://github.com/glfw/glfw
+[submodule "Shinobu/thirdParty/imgui"]
+	path = Shinobu/thirdParty/imgui
+	url = https://github.com/antjowie/imgui.git
