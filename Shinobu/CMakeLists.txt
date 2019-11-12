@@ -12,7 +12,6 @@ add_library(Shinobu
     src/Shinobu/Core/Core.h
     src/Shinobu/Core/EntryPoint.h
     src/Shinobu/Core/Layer.h
-    src/Shinobu/Core/Layer.cpp
     src/Shinobu/Core/LayerStack.h
     src/Shinobu/Core/LayerStack.cpp
     src/Shinobu/Core/Log.h
@@ -23,6 +22,9 @@ add_library(Shinobu
     src/Shinobu/Event/Event.h
     src/Shinobu/Event/KeyEvent.h
     src/Shinobu/Event/MouseEvent.h
+
+    src/Shinobu/ImGui/ImGuiLayer.h
+    src/Shinobu/ImGui/ImGuiLayer.cpp
 
     # These depend on current platform so we should move them in the future
     src/Shinobu/Platform/Windows/WindowsWindow.h

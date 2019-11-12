@@ -19,9 +19,7 @@ namespace sh
     {
     public:
         Layer(const std::string& name = "Layer")
-            : m_debugName(name)
-        {
-        }
+            : m_debugName(name) {}
         virtual ~Layer() = default;
 
         virtual void OnAttach() {}
