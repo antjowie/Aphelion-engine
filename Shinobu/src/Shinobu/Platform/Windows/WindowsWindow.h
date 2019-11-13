@@ -20,8 +20,10 @@ namespace sh
 
         inline virtual void SetEventCallback(const EventCallbackFn& callback) override { m_props.eventCallback = callback; }
 
+        inline virtual void* GetNativeWindow() override { return m_window; }
+
     private:
         GLFWwindow* m_window;
-        WindowProps m_props; 
+        WindowProps m_props;
     };
 }

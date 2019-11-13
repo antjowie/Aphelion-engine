@@ -38,14 +38,25 @@ namespace sh
     public:
         virtual ~Window() = default;
 
+        /**
+         * Updates the buffers and polls the events
+         */
         virtual void OnUpdate() = 0;
-        virtual void SetVSync(bool enable) = 0;
 
+        virtual void SetVSync(bool enable) = 0;
+        
         /**
          * Application owns a window. The window needs to send events to the application. To do this,
          * Applications gives the Window an event callback function. 
          */
         virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
+
+        /**
+         * Return the native window
+         * 
+         * This is required to set up the ImGui renderer
+         */
+        virtual void* GetNativeWindow() = 0; 
 
         /**
          * We override the static create function so that we won't have to bother with 

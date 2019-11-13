@@ -143,5 +143,6 @@ namespace sh
     void WindowsWindow::SetVSync(bool enable)
     {
         glfwSwapInterval(enable ? 1 : 0);
+        SH_CORE_TRACE("VSync set to {0}", enable ? "Enabled" : "Disabled");
     }
 }
