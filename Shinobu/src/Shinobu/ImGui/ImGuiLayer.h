@@ -12,6 +12,9 @@ namespace sh
     public:
         ImGuiLayer();
 
+        void Begin();
+        void End();
+
         virtual void OnAttach() override final;
         virtual void OnDetach() override final;
         virtual void OnUpdate() override final;

@@ -9,6 +9,9 @@
 
 namespace sh
 {
+    /**
+     * This function is declared in Window.h and we overwrite it platform specific
+     */
     std::unique_ptr<Window> Window::Create(WindowProps props)
     {
         return std::make_unique<WindowsWindow>(props);
@@ -17,12 +20,19 @@ namespace sh
     WindowsWindow::WindowsWindow(WindowProps& props)
         : m_props(props) 
     {
-        glfwInit();
+        glfwSetErrorCallback([](int code, const char* message)
+        {
+           SH_CORE_ERROR("GLFW Error ({0}): {1}", code, message); 
+        });
+
+        // Init GLFW
+        SH_CORE_VERIFY(glfwInit(),"GLFW failed to initialize");
         m_window = glfwCreateWindow(m_props.width, m_props.height, m_props.title.c_str(), nullptr, nullptr);
         SH_CORE_ASSERT(m_window, "GLFW window can't be created");
-        
         glfwSetWindowUserPointer(m_window, &m_props);
         glfwMakeContextCurrent(m_window);
+        
+        // Init Glad
         gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
 
         // Set GLFW callbacks
@@ -115,7 +125,7 @@ namespace sh
             MouseMovedEvent event((float)xPos, (float)yPos);
             data.eventCallback(event);
         });
-    
+
         SH_CORE_INFO("Created Windows window");
     }
 
@@ -130,4 +140,8 @@ namespace sh
         glfwSwapBuffers(m_window);
     }
 
+    void WindowsWindow::SetVSync(bool enable)
+    {
+        glfwSwapInterval(enable ? 1 : 0);
+    }
 }

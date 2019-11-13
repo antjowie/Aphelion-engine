@@ -39,12 +39,14 @@ namespace sh
         virtual ~Window() = default;
 
         virtual void OnUpdate() = 0;
+        virtual void SetVSync(bool enable) = 0;
+
         /**
          * Application owns a window. The window needs to send events to the application. To do this,
          * Applications gives the Window an event callback function. 
          */
         virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
-        
+
         /**
          * We override the static create function so that we won't have to bother with 
          * checking the platform in other code

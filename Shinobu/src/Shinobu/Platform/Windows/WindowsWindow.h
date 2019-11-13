@@ -16,11 +16,11 @@ namespace sh
         virtual ~WindowsWindow() override;
 
         virtual void OnUpdate() override;
+        virtual void SetVSync(bool enable) override;
 
         inline virtual void SetEventCallback(const EventCallbackFn& callback) override { m_props.eventCallback = callback; }
 
     private:
-
         GLFWwindow* m_window;
         WindowProps m_props; 
     };
