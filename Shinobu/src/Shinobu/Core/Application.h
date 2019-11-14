@@ -3,6 +3,8 @@
 #include "Shinobu/Core/LayerStack.h"
 #include "Shinobu/Core/Window.h"
 
+#include "Shinobu/Event/ApplicationEvent.h"
+
 #include "Shinobu/ImGui/ImGuiLayer.h"
 
 namespace sh
@@ -24,10 +26,13 @@ namespace sh
 
     private:
         void OnEvent(Event& event);
+        void OnWindowClose(WindowCloseEvent& event);
 
         std::unique_ptr<Window> m_window;
         LayerStack m_layerStack;
         ImGuiLayer* m_imguiLayer;
+
+        bool m_isRunning;
 
         static Application* m_instance;
     };

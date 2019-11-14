@@ -12,7 +12,13 @@ namespace sh
     public:
         ImGuiLayer();
 
+        /**
+         * Sets up ImGui, should be called every frame before any ImGui calls are made 
+         */
         void Begin();
+        /**
+         * Sets up ImGui, should be called every frame before any ImGui calls are made 
+         */
         void End();
 
         virtual void OnAttach() override final;

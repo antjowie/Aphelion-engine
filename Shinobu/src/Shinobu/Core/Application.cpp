@@ -11,6 +11,7 @@ namespace sh
 
     Application::Application()
         : m_imguiLayer(nullptr)
+        , m_isRunning(true)
     {
         SH_CORE_ASSERT(!m_instance,"Can not create multiple Applications");
         m_instance = this;
@@ -24,7 +25,7 @@ namespace sh
 
     void Application::Run()
     {
-        while (true)
+        while (m_isRunning)
         {
             m_imguiLayer->Begin();
             
@@ -40,12 +41,21 @@ namespace sh
                 (*layer)->OnUpdate();
             }
             m_imguiLayer->End();
+
             m_window->OnUpdate();
         }
     }
 
     void Application::OnEvent(Event& event)
     {
-        SH_CORE_TRACE(event);
+        sh::EventDispatcher dispatcher(event);
+        dispatcher.Dispatch<WindowCloseEvent>(SH_BIND_EVENT_FN(Application::OnWindowClose));
     }
+    
+    void Application::OnWindowClose(WindowCloseEvent& event)
+    {
+        m_isRunning = false;
+    }
+    
+
 } // namespace sh
