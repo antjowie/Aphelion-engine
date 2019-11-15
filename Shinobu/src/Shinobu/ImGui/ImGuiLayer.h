@@ -23,7 +23,10 @@ namespace sh
 
         virtual void OnAttach() override final;
         virtual void OnDetach() override final;
-        virtual void OnUpdate() override final;
         virtual void OnEvent(Event& event) override final;
+    
+    private:
+        void OnUpdate(LayerUpdateEvent& event);
+        void OnGuiRender(LayerGuiRenderEvent& event);
     };
 }

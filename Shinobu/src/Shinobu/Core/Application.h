@@ -21,6 +21,7 @@ namespace sh
 
         void Run();
 
+        inline LayerStack& GetLayerStack() { return m_layerStack; }
         inline Window& GetWindow() { return *m_window; }
         static inline Application& Get() { return *m_instance; } 
 

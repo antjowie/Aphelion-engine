@@ -38,25 +38,4 @@ namespace sh
         unsigned m_width;
         unsigned m_height;
     };
-
-    class SHINOBU_API AppTickEvent : public Event
-    {
-    public:
-        EVENT_CLASS_TYPE(EventType::AppTick)
-        EVENT_CLASS_CATEGORY(EventCategoryApplication)
-    };
-
-    class SHINOBU_API AppUpdateEvent : public Event
-    {
-    public:
-        EVENT_CLASS_TYPE(EventType::AppUpdate)
-        EVENT_CLASS_CATEGORY(EventCategoryApplication)
-    };
-
-    class SHINOBU_API AppRenderEvent : public Event
-    {
-    public:
-        EVENT_CLASS_TYPE(EventType::AppRender)
-        EVENT_CLASS_CATEGORY(EventCategoryApplication)
-    };
 } // namespace sh

@@ -21,6 +21,7 @@ add_library(Shinobu
     src/Shinobu/Event/ApplicationEvent.h
     src/Shinobu/Event/Event.h
     src/Shinobu/Event/KeyEvent.h
+    src/Shinobu/Event/LayerEvent.h
     src/Shinobu/Event/MouseEvent.h
 
     src/Shinobu/ImGui/ImGuiBuild.cpp

@@ -38,8 +38,10 @@ namespace sh
             
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {
-                (*layer)->OnUpdate();
+                (*layer)->OnEvent(LayerUpdateEvent());
+                (*layer)->OnEvent(LayerGuiRenderEvent());
             }
+
             m_imguiLayer->End();
 
             m_window->OnUpdate();
@@ -50,6 +52,15 @@ namespace sh
     {
         sh::EventDispatcher dispatcher(event);
         dispatcher.Dispatch<WindowCloseEvent>(SH_BIND_EVENT_FN(Application::OnWindowClose));
+       
+        // NOTE: Make LayerStack support standard function so we can use rend instead of making our own solution
+        for (auto layer = m_layerStack.end() - 1;; layer--)
+        {
+            if(event.m_handled) return;
+            (*layer)->OnEvent(event);
+            if (layer == m_layerStack.begin())
+                return;
+        }
     }
     
     void Application::OnWindowClose(WindowCloseEvent& event)
