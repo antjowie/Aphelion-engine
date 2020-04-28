@@ -14,11 +14,17 @@ namespace sh
         EVENT_CLASS_CATEGORY(EventCategoryLayer)
     };
 
-
     class SHINOBU_API LayerGuiRenderEvent: public Event
     {
     public:
         EVENT_CLASS_TYPE(EventType::LayerGuiRender)
+        EVENT_CLASS_CATEGORY(EventCategoryLayer)
+    };
+
+    class SHINOBU_API LayerRenderEvent: public Event
+    {
+    public:
+        EVENT_CLASS_TYPE(EventType::LayerRender)
         EVENT_CLASS_CATEGORY(EventCategoryLayer)
     };
 }

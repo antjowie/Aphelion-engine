@@ -29,12 +29,14 @@ add_library(Shinobu
     src/Shinobu/ImGui/ImGuiLayer.h
     src/Shinobu/ImGui/ImGuiLayer.cpp
 
-    src/Shinobu/Renderer/RendererAPI.h
-    src/Shinobu/Renderer/RendererAPI.cpp
     src/Shinobu/Renderer/GraphicsContext.h
     src/Shinobu/Renderer/GraphicsContext.cpp
     src/Shinobu/Renderer/RenderCommand.h
     src/Shinobu/Renderer/RenderCommand.cpp
+    src/Shinobu/Renderer/Renderer.h
+    src/Shinobu/Renderer/Renderer.cpp
+    src/Shinobu/Renderer/RendererAPI.h
+    src/Shinobu/Renderer/RendererAPI.cpp
     src/Shinobu/Renderer/Shader.h
     src/Shinobu/Renderer/Shader.cpp
     src/Shinobu/Renderer/Texture.h
@@ -135,7 +137,8 @@ add_subdirectory(thirdParty/glfw)
 add_subdirectory(thirdParty/imgui)
 add_subdirectory(thirdParty/Glad)
 add_subdirectory(thirdParty/stb_image)
+add_subdirectory(thirdParty/glm)
 
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD} CACHE BOOL "" FORCE)
   
-target_link_libraries(Shinobu PUBLIC spdlog glfw imgui Glad stb_image)
+target_link_libraries(Shinobu PUBLIC spdlog glfw imgui Glad stb_image glm)

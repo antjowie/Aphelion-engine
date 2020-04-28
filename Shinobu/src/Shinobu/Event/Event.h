@@ -11,7 +11,7 @@ namespace sh
 	{
 		None = 0,
 		WindowClose, WindowResize,
-		LayerUpdate, LayerGuiRender,
+		LayerUpdate, LayerGuiRender, LayerRender,
 		KeyPressed, KeyReleased, KeyTyped,
 		MouseButtonPressed, MouseButtonReleased, 
         MouseMoved, MouseScrolled

@@ -7,3 +7,6 @@
 [submodule "Shinobu/thirdParty/imgui"]
 	path = Shinobu/thirdParty/imgui
 	url = https://github.com/antjowie/imgui.git
+[submodule "Shinobu/thirdParty/glm"]
+	path = Shinobu/thirdParty/glm
+	url = https://github.com/g-truc/glm

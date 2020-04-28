@@ -1,15 +1,8 @@
 #include "Shinobu/Core/Application.h"
 
 #include "Shinobu/ImGui/ImGuiLayer.h"
-
-#include "Shinobu/Renderer/RendererAPI.h"
+#include "Shinobu/Renderer/Renderer.h"
 #include "Shinobu/Renderer/RenderCommand.h"
-
-// TEMP
-#include "Shinobu/Renderer/Shader.h"
-#include "Shinobu/Renderer/VertexArray.h"
-#include "Shinobu/Renderer/VertexBuffer.h"
-#include "Shinobu/Renderer/Texture.h"
 
 namespace sh
 {
@@ -24,6 +17,9 @@ namespace sh
 
         m_window = Window::Create();
         m_window->SetEventCallback(SH_BIND_EVENT_FN(Application::OnEvent));
+
+        Renderer::Init();
+        RenderCommand::SetClearColor(0.5f, 0.f, 0.5f, 1.f);
         
         m_imguiLayer = new ImGuiLayer();
         m_layerStack.PushOverlay(m_imguiLayer);
@@ -31,76 +27,19 @@ namespace sh
 
     void Application::Run()
     {
-        RenderCommand::Init();
-        RenderCommand::SetClearColor(0.5f, 0.f, 0.5f, 1.f);
-
-
-        auto shader = Shader::Create("default",
-R"(
-#version 450 core
-
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec2 aTex;
-
-out vec2 tex;
-
-void main()
-{
-    tex = aTex;
-    gl_Position = vec4(aPos ,1.0f);
-}
-)",
-
-R"(
-#version 450 core
-
-uniform sampler2D sampl;
-
-in vec2 tex;
-out vec4 color;
-
-void main()
-{
-	color = texture(sampl, tex);
-}
-)");
-        shader->Bind();
-        auto tex = Texture2D::Create("image.png");
-        tex->Bind();
-
-        //glDebugMessageInsert(0, 0, 0, 0, 100, "OOF");
-
-        constexpr float vert[] =
-        {
-            -0.5f, -0.5f, 0.f, 0.f, 0.f,
-             0.5f, -0.5f, 0.f, 1.f, 0.f,
-             0.5f,  0.5f, 0.f, 1.f, 1.f,
-            -0.5f,  0.5f, 0.f, 0.f, 1.f,
-        };
-
-        constexpr uint32_t indices[] =
-        { 0,1,2, 0,2,3 };
-
-        auto buffer = VertexBuffer::Create(vert,sizeof(vert));
-        buffer->AddElement(BufferElement(ShaderDataType::Float3, "aPos"));
-        buffer->AddElement(BufferElement(ShaderDataType::Float2, "aTex", true));
-        auto index = IndexBuffer::Create(indices, 6);
-
-        auto array = VertexArray::Create();
-        array->AddVertexBuffer(buffer);
-        array->SetIndexBuffer(index);
-
         while (m_isRunning)
         {
             m_imguiLayer->Begin();
-            
-            RenderCommand::Clear();
-            RenderCommand::DrawIndexed(array);
 
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {
                 (*layer)->OnEvent(LayerUpdateEvent());
                 (*layer)->OnEvent(LayerGuiRenderEvent());
+            }
+
+            for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
+            {
+                (*layer)->OnEvent(LayerRenderEvent());
             }
 
             m_imguiLayer->End();
@@ -113,7 +52,11 @@ void main()
     {
         sh::EventDispatcher dispatcher(event);
         dispatcher.Dispatch<WindowCloseEvent>(SH_BIND_EVENT_FN(Application::OnWindowClose));
-       
+        dispatcher.Dispatch<WindowResizeEvent>([](WindowResizeEvent& e)
+        {
+            Renderer::OnWindowResize(e.GetWidth(),e.GetHeight());
+        });
+
         // TODO: Make layertype be of type standard container to support standard container opperations (rend in this case)
         for (auto layer = m_layerStack.end() - 1; /*layer != m_layerStack.begin() - 1*/; layer--)
         {
