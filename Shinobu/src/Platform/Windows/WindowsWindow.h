@@ -4,6 +4,7 @@
  */
 #include "Shinobu/Core/Core.h"
 #include "Shinobu/Core/Window.h"
+#include "Shinobu/Renderer/GraphicsContext.h"
 
 struct GLFWwindow;
 
@@ -23,6 +24,7 @@ namespace sh
         inline virtual void* GetNativeWindow() override { return m_window; }
 
     private:
+        std::unique_ptr<GraphicsContext> m_context;
         GLFWwindow* m_window;
         WindowProps m_props;
     };

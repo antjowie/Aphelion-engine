@@ -28,9 +28,36 @@ add_library(Shinobu
     src/Shinobu/ImGui/ImGuiLayer.h
     src/Shinobu/ImGui/ImGuiLayer.cpp
 
+    src/Shinobu/Renderer/RendererAPI.h
+    src/Shinobu/Renderer/RendererAPI.cpp
+    src/Shinobu/Renderer/GraphicsContext.h
+    src/Shinobu/Renderer/GraphicsContext.cpp
+
+#    src/Shinobu/Renderer/Shader.h
+#    src/Shinobu/Renderer/Shader.cpp
+#    src/Shinobu/Renderer/Texture.h
+#    src/Shinobu/Renderer/Texture.cpp
+#    src/Shinobu/Renderer/VertexArray.h
+#    src/Shinobu/Renderer/VertexArray.cpp
+#    src/Shinobu/Renderer/VertexBuffer.h
+#    src/Shinobu/Renderer/VertexBuffer.cpp
+
     # These depend on current platform so we should move them in the future
-    src/Shinobu/Platform/Windows/WindowsWindow.h
-    src/Shinobu/Platform/Windows/WindowsWindow.cpp
+    src/Platform/Windows/WindowsWindow.h
+    src/Platform/Windows/WindowsWindow.cpp
+
+    src/Platform/OpenGL/OpenGLRendererAPI.h
+    src/Platform/OpenGL/OpenGLRendererAPI.cpp
+    src/Platform/OpenGL/OpenGLContext.h
+    src/Platform/OpenGL/OpenGLContext.cpp
+#    src/Platform/OpenGL/OpenGLShader.h
+#    src/Platform/OpenGL/OpenGLShader.cpp
+#    src/Platform/OpenGL/OpenGLTexture.h
+#    src/Platform/OpenGL/OpenGLTexture.cpp
+#    src/Platform/OpenGL/OpenGLVertexArray.h
+#    src/Platform/OpenGL/OpenGLVertexArray.cpp
+#    src/Platform/OpenGL/OpenGLVertexBuffer.h
+#    src/Platform/OpenGL/OpenGLVertexBuffer.cpp
 )
 
 target_precompile_headers(Shinobu 
@@ -46,6 +73,8 @@ target_precompile_headers(Shinobu
         <vector>
         <unordered_map>
         <unordered_set>
+
+        src/Shinobu/Core/Log.h
 )
 
 target_include_directories(Shinobu PUBLIC
@@ -57,6 +86,11 @@ if(BUILD_SHARED_LIBS)
     target_compile_definitions(Shinobu PUBLIC SH_DYNAMIC_LINK)
     target_compile_definitions(Shinobu PRIVATE SH_BUILD_DLL)
 endif()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(Shinobu PUBLIC SH_DEBUG)
+endif ()
+
 
 ################################
 # Download submodules if needed

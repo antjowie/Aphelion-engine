@@ -1,4 +1,5 @@
 #include <Shinobu/Common.h>
+#include <Shinobu/Event/KeyEvent.h>
 
 class ExampleLayer : public sh::Layer
 {
@@ -11,11 +12,14 @@ public:
 
     virtual void OnEvent(sh::Event& event) override 
     {
-        sh::EventDispatcher update(event); 
-        update.Dispatch<sh::LayerUpdateEvent>(SH_BIND_EVENT_FN(ExampleLayer::OnUpdate));
-        sh::EventDispatcher gui(event); 
-        gui.Dispatch<sh::LayerGuiRenderEvent>(SH_BIND_EVENT_FN(ExampleLayer::OnImGuiRender));
+        sh::EventDispatcher d(event); 
+        d.Dispatch<sh::KeyTypedEvent>([](sh::KeyTypedEvent& e)
+            {
+                SH_TRACE("Typed key {0}", e.GetKeyCode());
+            });
 
+        //d.Dispatch<sh::LayerUpdateEvent>(SH_BIND_EVENT_FN(ExampleLayer::OnUpdate));
+        //d.Dispatch<sh::LayerGuiRenderEvent>(SH_BIND_EVENT_FN(ExampleLayer::OnImGuiRender));
     }
 
 private:

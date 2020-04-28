@@ -1,4 +1,4 @@
-#include "Shinobu/Platform/Windows/WindowsWindow.h"
+#include "Platform/Windows/WindowsWindow.h"
 
 #include "Shinobu/Core/Log.h"
 
@@ -6,7 +6,6 @@
 #include "Shinobu/Event/MouseEvent.h"
 #include "Shinobu/Event/KeyEvent.h"
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace sh
@@ -16,28 +15,31 @@ namespace sh
      */
     std::unique_ptr<Window> Window::Create(WindowProps props)
     {
+#ifdef SH_PLATFORM_WINDOWS
         return std::make_unique<WindowsWindow>(props);
+#elif
+        SH_CRITICAL("Unknown platform!");
+#endif // SH_PLATFORM_WINDOWS
     }
 
     WindowsWindow::WindowsWindow(WindowProps& props)
         : m_props(props) 
     {
+        SH_CORE_VERIFY(glfwInit(), "GLFW failed to initialize");
+
+        m_window = glfwCreateWindow(m_props.width, m_props.height, m_props.title.c_str(), nullptr, nullptr);
+
+        SH_CORE_ASSERT(m_window, "GLFW window can't be created");
+        glfwSetWindowUserPointer(m_window, &m_props);
+
+        m_context = GraphicsContext::Create(static_cast<void*>(m_window));
+        m_context->Init();
+
+        // Set GLFW callbacks
         glfwSetErrorCallback([](int code, const char* message)
         {
            SH_CORE_ERROR("GLFW Error ({0}): {1}", code, message); 
         });
-
-        // Init GLFW
-        SH_CORE_VERIFY(glfwInit(),"GLFW failed to initialize");
-        m_window = glfwCreateWindow(m_props.width, m_props.height, m_props.title.c_str(), nullptr, nullptr);
-        SH_CORE_ASSERT(m_window, "GLFW window can't be created");
-        glfwSetWindowUserPointer(m_window, &m_props);
-        glfwMakeContextCurrent(m_window);
-        
-        // Init Glad
-        gladLoadGLLoader(GLADloadproc(glfwGetProcAddress));
-
-        // Set GLFW callbacks
         glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height)
         {
             WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
@@ -47,7 +49,6 @@ namespace sh
             WindowResizeEvent event(width, height);
             data.eventCallback(event);
         });
-
         glfwSetWindowCloseCallback(m_window, [](GLFWwindow* window)
         {
             WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
@@ -57,32 +58,31 @@ namespace sh
         });
 
         glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
-        {
-            WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
+            {
+                WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
 
-            switch (action)
-            {
-            case GLFW_PRESS:
-            {
-                KeyPressedEvent event(key, 0);
-                data.eventCallback(event);
-                break;
-            }
-            case GLFW_RELEASE:
-            {
-                KeyReleasedEvent event(key);
-                data.eventCallback(event);
-                break;
-            }
-            case GLFW_REPEAT:
-            {
-                KeyPressedEvent event(key, 1);
-                data.eventCallback(event);
-                break;
-            }
-            }
-        });
-
+                switch (action)
+                {
+                case GLFW_PRESS:
+                {
+                    KeyPressedEvent event(key, 0);
+                    data.eventCallback(event);
+                    break;
+                }
+                case GLFW_RELEASE:
+                {
+                    KeyReleasedEvent event(key);
+                    data.eventCallback(event);
+                    break;
+                }
+                case GLFW_REPEAT:
+                {
+                    KeyPressedEvent event(key, 1);
+                    data.eventCallback(event);
+                    break;
+                }
+                }
+            });
         glfwSetCharCallback(m_window, [](GLFWwindow* window, unsigned int keycode)
         {
            WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
@@ -111,7 +111,6 @@ namespace sh
             }
             }
         });
-
         glfwSetScrollCallback(m_window, [](GLFWwindow* window, double xOffset, double yOffset)
         {
             WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
@@ -119,7 +118,6 @@ namespace sh
             MouseScrolledEvent event((float)xOffset, (float)yOffset);
             data.eventCallback(event);
         });
-
         glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double xPos, double yPos)
         {
             WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
@@ -139,7 +137,7 @@ namespace sh
     void WindowsWindow::OnUpdate()
     {
         glfwPollEvents();
-        glfwSwapBuffers(m_window);
+        m_context->SwapBuffers();
     }
 
     void WindowsWindow::SetVSync(bool enable)
