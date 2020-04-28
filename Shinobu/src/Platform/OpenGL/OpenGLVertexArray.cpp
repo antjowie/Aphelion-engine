@@ -4,6 +4,24 @@
 
 namespace sh
 {
+    GLenum BaseTypeToOpenGLType(ShaderDataType type)
+    {
+        switch (type)
+        {
+		case ShaderDataType::Float: return GL_FLOAT; 
+		case ShaderDataType::Float2: return GL_FLOAT;
+		case ShaderDataType::Float3: return GL_FLOAT;
+		case ShaderDataType::Float4: return GL_FLOAT;
+		case ShaderDataType::Mat3: return GL_FLOAT;
+		case ShaderDataType::Mat4: return GL_FLOAT;
+		case ShaderDataType::Int: return GL_INT;
+		case ShaderDataType::Int2: return GL_INT;
+		case ShaderDataType::Int3: return GL_INT;
+		case ShaderDataType::Int4: return GL_INT;
+		case ShaderDataType::Bool: return GL_BOOL;
+        }
+    }
+
     OpenGLVertexArray::OpenGLVertexArray()
     {
         glCreateVertexArrays(1, &m_id);
@@ -28,17 +46,22 @@ namespace sh
     {
         Bind();
         buffer->Bind();
+
+        unsigned index = 0;
+        unsigned offset = 0;
         for (auto elem : buffer->GetElements())
         {
-            glEnableVertexAttribArray(elem.index);
+            glEnableVertexAttribArray(index);
             glVertexAttribPointer(
-                elem.index,
-                elem.count,
-                elem.dataType,
-                elem.normalized,
-                elem.stride,
-                (void*)elem.offset
-            );
+                index,
+                elem.GetComponentCount(),
+                BaseTypeToOpenGLType(elem.type),
+                elem.normalized ? GL_TRUE : GL_FALSE,
+                elem.size,
+                (void*)offset);
+
+            index++;
+            offset += elem.size;
         }
 
         m_buffers.push_back(buffer);

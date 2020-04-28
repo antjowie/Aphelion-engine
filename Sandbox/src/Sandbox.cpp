@@ -1,6 +1,8 @@
 #include <Shinobu/Common.h>
 #include <Shinobu/Event/KeyEvent.h>
 
+#include <GLFW/glfw3.h>
+
 class ExampleLayer : public sh::Layer
 {
 public:
@@ -17,6 +19,12 @@ public:
             {
                 SH_TRACE("Typed key {0}", e.GetKeyCode());
             });
+
+        d.Dispatch<sh::KeyPressedEvent>([&](sh::KeyPressedEvent& e)
+        {
+            if (e.GetKeyCode() == GLFW_KEY_ESCAPE)
+                sh::Application::Get().Exit();
+        });
 
         //d.Dispatch<sh::LayerUpdateEvent>(SH_BIND_EVENT_FN(ExampleLayer::OnUpdate));
         //d.Dispatch<sh::LayerGuiRenderEvent>(SH_BIND_EVENT_FN(ExampleLayer::OnImGuiRender));

@@ -3,22 +3,52 @@
 #include "Shinobu/Core/Core.h"
 
 #include <vector>
+#include <string>
 
 namespace sh
 {
+	enum class ShaderDataType
+	{
+		None = 0, 
+		Float, 
+		Float2, 
+		Float3, 
+		Float4, 
+		Mat3, 
+		Mat4, 
+		Int, 
+		Int2, 
+		Int3, 
+		Int4, 
+		Bool
+	};
+
+	uint32_t ShaderDataTypeSize(ShaderDataType type);
+
+	struct BufferElement
+	{	
+        BufferElement() = default;
+
+		BufferElement(ShaderDataType type, const std::string& name, bool normalized = false)
+			: name(name)
+			, type(type)
+			, size(ShaderDataTypeSize(type))
+			, offset(0)
+			, normalized(normalized)
+		{
+		}
+
+		uint32_t GetComponentCount() const;
+		
+		std::string name;
+		ShaderDataType type;
+		uint32_t size;
+		size_t offset;
+		bool normalized;
+	};
+
     class SHINOBU_API VertexBuffer
     {
-    public:
-        struct Element
-        {
-            unsigned index;
-            unsigned count;
-            unsigned dataType;
-            unsigned normalized;
-            unsigned stride;
-            unsigned offset;
-        };
-
     public:
         virtual ~VertexBuffer() = default;
 
@@ -27,14 +57,14 @@ namespace sh
 
         virtual void SetData(const void* data, uint32_t size) = 0;
 
-        virtual void AddElement(const Element& elem);
-        virtual const std::vector<Element>& GetElements() const;
+        virtual void AddElement(const BufferElement& elem);
+        virtual const std::vector<BufferElement>& GetElements() const;
 
         static std::shared_ptr<VertexBuffer> Create(uint32_t size);
         static std::shared_ptr<VertexBuffer> Create(const float* vertices, uint32_t size);
 
     private:
-        std::vector<Element> m_elements;
+        std::vector<BufferElement> m_elements;
     };
 
     // Currently supports 32-bit index buffers
@@ -50,5 +80,4 @@ namespace sh
 
         static std::shared_ptr<IndexBuffer> Create(const uint32_t* indices, uint32_t count);
     };
-
 }

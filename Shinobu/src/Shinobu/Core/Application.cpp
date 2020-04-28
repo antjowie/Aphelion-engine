@@ -69,12 +69,8 @@ void main()
         constexpr uint32_t indices[] =
         { 0,1,2 };
 
-        // TODO: Abstract data type for shader
-        unsigned GL_FLOAT = 0x1406;
-        unsigned GL_FALSE = 0;
-
         auto buffer = VertexBuffer::Create(tri,sizeof(tri));
-        buffer->AddElement(VertexBuffer::Element{ 0,3,GL_FLOAT,GL_FALSE,sizeof(float) * 3,0, });
+        buffer->AddElement(BufferElement(ShaderDataType::Float3, "aPos"));
         auto index = IndexBuffer::Create(indices, 3);
 
         auto array = VertexArray::Create();

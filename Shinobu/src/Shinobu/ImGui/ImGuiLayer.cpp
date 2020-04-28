@@ -75,7 +75,7 @@ namespace sh
         Application& app = Application::Get();
         void* window = app.GetWindow().GetNativeWindow();
         ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(window), true);
-        ImGui_ImplOpenGL3_Init("#version 460");
+        ImGui_ImplOpenGL3_Init("#version 450");
     }
 
     void ImGuiLayer::OnDetach()

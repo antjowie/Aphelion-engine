@@ -27,6 +27,8 @@ namespace sh
         inline Window& GetWindow() { return *m_window; }
         static inline Application& Get() { return *m_instance; } 
 
+        inline void Exit() { m_isRunning = false; }
+
     private:
         void OnEvent(Event& event);
         void OnWindowClose(WindowCloseEvent& event);
