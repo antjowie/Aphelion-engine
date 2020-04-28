@@ -10,18 +10,6 @@
 
 namespace sh
 {
-    /**
-     * This function is declared in Window.h and we overwrite it platform specific
-     */
-    std::unique_ptr<Window> Window::Create(WindowProps props)
-    {
-#ifdef SH_PLATFORM_WINDOWS
-        return std::make_unique<WindowsWindow>(props);
-#elif
-        SH_CRITICAL("Unknown platform!");
-#endif // SH_PLATFORM_WINDOWS
-    }
-
     WindowsWindow::WindowsWindow(WindowProps& props)
         : m_props(props) 
     {

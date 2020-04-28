@@ -5,6 +5,10 @@
 #include "Shinobu/Renderer/RendererAPI.h"
 #include "Shinobu/Renderer/RenderCommand.h"
 
+// TEMP
+#include <glad/glad.h>
+#include "Shinobu/Renderer/Shader.h"
+
 namespace sh
 {
     Application* Application::m_instance = nullptr;
@@ -25,7 +29,58 @@ namespace sh
 
     void Application::Run()
     {
+        RenderCommand::Init();
         RenderCommand::SetClearColor(0.5f, 0.f, 0.5f, 1.f);
+
+
+        auto shader = Shader::Create("default",
+R"(
+#version 450 core
+
+layout (location = 0) in vec3 aPos;
+void main()
+{
+    gl_Position = vec4(aPos ,1.0f);
+}
+)",
+
+R"(
+#version 450 core
+
+out vec4 color;
+
+void main()
+{
+    color = vec4(1,0,0,1);
+}
+)");
+        shader->Bind();
+
+        //glDebugMessageInsert(0, 0, 0, 0, 100, "OOF");
+
+        unsigned vao, vbo;
+        glGenVertexArrays(1, &vao);
+        glGenBuffers(1, &vbo);
+
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        float tri[] =
+        {
+            -0.5f, -0.5f, 0.f,
+             0.5f, -0.5f, 0.f,
+             0.f,  0.5f,  0.f,
+        };
+        glBufferData(GL_ARRAY_BUFFER, sizeof(tri), tri, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(
+            0,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(float) * 3,
+            0
+        );
 
 
         while (m_isRunning)
@@ -34,6 +89,11 @@ namespace sh
             
             RenderCommand::Clear();
 
+
+            // TODO: remove this. Temp render code
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+
+
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {
                 (*layer)->OnEvent(LayerUpdateEvent());
@@ -41,9 +101,6 @@ namespace sh
             }
 
             m_imguiLayer->End();
-
-            // TODO: remove this. Temp render code
-
 
             m_window->OnUpdate();
         }

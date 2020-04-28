@@ -37,10 +37,10 @@ namespace sh
 			m_rendererAPI->Clear();
 		}
 
-		static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, unsigned count = 0)
-		{
-			m_rendererAPI->DrawIndexed(vertexArray, count);
-		}
+		//static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, unsigned count = 0)
+		//{
+		//	m_rendererAPI->DrawIndexed(vertexArray, count);
+		//}
 	private:
 		static std::unique_ptr<RendererAPI> m_rendererAPI;
 	};

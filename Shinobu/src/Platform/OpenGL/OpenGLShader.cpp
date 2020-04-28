@@ -11,7 +11,7 @@ namespace sh
     {
         int success;
         char infoLog[1024];
-        if (type != "PROGRAM")
+        if (strcmp(type,  "Program"))
         {
             glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
             if (!success)
@@ -34,17 +34,19 @@ namespace sh
     GLenum StringToType(const std::string& string)
     {
         if (string == "vertex") return GL_VERTEX_SHADER;
-        else if (string == "fragment") return GL_VERTEX_SHADER;
+        else if (string == "fragment") return GL_FRAGMENT_SHADER;
         
+        SH_CORE_WARN("string {0} can't be converted", string);
         return 0;
     }
 
     std::string TypeToString(GLenum type)
     {
         if (type == GL_VERTEX_SHADER) return "vertex";
-        else if (type == GL_VERTEX_SHADER) return "fragment";
+        else if (type == GL_FRAGMENT_SHADER) return "fragment";
 
-        return "no name";
+        SH_CORE_WARN("type {0} can't be converted", type);
+        return "NO NAME";
     }
 
     std::string ReadFile(const std::string& filepath)
@@ -102,16 +104,14 @@ namespace sh
 
     void OpenGLShader::Compile(const std::unordered_map<unsigned, std::string>& shaders)
     {
-        const char* vShaderCode = shaders.at(GL_VERTEX_SHADER).c_str();
-        const char* fShaderCode = shaders.at(GL_FRAGMENT_SHADER).c_str();
-
         m_id = glCreateProgram();
         std::vector<unsigned> ids;
         for (const auto& shader : shaders)
         {
             const char* source = shader.second.c_str();
+            SH_CORE_TRACE("Created shader {0}", TypeToString(shader.first));
             unsigned id = glCreateShader(shader.first);
-            glShaderSource(id, 1, &vShaderCode, NULL);
+            glShaderSource(id, 1, &source, NULL);
             glCompileShader(id);
             CheckCompileErrors(id, TypeToString(shader.first).c_str());
             glAttachShader(m_id, id);
@@ -150,6 +150,7 @@ namespace sh
         std::unordered_map<GLenum, std::string> sources;
         sources[GL_VERTEX_SHADER] = vertexSrc;
         sources[GL_FRAGMENT_SHADER] = fragmentSrc;
+        Compile(sources);
     }
 
     OpenGLShader::~OpenGLShader()
