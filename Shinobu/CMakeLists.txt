@@ -32,6 +32,8 @@ add_library(Shinobu
     src/Shinobu/Renderer/RendererAPI.cpp
     src/Shinobu/Renderer/GraphicsContext.h
     src/Shinobu/Renderer/GraphicsContext.cpp
+    src/Shinobu/Renderer/RenderCommand.h
+    src/Shinobu/Renderer/RenderCommand.cpp
 
 #    src/Shinobu/Renderer/Shader.h
 #    src/Shinobu/Renderer/Shader.cpp
@@ -73,6 +75,7 @@ target_precompile_headers(Shinobu
         <vector>
         <unordered_map>
         <unordered_set>
+        <type_traits>
 
         src/Shinobu/Core/Log.h
 )

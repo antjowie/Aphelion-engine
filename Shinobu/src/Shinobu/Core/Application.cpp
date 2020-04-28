@@ -1,11 +1,9 @@
 #include "Shinobu/Core/Application.h"
-#include "Shinobu/Renderer/RendererAPI.h"
 
 #include "Shinobu/ImGui/ImGuiLayer.h"
 
-// Temporary, this class should not know about GLFW
-//#include <GLFW/glfw3.h>
-
+#include "Shinobu/Renderer/RendererAPI.h"
+#include "Shinobu/Renderer/RenderCommand.h"
 
 namespace sh
 {
@@ -27,24 +25,13 @@ namespace sh
 
     void Application::Run()
     {
-        // TODO: RenderCommands should interact with the API instead of user
-        auto api = RendererAPI::Create();
-        
-        api->SetClearColor(0.5f, 0.f, 0.5f, 1.f);
+        RenderCommand::SetClearColor(0.5f, 0.f, 0.5f, 1.f);
 
         while (m_isRunning)
         {
             m_imguiLayer->Begin();
             
-            // TODO: Move this into a renderer
-            //int display_w, display_h;
-            //glfwGetFramebufferSize((GLFWwindow*)m_window->GetNativeWindow(), &display_w, &display_h);
-            //glViewport(0, 0, display_w, display_h);
-            //glClearColor(0.5f, 0.f, 0.5f, 1.f);
-            //glClear(GL_COLOR_BUFFER_BIT);
-            
-            
-            api->Clear();
+            RenderCommand::Clear();
 
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {
