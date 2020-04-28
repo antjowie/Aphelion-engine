@@ -37,8 +37,8 @@ add_library(Shinobu
     src/Shinobu/Renderer/RenderCommand.cpp
     src/Shinobu/Renderer/Shader.h
     src/Shinobu/Renderer/Shader.cpp
-#    src/Shinobu/Renderer/Texture.h
-#    src/Shinobu/Renderer/Texture.cpp
+    src/Shinobu/Renderer/Texture.h
+    src/Shinobu/Renderer/Texture.cpp
     src/Shinobu/Renderer/VertexArray.h
     src/Shinobu/Renderer/VertexArray.cpp
     src/Shinobu/Renderer/VertexBuffer.h
@@ -54,8 +54,8 @@ add_library(Shinobu
     src/Platform/OpenGL/OpenGLContext.cpp
     src/Platform/OpenGL/OpenGLShader.h
     src/Platform/OpenGL/OpenGLShader.cpp
-#    src/Platform/OpenGL/OpenGLTexture.h
-#    src/Platform/OpenGL/OpenGLTexture.cpp
+    src/Platform/OpenGL/OpenGLTexture.h
+    src/Platform/OpenGL/OpenGLTexture.cpp
     src/Platform/OpenGL/OpenGLVertexArray.h
     src/Platform/OpenGL/OpenGLVertexArray.cpp
     src/Platform/OpenGL/OpenGLVertexBuffer.h
@@ -134,7 +134,8 @@ set(GLFW_BUILD_DOCS "OFF" CACHE BOOL "")
 add_subdirectory(thirdParty/glfw)
 add_subdirectory(thirdParty/imgui)
 add_subdirectory(thirdParty/Glad)
+add_subdirectory(thirdParty/stb_image)
 
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD} CACHE BOOL "" FORCE)
   
-target_link_libraries(Shinobu PUBLIC spdlog glfw imgui Glad)
+target_link_libraries(Shinobu PUBLIC spdlog glfw imgui Glad stb_image)

@@ -9,6 +9,7 @@
 #include "Shinobu/Renderer/Shader.h"
 #include "Shinobu/Renderer/VertexArray.h"
 #include "Shinobu/Renderer/VertexBuffer.h"
+#include "Shinobu/Renderer/Texture.h"
 
 namespace sh
 {
@@ -39,8 +40,13 @@ R"(
 #version 450 core
 
 layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTex;
+
+out vec2 tex;
+
 void main()
 {
+    tex = aTex;
     gl_Position = vec4(aPos ,1.0f);
 }
 )",
@@ -48,30 +54,37 @@ void main()
 R"(
 #version 450 core
 
+uniform sampler2D sampl;
+
+in vec2 tex;
 out vec4 color;
 
 void main()
 {
-    color = vec4(1,0,0,1);
+	color = texture(sampl, tex);
 }
 )");
         shader->Bind();
+        auto tex = Texture2D::Create("image.png");
+        tex->Bind();
 
         //glDebugMessageInsert(0, 0, 0, 0, 100, "OOF");
 
-        constexpr float tri[] =
+        constexpr float vert[] =
         {
-            -0.5f, -0.5f, 0.f,
-             0.5f, -0.5f, 0.f,
-             0.f,  0.5f,  0.f,
+            -0.5f, -0.5f, 0.f, 0.f, 0.f,
+             0.5f, -0.5f, 0.f, 1.f, 0.f,
+             0.5f,  0.5f, 0.f, 1.f, 1.f,
+            -0.5f,  0.5f, 0.f, 0.f, 1.f,
         };
 
         constexpr uint32_t indices[] =
-        { 0,1,2 };
+        { 0,1,2, 0,2,3 };
 
-        auto buffer = VertexBuffer::Create(tri,sizeof(tri));
+        auto buffer = VertexBuffer::Create(vert,sizeof(vert));
         buffer->AddElement(BufferElement(ShaderDataType::Float3, "aPos"));
-        auto index = IndexBuffer::Create(indices, 3);
+        buffer->AddElement(BufferElement(ShaderDataType::Float2, "aTex", true));
+        auto index = IndexBuffer::Create(indices, 6);
 
         auto array = VertexArray::Create();
         array->AddVertexBuffer(buffer);

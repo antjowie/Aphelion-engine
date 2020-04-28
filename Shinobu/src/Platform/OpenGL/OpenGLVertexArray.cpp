@@ -47,6 +47,11 @@ namespace sh
         Bind();
         buffer->Bind();
 
+        // Calculate stride
+        unsigned stride = 0;
+        for (auto elem : buffer->GetElements())
+            stride += elem.size;
+        
         unsigned index = 0;
         unsigned offset = 0;
         for (auto elem : buffer->GetElements())
@@ -57,7 +62,7 @@ namespace sh
                 elem.GetComponentCount(),
                 BaseTypeToOpenGLType(elem.type),
                 elem.normalized ? GL_TRUE : GL_FALSE,
-                elem.size,
+                stride,
                 (void*)offset);
 
             index++;
