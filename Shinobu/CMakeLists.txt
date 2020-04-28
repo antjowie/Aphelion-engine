@@ -34,9 +34,8 @@ add_library(Shinobu
     src/Shinobu/Renderer/GraphicsContext.cpp
     src/Shinobu/Renderer/RenderCommand.h
     src/Shinobu/Renderer/RenderCommand.cpp
-
-#    src/Shinobu/Renderer/Shader.h
-#    src/Shinobu/Renderer/Shader.cpp
+    src/Shinobu/Renderer/Shader.h
+    src/Shinobu/Renderer/Shader.cpp
 #    src/Shinobu/Renderer/Texture.h
 #    src/Shinobu/Renderer/Texture.cpp
 #    src/Shinobu/Renderer/VertexArray.h
@@ -52,8 +51,8 @@ add_library(Shinobu
     src/Platform/OpenGL/OpenGLRendererAPI.cpp
     src/Platform/OpenGL/OpenGLContext.h
     src/Platform/OpenGL/OpenGLContext.cpp
-#    src/Platform/OpenGL/OpenGLShader.h
-#    src/Platform/OpenGL/OpenGLShader.cpp
+    src/Platform/OpenGL/OpenGLShader.h
+    src/Platform/OpenGL/OpenGLShader.cpp
 #    src/Platform/OpenGL/OpenGLTexture.h
 #    src/Platform/OpenGL/OpenGLTexture.cpp
 #    src/Platform/OpenGL/OpenGLVertexArray.h
