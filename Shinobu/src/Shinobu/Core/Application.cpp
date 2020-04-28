@@ -45,6 +45,7 @@ namespace sh
             m_imguiLayer->End();
 
             m_window->OnUpdate();
+            RenderCommand::Clear();
         }
     }
 

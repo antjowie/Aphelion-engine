@@ -62,7 +62,7 @@
     #define SHINOBU_API
 #endif
 
-#define KEEP_ASSERT
+//#define KEEP_ASSERT
 
 /**
  * Set up the asserts

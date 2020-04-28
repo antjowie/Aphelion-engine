@@ -11,8 +11,7 @@
 namespace sh
 {
     /**
-     * The API that the end user will use.
-     * It wraps calls to the graphics API.
+     * A renderer knows about the environment. It encapsulated the render flow.
      */
     class SHINOBU_API Renderer
 	{

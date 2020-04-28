@@ -11,6 +11,7 @@
 #include <Shinobu/Renderer/Texture.h>
 #include <Shinobu/Renderer/Renderer.h>
 
+// TODO: Add our own keybindings
 #include <GLFW/glfw3.h>
 
 class ExampleLayer : public sh::Layer

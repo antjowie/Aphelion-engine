@@ -141,4 +141,4 @@ add_subdirectory(thirdParty/glm)
 
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD} CACHE BOOL "" FORCE)
   
-target_link_libraries(Shinobu PUBLIC spdlog glfw imgui Glad stb_image glm)
+target_link_libraries(Shinobu PUBLIC glm spdlog glfw imgui Glad stb_image)

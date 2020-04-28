@@ -21,7 +21,6 @@ namespace sh
 
     void Renderer::BeginScene(const glm::mat4& viewProjection)
     {
-        RenderCommand::Clear();
         m_scene.viewProjectionMatrix = viewProjection;
     }
 
