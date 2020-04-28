@@ -87,13 +87,13 @@ namespace sh
         while (pos != std::string::npos)
         {
             size_t eol = source.find_first_of("\r\n", pos); //End of shader type declaration line
-            SH_CORE_ASSERT_REL(eol != std::string::npos, "Syntax error");
+            SH_CORE_ASSERT(eol != std::string::npos, "Syntax error");
             size_t begin = pos + typeTokenLength + 1; //Start of shader type name (after "#type " keyword)
             std::string type = source.substr(begin, eol - begin);
-            SH_CORE_ASSERT_REL(StringToType(type) != 0, "Invalid shader type specified");
+            SH_CORE_ASSERT(StringToType(type) != 0, "Invalid shader type specified");
 
             size_t nextLinePos = source.find_first_not_of("\r\n", eol); //Start of shader code after shader type declaration line
-            SH_CORE_ASSERT_REL(nextLinePos != std::string::npos, "Syntax error");
+            SH_CORE_ASSERT(nextLinePos != std::string::npos, "Syntax error");
             pos = source.find(typeToken, nextLinePos); //Start of next shader type declaration line
 
             shaderSources[StringToType(type)] = (pos == std::string::npos) ? source.substr(nextLinePos) : source.substr(nextLinePos, pos - nextLinePos);
