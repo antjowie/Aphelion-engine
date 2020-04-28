@@ -59,7 +59,7 @@ void main()
 }
 )");
         shader->Bind();
-        tex = sh::Texture2D::Create("image.png");
+        tex = sh::Texture2D::Create("res/image.png");
         tex->Bind();
 
         //glDebugMessageInsert(0, 0, 0, 0, 100, "OOF");

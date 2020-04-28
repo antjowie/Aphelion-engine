@@ -62,7 +62,9 @@ add_library(Shinobu
     src/Platform/OpenGL/OpenGLVertexArray.cpp
     src/Platform/OpenGL/OpenGLVertexBuffer.h
     src/Platform/OpenGL/OpenGLVertexBuffer.cpp
-)
+
+    src/Shinobu/Renderer/OrthographicCamera.h
+    src/Shinobu/Renderer/OrthographicCamera.cpp)
 
 target_precompile_headers(Shinobu 
     PUBLIC
