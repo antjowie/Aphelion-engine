@@ -1,4 +1,8 @@
 #pragma once
+
+#include "Shinobu/Core/Core.h"
+#include "Shinobu/Renderer/VertexArray.h"
+
 #include <memory>
 
 namespace sh
@@ -9,7 +13,7 @@ namespace sh
      * It will wrap render api functions such as clearing, viewport,
      * all the state that the renderers that we implement should need.
      */
-    class RendererAPI
+    class SHINOBU_API RendererAPI
     {
     public:
         enum class API
@@ -25,7 +29,7 @@ namespace sh
 
         virtual void Clear() = 0;
 
-        //virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
+        virtual void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
 
         static API GetAPI() { return m_api; }
         static std::unique_ptr<RendererAPI> Create();

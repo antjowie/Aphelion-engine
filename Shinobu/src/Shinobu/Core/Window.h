@@ -1,7 +1,4 @@
 #pragma once
-/**
- * This header file contains the interface for desktop based window classes
- */
 #include "Shinobu/Core/Core.h"
 #include "Shinobu/Event/Event.h"
 

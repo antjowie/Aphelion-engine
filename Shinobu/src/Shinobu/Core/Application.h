@@ -7,6 +7,8 @@
 
 #include "Shinobu/ImGui/ImGuiLayer.h"
 
+#include <memory>
+
 namespace sh
 {
     /**

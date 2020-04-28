@@ -17,6 +17,7 @@ add_library(Shinobu
     src/Shinobu/Core/Log.h
     src/Shinobu/Core/Log.cpp
     src/Shinobu/Core/Window.h
+    src/Shinobu/Core/Window.cpp
 
     src/Shinobu/Event/ApplicationEvent.h
     src/Shinobu/Event/Event.h
@@ -40,8 +41,8 @@ add_library(Shinobu
 #    src/Shinobu/Renderer/Texture.cpp
     src/Shinobu/Renderer/VertexArray.h
     src/Shinobu/Renderer/VertexArray.cpp
-#    src/Shinobu/Renderer/VertexBuffer.h
-#    src/Shinobu/Renderer/VertexBuffer.cpp
+    src/Shinobu/Renderer/VertexBuffer.h
+    src/Shinobu/Renderer/VertexBuffer.cpp
 
     # These depend on current platform so we should move them in the future
     src/Platform/Windows/WindowsWindow.h
@@ -57,9 +58,9 @@ add_library(Shinobu
 #    src/Platform/OpenGL/OpenGLTexture.cpp
     src/Platform/OpenGL/OpenGLVertexArray.h
     src/Platform/OpenGL/OpenGLVertexArray.cpp
-#    src/Platform/OpenGL/OpenGLVertexBuffer.h
-#    src/Platform/OpenGL/OpenGLVertexBuffer.cpp
- "src/Shinobu/Core/Window.cpp")
+    src/Platform/OpenGL/OpenGLVertexBuffer.h
+    src/Platform/OpenGL/OpenGLVertexBuffer.cpp
+)
 
 target_precompile_headers(Shinobu 
     PUBLIC

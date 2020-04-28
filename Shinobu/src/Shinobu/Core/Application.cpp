@@ -6,8 +6,9 @@
 #include "Shinobu/Renderer/RenderCommand.h"
 
 // TEMP
-#include <glad/glad.h>
 #include "Shinobu/Renderer/Shader.h"
+#include "Shinobu/Renderer/VertexArray.h"
+#include "Shinobu/Renderer/VertexBuffer.h"
 
 namespace sh
 {
@@ -58,41 +59,34 @@ void main()
 
         //glDebugMessageInsert(0, 0, 0, 0, 100, "OOF");
 
-        unsigned vao, vbo;
-        glGenVertexArrays(1, &vao);
-        glGenBuffers(1, &vbo);
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        float tri[] =
+        constexpr float tri[] =
         {
             -0.5f, -0.5f, 0.f,
              0.5f, -0.5f, 0.f,
              0.f,  0.5f,  0.f,
         };
-        glBufferData(GL_ARRAY_BUFFER, sizeof(tri), tri, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(
-            0,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(float) * 3,
-            0
-        );
 
+        constexpr uint32_t indices[] =
+        { 0,1,2 };
+
+        // TODO: Abstract data type for shader
+        unsigned GL_FLOAT = 0x1406;
+        unsigned GL_FALSE = 0;
+
+        auto buffer = VertexBuffer::Create(tri,sizeof(tri));
+        buffer->AddElement(VertexBuffer::Element{ 0,3,GL_FLOAT,GL_FALSE,sizeof(float) * 3,0, });
+        auto index = IndexBuffer::Create(indices, 3);
+
+        auto array = VertexArray::Create();
+        array->AddVertexBuffer(buffer);
+        array->SetIndexBuffer(index);
 
         while (m_isRunning)
         {
             m_imguiLayer->Begin();
             
             RenderCommand::Clear();
-
-
-            // TODO: remove this. Temp render code
-            glDrawArrays(GL_TRIANGLES, 0, 3);
-
+            RenderCommand::DrawIndexed(array);
 
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {

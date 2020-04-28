@@ -53,6 +53,14 @@ namespace sh
 		glClearColor(r, g, b, a);
 	}
 
+	void OpenGLRendererAPI::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t indexCount)
+	{
+		vertexArray->Bind();
+		unsigned count = indexCount == 0 ? vertexArray->GetIndexBuffer()->GetCount() : indexCount;
+
+		glDrawElements(GL_TRIANGLES, count , GL_UNSIGNED_INT, nullptr);
+	}
+
 	void OpenGLRendererAPI::Clear()
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
