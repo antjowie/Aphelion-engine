@@ -1,4 +1,6 @@
 #include "Shinobu/ImGui/ImGuiLayer.h"
+
+#include "Shinobu/Core/Log.h"
 #include "Shinobu/Core/Application.h"
 
 #include <imgui.h>

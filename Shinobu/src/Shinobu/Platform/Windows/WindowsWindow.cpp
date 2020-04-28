@@ -1,5 +1,7 @@
 #include "Shinobu/Platform/Windows/WindowsWindow.h"
 
+#include "Shinobu/Core/Log.h"
+
 #include "Shinobu/Event/ApplicationEvent.h"
 #include "Shinobu/Event/MouseEvent.h"
 #include "Shinobu/Event/KeyEvent.h"

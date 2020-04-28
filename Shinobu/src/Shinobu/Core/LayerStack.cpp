@@ -1,5 +1,7 @@
 #include "Shinobu/Core/LayerStack.h"
 
+#include "Shinobu/Core/Log.h"
+
 namespace sh
 {
     LayerStack::~LayerStack()

@@ -46,8 +46,6 @@ target_precompile_headers(Shinobu
         <vector>
         <unordered_map>
         <unordered_set>
-
-        src/Shinobu/Core/Log.h
 )
 
 target_include_directories(Shinobu PUBLIC
