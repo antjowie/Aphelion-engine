@@ -76,6 +76,12 @@
 #endif
 
 /**
+ * RL also asserts in release
+ */
+#define SH_ASSERT_REL(x, msg) { if(!(x)) { SH_ERROR("Assertion Failed: {0}", msg); __debugbreak(); } }
+#define SH_CORE_ASSERT_REL(x, msg) { if(!(x)) { SH_CORE_ERROR("Assertion Failed: {0}", msg); __debugbreak(); } }
+
+/**
  * Verify is used if you still want to execute the arguments in release but not 
  * stop execution of the project if failed
  */

@@ -5,6 +5,19 @@
 
 namespace sh
 {
+    std::shared_ptr<Shader> Shader::Create(const std::string& filepath)
+    {
+        switch (RendererAPI::GetAPI())
+        {
+        case RendererAPI::API::None:
+            //SH_CORE_CRITICAL()
+            break;
+        case RendererAPI::API::OpenGL:
+            return std::make_shared<OpenGLShader>(filepath.c_str());
+            break;
+        }
+    }
+
     std::shared_ptr<Shader> Shader::Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
     {
         switch (RendererAPI::GetAPI())
@@ -13,7 +26,7 @@ namespace sh
             //SH_CORE_CRITICAL()
             break;
         case RendererAPI::API::OpenGL:
-            return std::make_shared<OpenGLShader>(vertexSrc.c_str(), fragmentSrc.c_str());
+            return std::make_shared<OpenGLShader>(name.c_str(), vertexSrc.c_str(), fragmentSrc.c_str());
             break;
         }
     }

@@ -38,8 +38,8 @@ add_library(Shinobu
     src/Shinobu/Renderer/Shader.cpp
 #    src/Shinobu/Renderer/Texture.h
 #    src/Shinobu/Renderer/Texture.cpp
-#    src/Shinobu/Renderer/VertexArray.h
-#    src/Shinobu/Renderer/VertexArray.cpp
+    src/Shinobu/Renderer/VertexArray.h
+    src/Shinobu/Renderer/VertexArray.cpp
 #    src/Shinobu/Renderer/VertexBuffer.h
 #    src/Shinobu/Renderer/VertexBuffer.cpp
 
@@ -55,8 +55,8 @@ add_library(Shinobu
     src/Platform/OpenGL/OpenGLShader.cpp
 #    src/Platform/OpenGL/OpenGLTexture.h
 #    src/Platform/OpenGL/OpenGLTexture.cpp
-#    src/Platform/OpenGL/OpenGLVertexArray.h
-#    src/Platform/OpenGL/OpenGLVertexArray.cpp
+    src/Platform/OpenGL/OpenGLVertexArray.h
+    src/Platform/OpenGL/OpenGLVertexArray.cpp
 #    src/Platform/OpenGL/OpenGLVertexBuffer.h
 #    src/Platform/OpenGL/OpenGLVertexBuffer.cpp
 )

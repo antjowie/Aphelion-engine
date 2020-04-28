@@ -27,6 +27,7 @@ namespace sh
     {
         RenderCommand::SetClearColor(0.5f, 0.f, 0.5f, 1.f);
 
+
         while (m_isRunning)
         {
             m_imguiLayer->Begin();
@@ -40,6 +41,9 @@ namespace sh
             }
 
             m_imguiLayer->End();
+
+            // TODO: remove this. Temp render code
+
 
             m_window->OnUpdate();
         }
