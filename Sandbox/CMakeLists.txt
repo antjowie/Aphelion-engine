@@ -19,14 +19,14 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/Shinobu/res)
-add_custom_command(TARGET Sandbox POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+add_custom_target(CopyGameAssets
+                   ALL COMMAND ${CMAKE_COMMAND} -E copy_directory
                    ${CMAKE_SOURCE_DIR}/Shinobu/res $<TARGET_FILE_DIR:Sandbox>/res)
 endif()
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/Sandbox/res)
-add_custom_command(TARGET Sandbox POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+add_custom_target(CopyEngineAssets
+                   ALL COMMAND ${CMAKE_COMMAND} -E copy_directory
                    ${CMAKE_SOURCE_DIR}/Sandbox/res $<TARGET_FILE_DIR:Sandbox>/res)
 endif()
 
