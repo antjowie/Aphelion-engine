@@ -1,18 +1,4 @@
 #include <Shinobu/Common.h>
-#include <Shinobu/Event/KeyEvent.h>
-#include <Shinobu/Renderer/Renderer.h>
-
-// TEMP
-// #include "Shinobu/Renderer/RendererAPI.h"
-// #include "Shinobu/Renderer/RenderCommand.h"
-// #include "Shinobu/Renderer/VertexArray.h"
-// #include "Shinobu/Renderer/VertexBuffer.h"
-#include <Shinobu/Renderer/Shader.h>
-#include <Shinobu/Renderer/Texture.h>
-#include <Shinobu/Renderer/Renderer.h>
-
-// TODO: Add our own keybindings
-#include <GLFW/glfw3.h>
 
 class ExampleLayer : public sh::Layer
 {
@@ -65,24 +51,20 @@ public:
 
         d.Dispatch<sh::KeyPressedEvent>([&](sh::KeyPressedEvent& e)
         {
-            if (e.GetKeyCode() == GLFW_KEY_ESCAPE)
+            if (e.GetKeyCode() == sh::KeyCode::Escape)
                 sh::Application::Get().Exit();
         });
-
-        // d.Dispatch<sh::LayerUpdateEvent>(SH_BIND_EVENT_FN(ExampleLayer::OnUpdate));
-        // d.Dispatch<sh::LayerGuiRenderEvent>(SH_BIND_EVENT_FN(ExampleLayer::OnImGuiRender));
-        d.Dispatch<sh::LayerRenderEvent>(SH_BIND_EVENT_FN(ExampleLayer::OnRender));
     }
 
-private:
-    void OnUpdate(sh::LayerUpdateEvent& event) { SH_TRACE("OnUpdate called in {0}", GetName()); }
-    void OnImGuiRender(sh::LayerGuiRenderEvent& event) { SH_TRACE("OnImGuiRender called in {0}", GetName()); }
-    void OnRender(sh::LayerRenderEvent& event) 
+    virtual void OnUpdate() override final
     {
         sh::Renderer::BeginScene(glm::mat4(1.f));
         tex->Bind();
         sh::Renderer::Submit(shader, array, glm::mat4(1));
         sh::Renderer::EndScene();
+    }
+    virtual void OnGuiRender() override final
+    {
     }
 };
 

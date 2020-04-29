@@ -10,10 +10,6 @@
 #include "Shinobu/Core/Core.h"
 #include "Shinobu/Event/Event.h"
 
-// This header is here for convenience since most users would like to 
-// use layer events for updating and rendering
-#include "Shinobu/Event/LayerEvent.h" 
-
 namespace sh
 {
     /**
@@ -29,7 +25,8 @@ namespace sh
         virtual void OnAttach() {}
         virtual void OnDetach() {}
         virtual void OnEvent(Event& event) {}
-
+        virtual void OnUpdate() {}
+        virtual void OnGuiRender() {}
         inline const std::string& GetName() const { return m_debugName; }
 
     private:

@@ -85,13 +85,7 @@ namespace sh
 		ImGui::DestroyContext();
     }
 
-    void ImGuiLayer::OnEvent(Event& event)
-    {
-        EventDispatcher gui(event); 
-        gui.Dispatch<LayerGuiRenderEvent>(SH_BIND_EVENT_FN(ImGuiLayer::OnGuiRender));
-    }
-
-    void ImGuiLayer::OnGuiRender(LayerGuiRenderEvent& event)
+    void ImGuiLayer::OnGuiRender()
     {
         static bool show = true;
         ImGui::ShowDemoWindow(&show);

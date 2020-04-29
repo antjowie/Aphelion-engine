@@ -11,7 +11,6 @@ namespace sh
 	{
 		None = 0,
 		WindowClose, WindowResize,
-		LayerUpdate, LayerGuiRender, LayerRender,
 		KeyPressed, KeyReleased, KeyTyped,
 		MouseButtonPressed, MouseButtonReleased, 
         MouseMoved, MouseScrolled
@@ -21,11 +20,10 @@ namespace sh
 	{
 		None = 0,
 		EventCategoryApplication    = BIT(0), // Application events are program related events such as shutdown
-		EventCategoryLayer          = BIT(1), // Layer events are updates, renders, etc
-		EventCategoryInput          = BIT(2), // Input are related to the way user interacts
-		EventCategoryKeyboard       = BIT(3), 
-		EventCategoryMouse          = BIT(4),
-		EventCategoryMouseButton    = BIT(5)
+		EventCategoryInput          = BIT(1), // Input are related to the way user interacts
+		EventCategoryKeyboard       = BIT(2), 
+		EventCategoryMouse          = BIT(3),
+		EventCategoryMouseButton    = BIT(4)
 	};
 
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return type; } \

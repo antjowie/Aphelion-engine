@@ -29,19 +29,17 @@ namespace sh
     {
         while (m_isRunning)
         {
+
+            for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
+            {
+                (*layer)->OnUpdate();
+            }
+
             m_imguiLayer->Begin();
-
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {
-                (*layer)->OnEvent(LayerUpdateEvent());
-                (*layer)->OnEvent(LayerGuiRenderEvent());
+                (*layer)->OnGuiRender();
             }
-
-            for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
-            {
-                (*layer)->OnEvent(LayerRenderEvent());
-            }
-
             m_imguiLayer->End();
 
             m_window->OnUpdate();

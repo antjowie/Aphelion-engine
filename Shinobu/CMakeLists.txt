@@ -19,10 +19,12 @@ add_library(Shinobu
     src/Shinobu/Core/Window.h
     src/Shinobu/Core/Window.cpp
 
+    src/Shinobu/Core/Input/KeyCodes.h
+    src/Shinobu/Core/Input/MouseCodes.h
+
     src/Shinobu/Event/ApplicationEvent.h
     src/Shinobu/Event/Event.h
     src/Shinobu/Event/KeyEvent.h
-    src/Shinobu/Event/LayerEvent.h
     src/Shinobu/Event/MouseEvent.h
 
     src/Shinobu/ImGui/ImGuiBuild.cpp
@@ -64,7 +66,8 @@ add_library(Shinobu
     src/Platform/OpenGL/OpenGLVertexBuffer.cpp
 
     src/Shinobu/Renderer/OrthographicCamera.h
-    src/Shinobu/Renderer/OrthographicCamera.cpp)
+    src/Shinobu/Renderer/OrthographicCamera.cpp
+)
 
 target_precompile_headers(Shinobu 
     PUBLIC
