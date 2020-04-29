@@ -17,6 +17,7 @@ namespace sh
 
         m_window = Window::Create();
         m_window->SetEventCallback(SH_BIND_EVENT_FN(Application::OnEvent));
+        m_window->SetVSync(true);
 
         Renderer::Init();
         RenderCommand::SetClearColor(0.5f, 0.f, 0.5f, 1.f);

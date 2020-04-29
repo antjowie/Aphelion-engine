@@ -21,6 +21,7 @@ namespace sh
 
         virtual void SetVec2(const char* name, const float* val) const = 0;
         virtual void SetVec3(const char* name, const float* val) const = 0;
+        virtual void SetVec4(const char* name, const float* val) const = 0;
 
         static std::shared_ptr<Shader> Create(const std::string& filepath);
         static std::shared_ptr<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);

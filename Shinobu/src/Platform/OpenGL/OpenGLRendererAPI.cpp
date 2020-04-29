@@ -55,7 +55,6 @@ namespace sh
 
 	void OpenGLRendererAPI::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, uint32_t indexCount)
 	{
-		vertexArray->Bind();
 		unsigned count = indexCount == 0 ? vertexArray->GetIndexBuffer()->GetCount() : indexCount;
 
 		glDrawElements(GL_TRIANGLES, count , GL_UNSIGNED_INT, nullptr);

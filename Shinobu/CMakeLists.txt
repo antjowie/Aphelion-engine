@@ -37,6 +37,8 @@ add_library(Shinobu
     src/Shinobu/Renderer/RenderCommand.cpp
     src/Shinobu/Renderer/Renderer.h
     src/Shinobu/Renderer/Renderer.cpp
+    src/Shinobu/Renderer/Renderer2D.h
+    src/Shinobu/Renderer/Renderer2D.cpp
     src/Shinobu/Renderer/RendererAPI.h
     src/Shinobu/Renderer/RendererAPI.cpp
     src/Shinobu/Renderer/Shader.h

@@ -1,42 +1,22 @@
 #include <Shinobu/Common.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
+// With this, build no longer works as shared library
+//#include <imgui.h>
+//#include <Shinobu/ImGui/ImGuiBuild.cpp>
+
 class ExampleLayer : public sh::Layer
 {
 public:
     ExampleLayer() : sh::Layer("Example Layer") {}
 
-    std::shared_ptr<sh::Shader> shader;
     std::shared_ptr<sh::Texture> tex;
-    std::shared_ptr<sh::VertexArray> array;
+    float degrees = 0.f;
 
     virtual void OnAttach() override 
     {
-        shader = sh::Shader::Create("res/shaders/Texture2D.glsl");
-        //shader->Bind();
         tex = sh::Texture2D::Create("res/image.png");
-        tex->Bind();
-
-        //glDebugMessageInsert(0, 0, 0, 0, 100, "OOF");
-
-        constexpr float vert[] =
-        {
-            -0.5f, -0.5f, 0.f, 0.f, 0.f,
-             0.5f, -0.5f, 0.f, 1.f, 0.f,
-             0.5f,  0.5f, 0.f, 1.f, 1.f,
-            -0.5f,  0.5f, 0.f, 0.f, 1.f,
-        };
-
-        constexpr uint32_t indices[] =
-        { 0,1,2, 0,2,3 };
-
-        auto buffer = sh::VertexBuffer::Create(vert,sizeof(vert));
-        buffer->AddElement(sh::BufferElement(sh::ShaderDataType::Float3, "aPos"));
-        buffer->AddElement(sh::BufferElement(sh::ShaderDataType::Float2, "aTex", true));
-        auto index = sh::IndexBuffer::Create(indices, 6);
-
-        array = sh::VertexArray::Create();
-        array->AddVertexBuffer(buffer);
-        array->SetIndexBuffer(index);
     }
     
     virtual void OnDetach() override { SH_INFO("Detached {0}", GetName()); }
@@ -58,13 +38,28 @@ public:
 
     virtual void OnUpdate() override final
     {
-        sh::Renderer::BeginScene(glm::mat4(1.f));
-        tex->Bind();
-        sh::Renderer::Submit(shader, array, glm::mat4(1));
-        sh::Renderer::EndScene();
+        sh::Renderer2D::BeginScene(glm::ortho(-2.f,2.f,2.f,-2.f));
+        // Draw a quad
+        sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(0.f), glm::vec2(1.f), glm::vec4(1.f)));
+        // Draw a rotated quad
+        sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(1.f,0.1f), glm::vec2(1.f), glm::vec4(0.5f,1.f,1.f,1.f), glm::radians(degrees)));
+        // Draw a textured quad
+        sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(1.f), glm::vec2(3.f),tex, glm::radians(180.f)));
+        sh::Renderer2D::EndScene();
+
+        degrees += 1.f;
+
+        //sh::Renderer::BeginScene(glm::mat4(1.f));
+        //sh::Renderer::Submit(shader, array, glm::mat4(1));
+        //sh::Renderer::EndScene();
     }
+
+
     virtual void OnGuiRender() override final
     {
+        //ImGui::Begin("Data");
+        //ImGui::SliderFloat("rotation", &degrees, 0, 360.f);
+        //ImGui::End();
     }
 };
 

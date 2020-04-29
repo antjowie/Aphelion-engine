@@ -24,6 +24,7 @@ namespace sh
 
         virtual void SetVec2(const char* name, const float* val) const override final;
         virtual void SetVec3(const char* name, const float* val) const override final;
+        virtual void SetVec4(const char* name, const float* val) const override final;
 
     private:
         void Compile(const std::unordered_map<unsigned, std::string>& shaders);

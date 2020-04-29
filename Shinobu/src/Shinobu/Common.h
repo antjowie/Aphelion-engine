@@ -16,5 +16,6 @@
 #include "Shinobu/Event/MouseEvent.h"
 
 #include "Shinobu/Renderer/Renderer.h"
+#include "Shinobu/Renderer/Renderer2D.h"
 #include "Shinobu/Renderer/Shader.h"
 #include "Shinobu/Renderer/Texture.h"

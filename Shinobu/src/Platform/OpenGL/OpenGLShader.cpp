@@ -188,8 +188,14 @@ namespace sh
     { 
         glUniform2fv(glGetUniformLocation(m_id, name), 1, val); 
     }
+
     void OpenGLShader::SetVec3(const char* name, const float* val) const
     { 
         glUniform3fv(glGetUniformLocation(m_id, name), 1, val); 
+    }
+
+    void OpenGLShader::SetVec4(const char* name, const float* val) const
+    {
+        glUniform4fv(glGetUniformLocation(m_id, name), 1, val);
     }
 }
