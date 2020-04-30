@@ -1,18 +1,16 @@
 #include <Shinobu/Common.h>
 
-#include <glm/gtc/matrix_transform.hpp>
-
-// With this, build no longer works as shared library
-#include <imgui.h>
-//#include <Shinobu/ImGui/ImGuiBuild.cpp>
-
 class ExampleLayer : public sh::Layer
 {
 public:
-    ExampleLayer() : sh::Layer("Example Layer") {}
+    ExampleLayer() 
+        : sh::Layer("Example Layer") 
+        , m_camera(-2.f,2.f,-2.f,2.f){}
 
     std::shared_ptr<sh::Texture> tex;
     float degrees = 0.f;
+    float yPos = 0.f;
+    sh::OrthographicCamera m_camera;
 
     virtual void OnAttach() override 
     {
@@ -40,15 +38,16 @@ public:
         });
     }
 
+
     virtual void OnUpdate() override final
     {
-        sh::Renderer2D::BeginScene(glm::ortho(-2.f,2.f,2.f,-2.f));
+        sh::Renderer2D::BeginScene(m_camera);
         // Draw a quad
         sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(0.f), glm::vec2(1.f), glm::vec4(1.f)));
         // Draw a rotated quad
         sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(1.f,0.1f), glm::vec2(1.f), glm::vec4(0.5f,1.f,1.f,1.f), glm::radians(degrees)));
         // Draw a textured quad
-        sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(1.f), glm::vec2(3.f),tex, glm::radians(180.f)));
+        sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(0.f,yPos), glm::vec2(3.f),tex));
         sh::Renderer2D::EndScene();
     }
 
@@ -62,6 +61,7 @@ public:
             return;
         }
         ImGui::SliderFloat("rotation", &degrees, 0, 360.f);
+        ImGui::SliderFloat("yPos", &yPos,-10.f,10.f);
         ImGui::End();
     }
 };

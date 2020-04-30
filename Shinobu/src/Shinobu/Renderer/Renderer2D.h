@@ -2,6 +2,7 @@
 
 #include "Shinobu/Core/Core.h"
 #include "Shinobu/Renderer/Texture.h "
+#include "Shinobu/Renderer/OrthographicCamera.h"
 
 #include <glm/glm.hpp>
 
@@ -35,7 +36,7 @@ namespace sh
         static void Init();
         static void Shutdown();
 
-        static void BeginScene(const glm::mat4& viewProjection);
+        static void BeginScene(const OrthographicCamera& camera);
         static void EndScene();
 
         static void Submit(const Render2DData& rData);

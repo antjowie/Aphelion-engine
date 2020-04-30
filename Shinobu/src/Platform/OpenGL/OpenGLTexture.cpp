@@ -26,7 +26,7 @@ namespace sh
     OpenGLTexture2D::OpenGLTexture2D(const char* path)
 	{
 		int width, height, channels;
-		stbi_set_flip_vertically_on_load(1);
+		stbi_set_flip_vertically_on_load(true);
 		stbi_uc* data = nullptr;
 		{
 			data = stbi_load(path, &width, &height, &channels, 0);

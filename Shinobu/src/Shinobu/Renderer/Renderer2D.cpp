@@ -57,10 +57,10 @@ namespace sh
     {
     }
 
-	void Renderer2D::BeginScene(const glm::mat4& viewProjection)
+	void Renderer2D::BeginScene(const OrthographicCamera& camera)
     {
         data.shader->Bind();
-        data.shader->SetMat4("aVP", glm::value_ptr(viewProjection));
+        data.shader->SetMat4("aVP", glm::value_ptr(camera.GetViewProjectionMatrix()));
         
         data.vertexArray->Bind();
     }
