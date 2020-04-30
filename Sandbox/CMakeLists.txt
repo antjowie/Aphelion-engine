@@ -11,23 +11,38 @@ add_executable(Sandbox
 # We don't need to copy a static lib to the executable directory
 if(BUILD_SHARED_LIBS)
     add_custom_target(CopyDLL 
-                      ALL COMMAND ${CMAKE_COMMAND} -E copy
-                      $<TARGET_FILE:Shinobu>
-                      $<TARGET_FILE_DIR:Sandbox>
-                      COMMENT "Copying Shinobu.dll to output dir"
+                        ALL COMMAND ${CMAKE_COMMAND} -E copy
+                        $<TARGET_FILE:Shinobu>
+                        $<TARGET_FILE_DIR:Sandbox>
+                        COMMENT "Copying Shinobu.dll to output dir"
     )
 endif()
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_custom_target(CopyPDB
+                    ALL COMMAND ${CMAKE_COMMAND} -E copy
+                    $<TARGET_FILE_DIR:Shinobu>/Shinobu.pdb 
+                    $<TARGET_FILE_DIR:Sandbox>
+                    COMMENT "Copying Shinobu.pdb to output dir"
+    )
+endif ()
+
 if (EXISTS ${CMAKE_SOURCE_DIR}/Shinobu/res)
-add_custom_target(CopyGameAssets
-                   ALL COMMAND ${CMAKE_COMMAND} -E copy_directory
-                   ${CMAKE_SOURCE_DIR}/Shinobu/res $<TARGET_FILE_DIR:Sandbox>/res)
+    add_custom_target(CopyGameAssets
+                    ALL COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    ${CMAKE_SOURCE_DIR}/Shinobu/res 
+                    $<TARGET_FILE_DIR:Sandbox>/res
+                    COMMENT "Copying Shinobu resources to output dir"
+    )
 endif()
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/Sandbox/res)
-add_custom_target(CopyEngineAssets
-                   ALL COMMAND ${CMAKE_COMMAND} -E copy_directory
-                   ${CMAKE_SOURCE_DIR}/Sandbox/res $<TARGET_FILE_DIR:Sandbox>/res)
+    add_custom_target(CopyEngineAssets
+                    ALL COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    ${CMAKE_SOURCE_DIR}/Sandbox/res 
+                    $<TARGET_FILE_DIR:Sandbox>/res
+                    COMMENT "Copying Sandbox resources to output dir"
+    )
 endif()
 
 target_link_libraries(Sandbox PUBLIC Shinobu)
