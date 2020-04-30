@@ -39,7 +39,7 @@ public:
     }
 
 
-    virtual void OnUpdate() override final
+    virtual void OnUpdate(sh::Timestep ts) override final
     {
         sh::Renderer2D::BeginScene(m_camera);
         // Draw a quad

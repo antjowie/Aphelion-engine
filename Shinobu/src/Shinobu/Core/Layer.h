@@ -9,6 +9,7 @@
 
 #include "Shinobu/Core/Core.h"
 #include "Shinobu/Event/Event.h"
+#include "Shinobu/Core/Timestep.h"
 
 namespace sh
 {
@@ -25,7 +26,7 @@ namespace sh
         virtual void OnAttach() {}
         virtual void OnDetach() {}
         virtual void OnEvent(Event& event) {}
-        virtual void OnUpdate() {}
+        virtual void OnUpdate(Timestep ts) {}
         virtual void OnGuiRender() {}
         inline const std::string& GetName() const { return m_debugName; }
 

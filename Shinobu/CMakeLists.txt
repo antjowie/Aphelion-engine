@@ -16,6 +16,7 @@ add_library(Shinobu
     src/Shinobu/Core/LayerStack.cpp
     src/Shinobu/Core/Log.h
     src/Shinobu/Core/Log.cpp
+    src/Shinobu/Core/Timestep.h
     src/Shinobu/Core/Window.h
     src/Shinobu/Core/Window.cpp
 
@@ -69,6 +70,8 @@ add_library(Shinobu
 
     src/Shinobu/Renderer/OrthographicCamera.h
     src/Shinobu/Renderer/OrthographicCamera.cpp
+    src/Shinobu/Renderer/OrthographicCameraController.h
+    src/Shinobu/Renderer/OrthographicCameraController.cpp
 )
 
 target_precompile_headers(Shinobu 

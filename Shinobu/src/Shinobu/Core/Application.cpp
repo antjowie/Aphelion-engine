@@ -1,5 +1,7 @@
 #include "Shinobu/Core/Application.h"
 
+#include "Shinobu/Core/Timestep.h"
+
 #include "Shinobu/ImGui/ImGuiLayer.h"
 #include "Shinobu/Renderer/Renderer.h"
 #include "Shinobu/Renderer/RenderCommand.h"
@@ -28,12 +30,17 @@ namespace sh
 
     void Application::Run()
     {
+        // TODO: Add our own timer instead of relying on ImGui
+        float oldTime = ImGui::GetTime();
         while (m_isRunning)
         {
+            float elapsedTime = ImGui::GetTime() - oldTime;
+            oldTime = ImGui::GetTime();
+            const Timestep step(elapsedTime);
 
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {
-                (*layer)->OnUpdate();
+                (*layer)->OnUpdate(step);
             }
 
             m_imguiLayer->Begin();
