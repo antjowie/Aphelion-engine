@@ -31,7 +31,7 @@ namespace sh
 
     private:
         void OnEvent(Event& event);
-        void OnWindowClose(WindowCloseEvent& event);
+        bool OnWindowClose(WindowCloseEvent& event);
 
         std::unique_ptr<Window> m_window;
         LayerStack m_layerStack;

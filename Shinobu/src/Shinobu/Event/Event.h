@@ -7,24 +7,24 @@
 
 namespace sh
 {
-	enum class EventType
-	{
-		None = 0,
-		WindowClose, WindowResize,
-		KeyPressed, KeyReleased, KeyTyped,
-		MouseButtonPressed, MouseButtonReleased, 
+    enum class EventType
+    {
+        None = 0,
+        WindowClose, WindowResize,
+        KeyPressed, KeyReleased, KeyTyped,
+        MouseButtonPressed, MouseButtonReleased, 
         MouseMoved, MouseScrolled
-	};
+    };
 
-	enum EventCategory
-	{
-		None = 0,
-		EventCategoryApplication    = BIT(0), // Application events are program related events such as shutdown
-		EventCategoryInput          = BIT(1), // Input are related to the way user interacts
-		EventCategoryKeyboard       = BIT(2), 
-		EventCategoryMouse          = BIT(3),
-		EventCategoryMouseButton    = BIT(4)
-	};
+    enum EventCategory
+    {
+        None = 0,
+        EventCategoryApplication    = BIT(0), // Application events are program related events such as shutdown
+        EventCategoryInput          = BIT(1), // Input are related to the way user interacts
+        EventCategoryKeyboard       = BIT(2), 
+        EventCategoryMouse          = BIT(3),
+        EventCategoryMouseButton    = BIT(4)
+    };
 
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return type; } \
                                virtual EventType GetEventType() const override { return GetStaticType(); } \
@@ -35,7 +35,7 @@ namespace sh
     class SHINOBU_API Event
     {
     public:
-        bool m_handled = false;
+        bool handled = false;
 
         virtual EventType GetEventType() const = 0;
         virtual const char* GetName() const = 0;
@@ -65,7 +65,7 @@ namespace sh
         {
             if (m_event.GetEventType() == T::GetStaticType())
             {
-                if(!m_event.m_handled) func(static_cast<T&>(m_event));
+                m_event.handled = func(static_cast<T&>(m_event));
                 return true;
             }
             return false;

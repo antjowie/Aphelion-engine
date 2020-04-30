@@ -44,7 +44,6 @@ namespace sh
             }
 
             m_imguiLayer->Begin();
-
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {
                 (*layer)->OnGuiRender();
@@ -63,22 +62,24 @@ namespace sh
         dispatcher.Dispatch<WindowResizeEvent>([](WindowResizeEvent& e)
         {
             Renderer::OnWindowResize(e.GetWidth(),e.GetHeight());
+            return false;
         });
 
         // TODO: Make layertype be of type standard container to support standard container opperations (rend in this case)
         for (auto layer = m_layerStack.end() - 1; /*layer != m_layerStack.begin() - 1*/; layer--)
         {
-            if(event.m_handled) return;
             (*layer)->OnEvent(event);
+            if(event.handled) return;
 
             // Calling -- on begin() is incorrect behavior
             if (layer == m_layerStack.begin()) return;
         }
     }
     
-    void Application::OnWindowClose(WindowCloseEvent& event)
+    bool Application::OnWindowClose(WindowCloseEvent& event)
     {
         m_isRunning = false;
+        return false;
     }
     
 

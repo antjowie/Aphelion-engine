@@ -22,9 +22,10 @@ namespace sh
     {
         if (!m_dirtyFlag) return;
 
-        m_viewMatrix = 
+        m_viewMatrix =
+            glm::inverse(
             glm::translate(glm::mat4(1), m_position) * 
-            glm::rotate(glm::mat4(1), glm::radians(m_degrees), glm::vec3(0, 0, 1));
+            glm::rotate(glm::mat4(1), glm::radians(m_degrees), glm::vec3(0, 0, 1)));
 
         m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
         m_dirtyFlag = false;

@@ -5,12 +5,12 @@ class ExampleLayer : public sh::Layer
 public:
     ExampleLayer() 
         : sh::Layer("Example Layer") 
-        , m_camera(-2.f,2.f,-2.f,2.f){}
+        , m_camera(16.f/9.f){}
 
     std::shared_ptr<sh::Texture> tex;
     float degrees = 0.f;
     float yPos = 0.f;
-    sh::OrthographicCamera m_camera;
+    sh::OrthographicCameraController m_camera;
 
     virtual void OnAttach() override 
     {
@@ -25,23 +25,29 @@ public:
 
     virtual void OnEvent(sh::Event& event) override 
     {
+        m_camera.OnEvent(event);
+
         sh::EventDispatcher d(event); 
         d.Dispatch<sh::KeyTypedEvent>([](sh::KeyTypedEvent& e)
             {
                 SH_TRACE("Typed key {0}", e.GetKeyCode());
+                return false;
             });
 
         d.Dispatch<sh::KeyPressedEvent>([&](sh::KeyPressedEvent& e)
         {
             if (e.GetKeyCode() == sh::KeyCode::Escape)
                 sh::Application::Get().Exit();
+            return false;
         });
     }
 
 
     virtual void OnUpdate(sh::Timestep ts) override final
     {
-        sh::Renderer2D::BeginScene(m_camera);
+        m_camera.OnUpdate(ts);
+
+        sh::Renderer2D::BeginScene(m_camera.GetCamera());
         // Draw a quad
         sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(0.f), glm::vec2(1.f), glm::vec4(1.f)));
         // Draw a rotated quad

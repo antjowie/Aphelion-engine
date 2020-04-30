@@ -18,4 +18,18 @@ namespace sh
         Right = B2,
         Middle = B3,
     };
+
+    inline int AsInt(ButtonCode code)
+    {
+        return static_cast<int>(code);
+    }
+    inline bool operator==(int i, ButtonCode code)
+    {
+        return i == static_cast<int>(code);
+    }
+    inline bool operator==(ButtonCode code, int i)
+    {
+        return i == code;
+    }
+
 }

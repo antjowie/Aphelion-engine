@@ -129,6 +129,10 @@ namespace sh
         Menu = 348,
     };
 
+    inline int AsInt(KeyCode code)
+    {
+        return static_cast<int>(code);
+    }
     inline bool operator==(int i, KeyCode code)
     {
         return i == static_cast<int>(code);

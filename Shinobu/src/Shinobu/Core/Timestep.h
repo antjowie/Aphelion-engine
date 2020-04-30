@@ -10,7 +10,7 @@ namespace sh
 
         operator float() const { return m_seconds; }
         float Seconds() const { return m_seconds; }
-        float MiliSecond() const { return m_seconds * 1000.f; }
+        float MilliSeconds() const { return m_seconds * 1000.f; }
 
     private:
         float m_seconds;
