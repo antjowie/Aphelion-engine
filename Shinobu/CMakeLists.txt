@@ -103,7 +103,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(Shinobu PUBLIC SH_DEBUG)
 endif ()
 
-
 ################################
 # Download submodules if needed
 find_package(Git QUIET)

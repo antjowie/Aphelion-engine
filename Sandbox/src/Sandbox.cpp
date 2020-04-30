@@ -3,7 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // With this, build no longer works as shared library
-//#include <imgui.h>
+#include <imgui.h>
 //#include <Shinobu/ImGui/ImGuiBuild.cpp>
 
 class ExampleLayer : public sh::Layer
@@ -16,6 +16,10 @@ public:
 
     virtual void OnAttach() override 
     {
+        // 1) Important: globals are not shared across DLL boundaries! If you use DLLs or any form of hot-reloading: you will need to call
+        //    SetCurrentContext() (with the pointer you got from CreateContext) from each unique static/DLL boundary, and after each hot-reloading.
+        //    In your debugger, add GImGui to your watch window and notice how its value changes depending on which location you are currently stepping into.
+        ImGui::SetCurrentContext(sh::ImGuiLayer::GetContext());
         tex = sh::Texture2D::Create("res/image.png");
     }
     
@@ -46,20 +50,19 @@ public:
         // Draw a textured quad
         sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(1.f), glm::vec2(3.f),tex, glm::radians(180.f)));
         sh::Renderer2D::EndScene();
-
-        degrees += 1.f;
-
-        //sh::Renderer::BeginScene(glm::mat4(1.f));
-        //sh::Renderer::Submit(shader, array, glm::mat4(1));
-        //sh::Renderer::EndScene();
     }
 
 
     virtual void OnGuiRender() override final
     {
-        //ImGui::Begin("Data");
-        //ImGui::SliderFloat("rotation", &degrees, 0, 360.f);
-        //ImGui::End();
+        if (!ImGui::Begin("Renderer 2D"))
+        {
+            // Early out if the window is collapsed, as an optimization.
+            ImGui::End();
+            return;
+        }
+        ImGui::SliderFloat("rotation", &degrees, 0, 360.f);
+        ImGui::End();
     }
 };
 

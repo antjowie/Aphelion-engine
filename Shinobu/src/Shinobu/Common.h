@@ -19,3 +19,5 @@
 #include "Shinobu/Renderer/Renderer2D.h"
 #include "Shinobu/Renderer/Shader.h"
 #include "Shinobu/Renderer/Texture.h"
+
+#include "Shinobu/ImGui/ImGuiLayer.h"

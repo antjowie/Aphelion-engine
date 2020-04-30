@@ -37,6 +37,7 @@ namespace sh
             }
 
             m_imguiLayer->Begin();
+
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {
                 (*layer)->OnGuiRender();

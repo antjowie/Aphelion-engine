@@ -18,6 +18,11 @@ namespace sh
         SH_CORE_INFO("Running ImGui {0}", IMGUI_VERSION);
     }
 
+    ImGuiContext* ImGuiLayer::GetContext()
+    {
+        return ImGui::GetCurrentContext();
+    }
+
     void ImGuiLayer::Begin()
     {
         ImGui_ImplOpenGL3_NewFrame();
@@ -85,9 +90,9 @@ namespace sh
 		ImGui::DestroyContext();
     }
 
-    void ImGuiLayer::OnGuiRender()
-    {
-        static bool show = true;
-        ImGui::ShowDemoWindow(&show);
-    }
+    //void ImGuiLayer::OnGuiRender()
+    //{
+    //    static bool show = true;
+    //    ImGui::ShowDemoWindow(&show);
+    //}
 }
