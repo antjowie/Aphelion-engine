@@ -28,12 +28,6 @@ public:
         m_camera.OnEvent(event);
 
         sh::EventDispatcher d(event); 
-        d.Dispatch<sh::KeyTypedEvent>([](sh::KeyTypedEvent& e)
-            {
-                SH_TRACE("Typed key {0}", e.GetKeyCode());
-                return false;
-            });
-
         d.Dispatch<sh::KeyPressedEvent>([&](sh::KeyPressedEvent& e)
         {
             if (e.GetKeyCode() == sh::KeyCode::Escape)

@@ -31,6 +31,13 @@ namespace sh
         if (glfwGetKey(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), AsInt(KeyCode::D))) offset += right;
 
         m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(offset,0.f) * ts.Seconds());
+
+        float degrees = 0.f;
+        constexpr float degOffset = 90.f;
+        if (glfwGetKey(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), AsInt(KeyCode::Q))) degrees -= degOffset;
+        if (glfwGetKey(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), AsInt(KeyCode::E))) degrees += degOffset;
+
+        m_camera.SetRotation(m_camera.GetRotation() + degrees * ts);
     }
 
     void OrthographicCameraController::OnEvent(Event& e)
@@ -47,7 +54,7 @@ namespace sh
         if (d.Dispatch<MouseScrolledEvent>([&](MouseScrolledEvent& e)
             {
                 float zoom = GetZoom() - e.GetYOffset();
-                SetZoom(glm::max(0.f,zoom));
+                SetZoom(glm::max(0.5f,zoom));
                 return false;
             })) return;
 
