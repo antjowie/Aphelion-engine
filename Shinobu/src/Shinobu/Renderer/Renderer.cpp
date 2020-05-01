@@ -1,11 +1,19 @@
 #include "Shinobu/Renderer/Renderer.h"
-
 #include "Shinobu/Renderer/Renderer2D.h"
 #include "Shinobu/Renderer/RenderCommand.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 namespace sh
 {
-    Renderer::SceneData Renderer::m_scene;
+    struct RendererData
+    {
+        //PerspectiveCamera camera;
+        glm::mat4 view;
+        glm::mat4 projection;
+    };
+
+    static RendererData data;
 
     void Renderer::Init()
     {
@@ -23,9 +31,10 @@ namespace sh
         RenderCommand::SetViewport(0,0,width,height);
     }
 
-    void Renderer::BeginScene(const glm::mat4& viewProjection)
+    void Renderer::BeginScene(const PerspectiveCamera& camera)
     {
-        m_scene.viewProjectionMatrix = viewProjection;
+        data.view = camera.GetViewMatrix();
+        data.projection = camera.GetProjectionMatrix();
     }
 
     void Renderer::EndScene()
@@ -35,6 +44,9 @@ namespace sh
     void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
     {
         shader->Bind();
+
+        shader->SetMat4("aTransform", glm::value_ptr(transform));
+        shader->SetMat4("aVP", glm::value_ptr(data.projection * data.view));
 
         vertexArray->Bind();
         RenderCommand::DrawIndexed(vertexArray,vertexArray->GetIndexBuffer()->GetCount());

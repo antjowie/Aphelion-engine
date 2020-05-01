@@ -21,7 +21,6 @@ namespace sh
     void OrthographicCamera::CalculateMatrices() const
     {
         if (!m_dirtyFlag) return;
-
         m_viewMatrix =
             glm::inverse(
             glm::translate(glm::mat4(1), m_position) * 

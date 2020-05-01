@@ -1,8 +1,9 @@
 #pragma once
 #include "Shinobu/Core/Core.h"
-#include "Shinobu/Renderer/RendererAPI.h"
 
+#include "Shinobu/Renderer/RendererAPI.h"
 #include "Shinobu/Renderer/Shader.h"
+#include "Shinobu/Renderer/PerspectiveCamera.h"
 
 #include <glm/glm.hpp>
 
@@ -21,19 +22,12 @@ namespace sh
 		
 		static void OnWindowResize(uint32_t width, uint32_t height);
 
-		static void BeginScene(const glm::mat4& viewProjection);
+		// TODO: Upload scene data (lighting, camera, everything that is consistent for all objects in the scene)
+		static void BeginScene(const PerspectiveCamera& camera);
 		static void EndScene();
 
 		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform = glm::mat4(1.0f));
 
 		static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
-
-	private:
-		struct SceneData
-		{
-			glm::mat4 viewProjectionMatrix;
-		};
-
-        static SceneData m_scene;
 	};
 }

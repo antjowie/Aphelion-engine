@@ -79,7 +79,7 @@ add_library(Shinobu
     
     
     
-)
+ "src/Shinobu/Renderer/PerspectiveCamera.cpp")
 
 
 target_precompile_headers(Shinobu 

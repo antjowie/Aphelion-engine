@@ -12,7 +12,7 @@ uniform mat4 aTransform;
 void main()
 {
     tex = aTex;
-    gl_Position =  aVP * aTransform * vec4(aPos, -1.f, 1.0f);
+    gl_Position =  aVP * aTransform * vec4(aPos, 0.f, 1.0f);
 }
 
 #type fragment

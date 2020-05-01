@@ -1,9 +1,12 @@
 #include <Shinobu/Common.h>
 
-class ExampleLayer : public sh::Layer
+#include <glm/gtc/matrix_transform.hpp>
+
+/*
+class ExampleLayer2D : public sh::Layer
 {
 public:
-    ExampleLayer() 
+    ExampleLayer2D() 
         : sh::Layer("Example Layer") 
         , m_camera(16.f/9.f){}
 
@@ -65,11 +68,147 @@ public:
         ImGui::End();
     }
 };
+*/
+
+class ExampleLayer3D : public sh::Layer
+{
+public:
+    ExampleLayer3D()
+        : sh::Layer("Example Layer")
+        , z(-5)
+        , fov(glm::radians(45.f))
+        , m_camera(fov, 16.f/9.f)
+    {}
+
+    float z;
+    float fov;
+
+    sh::PerspectiveCamera m_camera;
+    std::shared_ptr<sh::VertexArray> m_cube;
+    std::shared_ptr<sh::Shader> m_shader;
+
+    virtual void OnAttach() override
+    {
+        ImGui::SetCurrentContext(sh::ImGuiLayer::GetContext());
+
+        // Create a cube
+        {
+            //https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Creating_3D_objects_using_WebGL
+            constexpr float positions[] {
+            // Front face
+                -1.0, -1.0, 1.0,
+                1.0, -1.0, 1.0,
+                1.0, 1.0, 1.0,
+                -1.0, 1.0, 1.0,
+
+                // Back face
+                -1.0, -1.0, -1.0,
+                -1.0, 1.0, -1.0,
+                1.0, 1.0, -1.0,
+                1.0, -1.0, -1.0,
+
+                // Top face
+                -1.0, 1.0, -1.0,
+                -1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0,
+                1.0, 1.0, -1.0,
+
+                // Bottom face
+                -1.0, -1.0, -1.0,
+                1.0, -1.0, -1.0,
+                1.0, -1.0, 1.0,
+                -1.0, -1.0, 1.0,
+
+                // Right face
+                1.0, -1.0, -1.0,
+                1.0, 1.0, -1.0,
+                1.0, 1.0, 1.0,
+                1.0, -1.0, 1.0,
+
+                // Left face
+                -1.0, -1.0, -1.0,
+                -1.0, -1.0, 1.0,
+                -1.0, 1.0, 1.0,
+                -1.0, 1.0, -1.0,
+        };
+            constexpr uint32_t indices[] {
+                0, 1, 2, 0, 2, 3,    // front
+                4, 5, 6, 4, 6, 7,    // back
+                8, 9, 10, 8, 10, 11,   // top
+                12, 13, 14, 12, 14, 15,   // bottom
+                16, 17, 18, 16, 18, 19,   // right
+                20, 21, 22, 20, 22, 23,   // left
+        };
+
+            m_shader = sh::Shader::Create("res/shaders/Texture3D.glsl");
+
+            auto vBuffer = sh::VertexBuffer::Create(positions, sizeof(positions));
+            vBuffer->AddElement(sh::BufferElement(sh::ShaderDataType::Float3, "aPos"));
+
+            auto iBuffer = sh::IndexBuffer::Create(indices, sizeof(indices) / sizeof(indices[0]));
+
+            m_cube = sh::VertexArray::Create();
+            m_cube->AddVertexBuffer(vBuffer);
+            m_cube->SetIndexBuffer(iBuffer);
+        }
+    }
+
+    virtual void OnDetach() override { SH_INFO("Detached {0}", GetName()); }
+
+    virtual void OnEvent(sh::Event& event) override
+    {
+        //m_camera.OnEvent(event);
+
+        sh::EventDispatcher d(event);
+        d.Dispatch<sh::KeyPressedEvent>([&](sh::KeyPressedEvent& e)
+        {
+            if (e.GetKeyCode() == sh::KeyCode::Escape)
+                sh::Application::Get().Exit();
+            return false;
+        });
+    }
+
+    virtual void OnUpdate(sh::Timestep ts) override final
+    {
+        //m_camera.OnUpdate(ts);
+        static float et = 0.f;
+        et += ts;
+
+        const float rotX = glm::sin(glm::radians(et * 180.f));
+        const float rotY = glm::cos(glm::radians(et * 90.f));
+        const float rotZ = glm::sin(glm::cos(glm::radians(et * 180.f)));
+        auto transform =
+              glm::translate(glm::mat4(1), glm::vec3(0,0,z))
+            * glm::rotate(glm::mat4(1), rotX, glm::vec3(1, 0, 0))
+            * glm::rotate(glm::mat4(1), rotY, glm::vec3(0, 1, 0))
+            * glm::rotate(glm::mat4(1), rotZ, glm::vec3(0, 0, 1))
+            ;
+
+        sh::Renderer::BeginScene(m_camera);
+        sh::Renderer::Submit(m_shader, m_cube, transform);
+        sh::Renderer::EndScene();
+    }
+
+    virtual void OnGuiRender() override final
+    {
+        if (!ImGui::Begin("Cube"))
+        {
+            ImGui::End();
+            return;
+        }
+
+        ImGui::SliderFloat("zPos", &z,-10, 10);
+        ImGui::SliderAngle("fov", &fov, 0, 360);
+        m_camera.SetFOV(fov);
+
+        ImGui::End();
+    }
+};
 
 std::unique_ptr<sh::Application> sh::CreateApplication()
 {
     auto app = std::make_unique<sh::Application>();
-    app->GetLayerStack().PushLayer(new ExampleLayer);
+    app->GetLayerStack().PushLayer(new ExampleLayer3D);
 
     return app;
 }

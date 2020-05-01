@@ -76,7 +76,7 @@ namespace sh
 
         // Upload shader data
         glm::mat4 transform =
-            glm::translate(glm::mat4(1), glm::vec3(rData.pos, 1)) *
+            glm::translate(glm::mat4(1), glm::vec3(rData.pos, 0)) *
             glm::rotate(glm::mat4(1), rData.radians, glm::vec3(0, 0, 1)) *
             glm::scale(glm::mat4(1), glm::vec3(rData.size, 1));
 
