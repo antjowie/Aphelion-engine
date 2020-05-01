@@ -27,6 +27,8 @@ namespace sh
 
     void PerspectiveCamera::CalculateMatrices() const
     {
+        glm::quat quat;
+        
         if (!m_dirtyFlag) return;
 
         m_projectionMatrix = glm::perspective(m_fovY, m_aspectRatio, m_near, m_far);

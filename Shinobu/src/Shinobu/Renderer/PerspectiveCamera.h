@@ -3,6 +3,7 @@
 
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 namespace sh
 {
@@ -38,6 +39,7 @@ namespace sh
         mutable glm::mat4 m_viewMatrix;
         mutable glm::mat4 m_viewProjectionMatrix;
 
+        glm::quat m_quat;
         glm::vec3 m_position;
         float m_fovY;
         float m_aspectRatio;

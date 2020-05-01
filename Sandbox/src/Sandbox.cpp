@@ -75,12 +75,10 @@ class ExampleLayer3D : public sh::Layer
 public:
     ExampleLayer3D()
         : sh::Layer("Example Layer")
-        , z(-5)
         , fov(glm::radians(45.f))
         , m_camera(fov, 16.f/9.f)
     {}
-
-    float z;
+    
     float fov;
 
     sh::PerspectiveCamera m_camera;
@@ -171,22 +169,43 @@ public:
     virtual void OnUpdate(sh::Timestep ts) override final
     {
         //m_camera.OnUpdate(ts);
-        static float et = 0.f;
-        et += ts;
 
-        const float rotX = glm::sin(glm::radians(et * 180.f));
-        const float rotY = glm::cos(glm::radians(et * 90.f));
-        const float rotZ = glm::sin(glm::cos(glm::radians(et * 180.f)));
-        auto transform =
-              glm::translate(glm::mat4(1), glm::vec3(0,0,z))
-            * glm::rotate(glm::mat4(1), rotX, glm::vec3(1, 0, 0))
-            * glm::rotate(glm::mat4(1), rotY, glm::vec3(0, 1, 0))
-            * glm::rotate(glm::mat4(1), rotZ, glm::vec3(0, 0, 1))
-            ;
+        // Update camera
+        {
+            glm::vec3 offset(0);
+            constexpr glm::vec3 forward (0, 0, -1);
+            constexpr glm::vec3 right   (1, 0,  0);
+            constexpr glm::vec3 up      (0, 1,  0);
 
-        sh::Renderer::BeginScene(m_camera);
-        sh::Renderer::Submit(m_shader, m_cube, transform);
-        sh::Renderer::EndScene();
+            if (sh::Input::IsKeyPressed(sh::KeyCode::W)) offset +=  forward;
+            if (sh::Input::IsKeyPressed(sh::KeyCode::A)) offset += -right;
+            if (sh::Input::IsKeyPressed(sh::KeyCode::S)) offset += -forward;
+            if (sh::Input::IsKeyPressed(sh::KeyCode::D)) offset +=  right;
+            if (sh::Input::IsKeyPressed(sh::KeyCode::E)) offset +=  up;
+            if (sh::Input::IsKeyPressed(sh::KeyCode::Q)) offset += -up;
+
+            m_camera.SetPosition(m_camera.GetPosition() + offset * ts.Seconds() * 5.f);
+        }
+
+        // Update cube and render it
+        {
+            static float et = 0.f;
+            et += ts;
+
+            const float rotX = glm::sin(glm::radians(et * 180.f));
+            const float rotY = glm::cos(glm::radians(et * 90.f));
+            const float rotZ = glm::sin(glm::cos(glm::radians(et * 180.f)));
+            auto transform =
+                  glm::translate(glm::mat4(1), glm::vec3(0,0,-10.f))
+                * glm::rotate(glm::mat4(1), rotX, glm::vec3(1, 0, 0))
+                * glm::rotate(glm::mat4(1), rotY, glm::vec3(0, 1, 0))
+                * glm::rotate(glm::mat4(1), rotZ, glm::vec3(0, 0, 1))
+                ;
+
+            sh::Renderer::BeginScene(m_camera);
+            sh::Renderer::Submit(m_shader, m_cube, transform);
+            sh::Renderer::EndScene();
+        }
     }
 
     virtual void OnGuiRender() override final
@@ -197,8 +216,7 @@ public:
             return;
         }
 
-        ImGui::SliderFloat("zPos", &z,-10, 10);
-        ImGui::SliderAngle("fov", &fov, 0, 360);
+        ImGui::SliderAngle("fov", &fov, 0, 180);
         m_camera.SetFOV(fov);
 
         ImGui::End();
