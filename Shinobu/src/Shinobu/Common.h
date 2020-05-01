@@ -8,6 +8,7 @@
 #include "Shinobu/Core/Layer.h"
 #include "Shinobu/Core/Log.h"
 
+#include "Shinobu/Core/Input/Input.h"
 #include "Shinobu/Core/Input/KeyCodes.h"
 #include "Shinobu/Core/Input/MouseCodes.h"
 

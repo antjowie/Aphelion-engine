@@ -1,12 +1,11 @@
 #include "Shinobu/Renderer/OrthographicCameraController.h"
 
-#include "Shinobu/Core/Input/KeyCodes.h"
-#include "Shinobu/Core/Input/MouseCodes.h"
-
-#include "Shinobu/Event/KeyEvent.h"
+#include "Shinobu/Event/ApplicationEvent.h"
 #include "Shinobu/Event/MouseEvent.h"
 
 #include "Shinobu/Core/Application.h"
+#include "Shinobu/Core/Input/Input.h"
+
 #include <GLFW/glfw3.h>
 
 namespace sh
@@ -24,18 +23,17 @@ namespace sh
         constexpr glm::vec2 right(1,0);
         constexpr glm::vec2 up(0, 1);
 
-        // TODO: Add an input class
-        if (glfwGetKey(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), AsInt(KeyCode::W))) offset += up;
-        if (glfwGetKey(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), AsInt(KeyCode::A))) offset += -right;
-        if (glfwGetKey(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), AsInt(KeyCode::S))) offset += -up;
-        if (glfwGetKey(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), AsInt(KeyCode::D))) offset += right;
+        if (Input::IsKeyPressed(KeyCode::W)) offset += up;
+        if (Input::IsKeyPressed(KeyCode::A)) offset += -right;
+        if (Input::IsKeyPressed(KeyCode::S)) offset += -up;
+        if (Input::IsKeyPressed(KeyCode::D)) offset += right;
 
         m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(offset,0.f) * ts.Seconds());
 
         float degrees = 0.f;
         constexpr float degOffset = 90.f;
-        if (glfwGetKey(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), AsInt(KeyCode::Q))) degrees -= degOffset;
-        if (glfwGetKey(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), AsInt(KeyCode::E))) degrees += degOffset;
+        if (Input::IsKeyPressed(KeyCode::Q)) degrees += degOffset;
+        if (Input::IsKeyPressed(KeyCode::E)) degrees -= degOffset;
 
         m_camera.SetRotation(m_camera.GetRotation() + degrees * ts);
     }
