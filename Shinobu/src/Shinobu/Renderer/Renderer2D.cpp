@@ -34,17 +34,17 @@ namespace sh
         // Set up buffers
         constexpr float vert[] =
         {
-            -0.5f, -0.5f, 0.f, 0.f, 0.f,
-             0.5f, -0.5f, 0.f, 1.f, 0.f,
-             0.5f,  0.5f, 0.f, 1.f, 1.f,
-            -0.5f,  0.5f, 0.f, 0.f, 1.f,
+            -0.5f, -0.5f, 0.f, 0.f,
+             0.5f, -0.5f, 1.f, 0.f,
+             0.5f,  0.5f, 1.f, 1.f,
+            -0.5f,  0.5f, 0.f, 1.f,
         };
 
         constexpr uint32_t indices[] =
         { 0,1,2, 0,2,3 };
 
         auto buffer = sh::VertexBuffer::Create(vert, sizeof(vert));
-        buffer->AddElement(sh::BufferElement(sh::ShaderDataType::Float3, "aPos"));
+        buffer->AddElement(sh::BufferElement(sh::ShaderDataType::Float2, "aPos"));
         buffer->AddElement(sh::BufferElement(sh::ShaderDataType::Float2, "aTex", true));
         auto index = sh::IndexBuffer::Create(indices, 6);
         
