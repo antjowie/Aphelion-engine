@@ -83,6 +83,7 @@ public:
 
     sh::PerspectiveCamera m_camera;
 
+    bool m_lookAtCube = false;
     sh::Transform m_transform;
     std::shared_ptr<sh::VertexArray> m_cube;
     std::shared_ptr<sh::Shader> m_shader;
@@ -195,12 +196,22 @@ public:
         const float rotX = glm::sin(glm::radians(et * 180.f));
         const float rotY = glm::cos(glm::radians(et * 90.f));
         const float rotZ = glm::sin(glm::cos(glm::radians(et * 180.f)));
+        const float xOffset = glm::cos(glm::radians(et * 180.f));
+        const float yOffset = glm::sin(glm::radians(et * 180.f));
+        const glm::vec3 offset = glm::vec3(xOffset, yOffset, 0.f) * 3.f; 
         auto transform =
-              glm::translate(glm::mat4(1), glm::vec3(0,0,-10.f))
+              glm::translate(glm::mat4(1), offset+ sh::Transform::GetWorldForward() * 10.f)
             * glm::rotate(glm::mat4(1), rotX, glm::vec3(1, 0, 0))
             * glm::rotate(glm::mat4(1), rotY, glm::vec3(0, 1, 0))
             * glm::rotate(glm::mat4(1), rotZ, glm::vec3(0, 0, 1))
             ;
+
+        m_transform.SetPosition(transform[3]);
+
+        if(m_lookAtCube)
+            m_camera.transform.LookAt(m_transform.GetPosition());
+        else
+            m_camera.transform.LookAt(sh::Transform::GetWorldForward());
 
         sh::Renderer::BeginScene(m_camera);
         sh::Renderer::Submit(m_shader, m_cube, m_transform.GetWorldMatrix());
@@ -223,6 +234,7 @@ public:
         m_transform.SetRotation(sh::Radians(t));
 
         if (ImGui::Button("reset")) m_transform.SetRotation(glm::vec3(0));
+        if (ImGui::Checkbox("look at cube", &m_lookAtCube)); // Yea we don't do anything here cuz we check in update
 
         ImGui::End();
     }

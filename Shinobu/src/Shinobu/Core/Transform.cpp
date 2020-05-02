@@ -11,6 +11,11 @@ namespace sh
     {
     }
 
+    void Transform::LookAt(const glm::vec3& target)
+    {
+        m_euler = glm::eulerAngles(glm::quatLookAt(glm::normalize(target - m_position), glm::vec3(0, 1, 0)));
+    }
+
     glm::mat4 Transform::GetWorldMatrix() const
     {
         const glm::mat4 rotation = glm::toMat4(glm::quat(m_euler));
@@ -39,7 +44,7 @@ namespace sh
         m_euler = m_euler;
     }
     
-    glm::vec3 Transform::GetEulerRotation() const
+    const glm::vec3& Transform::GetEulerRotation() const
     {
         return m_euler;
     }
