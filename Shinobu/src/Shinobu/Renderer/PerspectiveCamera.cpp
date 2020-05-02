@@ -31,12 +31,7 @@ namespace sh
 
         m_projectionMatrix = glm::perspective(m_fovY, m_aspectRatio, m_near, m_far);
 
-        m_viewMatrix =
-            glm::inverse(
-                  glm::translate(glm::mat4(1), m_position)
-                //* glm::rotate(glm::mat4(1), glm::radians(m_degrees), glm::vec3(0, 0, 1))
-            
-            );
+        m_viewMatrix = glm::inverse(transform.GetWorldMatrix());
 
         m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
         m_dirtyFlag = false;

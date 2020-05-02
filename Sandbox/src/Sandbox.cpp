@@ -174,6 +174,13 @@ public:
         static float et = 0.f;
         et += ts;
 
+        if (sh::Input::IsKeyPressed(sh::KeyCode::A)) 
+            m_camera.transform.Move(-sh::Transform::GetWorldRight() * ts.Seconds());
+        if (sh::Input::IsKeyPressed(sh::KeyCode::D)) 
+            m_camera.transform.Move(sh::Transform::GetWorldRight() * ts.Seconds());
+
+        SH_TRACE(m_camera.transform.GetPosition().x);
+
         const float rotX = glm::sin(glm::radians(et * 180.f));
         const float rotY = glm::cos(glm::radians(et * 90.f));
         const float rotZ = glm::sin(glm::cos(glm::radians(et * 180.f)));
