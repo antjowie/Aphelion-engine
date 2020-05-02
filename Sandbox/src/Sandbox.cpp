@@ -82,6 +82,8 @@ public:
     float fov;
 
     sh::PerspectiveCamera m_camera;
+
+    sh::Transform m_transform;
     std::shared_ptr<sh::VertexArray> m_cube;
     std::shared_ptr<sh::Shader> m_shader;
 
@@ -149,6 +151,7 @@ public:
             m_cube->AddVertexBuffer(vBuffer);
             m_cube->SetIndexBuffer(iBuffer);
         }
+        m_transform.SetPosition(glm::vec3(0, 0, -10));
     }
 
     virtual void OnDetach() override { SH_INFO("Detached {0}", GetName()); }
@@ -189,8 +192,6 @@ public:
             m_camera.transform.SetPosition(m_camera.transform.GetPosition() + offset * ts.Seconds() * 5.f);
         }
 
-        SH_TRACE(m_camera.transform.GetPosition().x);
-
         const float rotX = glm::sin(glm::radians(et * 180.f));
         const float rotY = glm::cos(glm::radians(et * 90.f));
         const float rotZ = glm::sin(glm::cos(glm::radians(et * 180.f)));
@@ -202,7 +203,7 @@ public:
             ;
 
         sh::Renderer::BeginScene(m_camera);
-        sh::Renderer::Submit(m_shader, m_cube, transform);
+        sh::Renderer::Submit(m_shader, m_cube, m_transform.GetWorldMatrix());
         sh::Renderer::EndScene();
     }
 
@@ -216,6 +217,12 @@ public:
 
         ImGui::SliderAngle("fov", &fov, 0, 180);
         m_camera.SetFOV(fov);
+
+        glm::vec3 t(m_transform.GetEulerRotation());
+        ImGui::SliderAngle("x", &t.x);
+        ImGui::SliderAngle("y", &t.y);
+        ImGui::SliderAngle("z", &t.z);
+        m_transform.SetRotation(t);
 
         ImGui::End();
     }

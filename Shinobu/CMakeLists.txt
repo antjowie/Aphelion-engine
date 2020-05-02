@@ -105,6 +105,7 @@ target_precompile_headers(Shinobu
         <glm/gtc/matrix_transform.hpp>
         <glm/gtc/matrix_transform.hpp>
         <glm/gtc/type_ptr.hpp>
+        <glm/gtx/quaternion.hpp>
         
         src/Shinobu/Core/Log.h
 )
