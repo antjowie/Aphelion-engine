@@ -219,10 +219,10 @@ public:
         m_camera.SetFOV(fov);
 
         glm::vec3 t(m_transform.GetEulerRotation());
-        ImGui::SliderAngle("x", &t.x);
-        ImGui::SliderAngle("y", &t.y);
-        ImGui::SliderAngle("z", &t.z);
-        m_transform.SetRotation(t);
+        ImGui::DragFloat3("rotation", &sh::Degrees(t).x);
+        m_transform.SetRotation(sh::Radians(t));
+
+        if (ImGui::Button("reset")) m_transform.SetRotation(glm::vec3(0));
 
         ImGui::End();
     }

@@ -7,6 +7,9 @@
 
 namespace sh
 {
+    /**
+     * All rotations are done in radians
+     */
     class SHINOBU_API Transform
     {
     public:
@@ -30,6 +33,9 @@ namespace sh
 
     private:
         glm::vec3 m_position;
-        glm::quat m_quat;
+        glm::vec3 m_euler;
     };
+
+    inline glm::vec3& Degrees(glm::vec3& radians) { return radians = radians / glm::pi<float>() * 180.f; }
+    inline glm::vec3& Radians(glm::vec3& degrees) { return degrees = degrees / 180.f * glm::pi<float>(); }
 }
