@@ -169,43 +169,41 @@ public:
     virtual void OnUpdate(sh::Timestep ts) override final
     {
         //m_camera.OnUpdate(ts);
+        static float et = 0.f;
+        et += ts;
 
         // Update camera
         {
             glm::vec3 offset(0);
-            constexpr glm::vec3 forward (0, 0, -1);
-            constexpr glm::vec3 right   (1, 0,  0);
-            constexpr glm::vec3 up      (0, 1,  0);
+            constexpr glm::vec3 forward(sh::Transform::GetWorldForward());
+            constexpr glm::vec3 right(sh::Transform::GetWorldRight());
+            constexpr glm::vec3 up(sh::Transform::GetWorldUp());
 
-            if (sh::Input::IsKeyPressed(sh::KeyCode::W)) offset +=  forward;
+            if (sh::Input::IsKeyPressed(sh::KeyCode::W)) offset += forward;
             if (sh::Input::IsKeyPressed(sh::KeyCode::A)) offset += -right;
             if (sh::Input::IsKeyPressed(sh::KeyCode::S)) offset += -forward;
-            if (sh::Input::IsKeyPressed(sh::KeyCode::D)) offset +=  right;
-            if (sh::Input::IsKeyPressed(sh::KeyCode::E)) offset +=  up;
+            if (sh::Input::IsKeyPressed(sh::KeyCode::D)) offset += right;
+            if (sh::Input::IsKeyPressed(sh::KeyCode::E)) offset += up;
             if (sh::Input::IsKeyPressed(sh::KeyCode::Q)) offset += -up;
 
-            m_camera.SetPosition(m_camera.GetPosition() + offset * ts.Seconds() * 5.f);
+            m_camera.transform.SetPosition(m_camera.transform.GetPosition() + offset * ts.Seconds() * 5.f);
         }
 
-        // Update cube and render it
-        {
-            static float et = 0.f;
-            et += ts;
+        SH_TRACE(m_camera.transform.GetPosition().x);
 
-            const float rotX = glm::sin(glm::radians(et * 180.f));
-            const float rotY = glm::cos(glm::radians(et * 90.f));
-            const float rotZ = glm::sin(glm::cos(glm::radians(et * 180.f)));
-            auto transform =
-                  glm::translate(glm::mat4(1), glm::vec3(0,0,-10.f))
-                * glm::rotate(glm::mat4(1), rotX, glm::vec3(1, 0, 0))
-                * glm::rotate(glm::mat4(1), rotY, glm::vec3(0, 1, 0))
-                * glm::rotate(glm::mat4(1), rotZ, glm::vec3(0, 0, 1))
-                ;
+        const float rotX = glm::sin(glm::radians(et * 180.f));
+        const float rotY = glm::cos(glm::radians(et * 90.f));
+        const float rotZ = glm::sin(glm::cos(glm::radians(et * 180.f)));
+        auto transform =
+              glm::translate(glm::mat4(1), glm::vec3(0,0,-10.f))
+            * glm::rotate(glm::mat4(1), rotX, glm::vec3(1, 0, 0))
+            * glm::rotate(glm::mat4(1), rotY, glm::vec3(0, 1, 0))
+            * glm::rotate(glm::mat4(1), rotZ, glm::vec3(0, 0, 1))
+            ;
 
-            sh::Renderer::BeginScene(m_camera);
-            sh::Renderer::Submit(m_shader, m_cube, transform);
-            sh::Renderer::EndScene();
-        }
+        sh::Renderer::BeginScene(m_camera);
+        sh::Renderer::Submit(m_shader, m_cube, transform);
+        sh::Renderer::EndScene();
     }
 
     virtual void OnGuiRender() override final

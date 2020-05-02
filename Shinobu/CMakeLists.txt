@@ -17,11 +17,15 @@ add_library(Shinobu
     src/Shinobu/Core/Log.h
     src/Shinobu/Core/Log.cpp
     src/Shinobu/Core/Timestep.h
+    src/Shinobu/Core/Transform.h
+    src/Shinobu/Core/Transform.cpp
     src/Shinobu/Core/Window.h
     src/Shinobu/Core/Window.cpp
 
     src/Shinobu/Core/Input/KeyCodes.h
     src/Shinobu/Core/Input/MouseCodes.h
+    src/Shinobu/Core/Input/Input.h
+    src/Shinobu/Core/Input/Input.cpp
 
     src/Shinobu/Event/ApplicationEvent.h
     src/Shinobu/Event/Event.h
@@ -34,6 +38,14 @@ add_library(Shinobu
 
     src/Shinobu/Renderer/GraphicsContext.h
     src/Shinobu/Renderer/GraphicsContext.cpp
+    src/Shinobu/Renderer/OrthographicCamera.h
+    src/Shinobu/Renderer/OrthographicCamera.cpp
+    src/Shinobu/Renderer/OrthographicCameraController.h
+    src/Shinobu/Renderer/OrthographicCameraController.cpp
+    src/Shinobu/Renderer/PerspectiveCamera.h
+    src/Shinobu/Renderer/PerspectiveCamera.cpp
+    # src/Shinobu/Renderer/PerspectiveCameraController.h
+    # src/Shinobu/Renderer/PerspectiveCameraController.cpp
     src/Shinobu/Renderer/RenderCommand.h
     src/Shinobu/Renderer/RenderCommand.cpp
     src/Shinobu/Renderer/Renderer.h
@@ -50,13 +62,6 @@ add_library(Shinobu
     src/Shinobu/Renderer/VertexArray.cpp
     src/Shinobu/Renderer/VertexBuffer.h
     src/Shinobu/Renderer/VertexBuffer.cpp
-
-    src/Shinobu/Renderer/OrthographicCamera.h
-    src/Shinobu/Renderer/OrthographicCamera.cpp
-    src/Shinobu/Renderer/OrthographicCameraController.h
-    src/Shinobu/Renderer/OrthographicCameraController.cpp
-    src/Shinobu/Core/Input/Input.h
-    src/Shinobu/Core/Input/Input.cpp
 
     # These depend on current platform so we should move them in the future
     src/Platform/Windows/WindowsWindow.h
@@ -76,10 +81,7 @@ add_library(Shinobu
     src/Platform/OpenGL/OpenGLVertexArray.cpp
     src/Platform/OpenGL/OpenGLVertexBuffer.h
     src/Platform/OpenGL/OpenGLVertexBuffer.cpp
-    
-    
-    
- "src/Shinobu/Renderer/PerspectiveCamera.cpp")
+)
 
 
 target_precompile_headers(Shinobu 
