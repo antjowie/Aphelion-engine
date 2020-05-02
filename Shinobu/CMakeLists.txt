@@ -99,6 +99,13 @@ target_precompile_headers(Shinobu
         <unordered_set>
         <type_traits>
 
+        <glm/vec3.hpp>
+        <glm/mat4x4.hpp>
+        <glm/gtc/quaternion.hpp>
+        <glm/gtc/matrix_transform.hpp>
+        <glm/gtc/matrix_transform.hpp>
+        <glm/gtc/type_ptr.hpp>
+        
         src/Shinobu/Core/Log.h
 )
 
