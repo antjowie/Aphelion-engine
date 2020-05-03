@@ -16,6 +16,9 @@ namespace sh
         WindowsWindow(WindowProps& props);
         virtual ~WindowsWindow() override final;
 
+        virtual unsigned GetWidth() const override final { return m_props.width; }
+        virtual unsigned GetHeight() const override final { return m_props.height; }
+
         virtual void OnUpdate() override final;
         virtual void SetVSync(bool enable) override final;
 

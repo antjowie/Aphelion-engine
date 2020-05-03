@@ -45,7 +45,7 @@ namespace sh
 
     void Transform::Rotate(const glm::vec3& euler)
     {
-        m_euler = m_euler;
+        m_euler += euler;
     }
     
     const glm::vec3& Transform::GetEulerRotation() const

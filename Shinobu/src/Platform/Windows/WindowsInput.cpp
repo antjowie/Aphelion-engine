@@ -6,40 +6,60 @@
 
 namespace sh
 {
-    GLFWwindow* GetWindow()
+    GLFWwindow* GetNativeWindow()
     {
         return static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
     }
 
+    Window& GetWindow()
+    {
+        return Application::Get().GetWindow();
+    }
+
+    void WindowsInput::EnableCursorImpl(bool enable)
+    {
+        glfwSetInputMode(GetNativeWindow(), GLFW_CURSOR, enable ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+    }
+
     bool WindowsInput::IsKeyPressedImpl(KeyCode code)
     {
-        return glfwGetKey(GetWindow(), static_cast<int>(code));
+        return glfwGetKey(GetNativeWindow(), static_cast<int>(code));
     }
 
     bool WindowsInput::IsButtonPressedImpl(ButtonCode code) 
     {
-        return glfwGetMouseButton(GetWindow(), static_cast<int>(code));
+        return glfwGetMouseButton(GetNativeWindow(), static_cast<int>(code));
     }
 
-    glm::vec2 WindowsInput::GetMousePosImpl() 
+    void WindowsInput::SetCursorPosImpl(const glm::vec2& pos)
+    {
+        glfwSetCursorPos(GetNativeWindow(), pos.x, pos.y);
+    }
+
+    void WindowsInput::SetCursorXImpl(float x)
+    {
+        glfwSetCursorPos(GetNativeWindow(), x, GetCursorYImpl());
+    }
+    
+    void WindowsInput::SetCursorYImpl(float y)
+    {
+        glfwSetCursorPos(GetNativeWindow(), GetCursorXImpl(), y);
+    }
+
+    glm::vec2 WindowsInput::GetCursorPosImpl() 
     {
         glm::dvec2 ret;
-        glfwGetCursorPos(GetWindow(), &ret.x, &ret.y);
+        glfwGetCursorPos(GetNativeWindow(), &ret.x, &ret.y);
         return ret;
     }
     
-    float WindowsInput::GetMouseXImpl() 
+    float WindowsInput::GetCursorXImpl() 
     {
-        glm::dvec2 ret;
-        glfwGetCursorPos(GetWindow(), &ret.x, &ret.y);
-        return ret.x;
-
+        return GetCursorPosImpl().x;
     }
     
-    float WindowsInput::GetMouseYImpl() 
+    float WindowsInput::GetCursorYImpl() 
     {
-        glm::dvec2 ret;
-        glfwGetCursorPos(GetWindow(), &ret.x, &ret.y);
-        return ret.y;
+        return GetCursorPosImpl().y;
     }
 }

@@ -54,6 +54,9 @@ namespace sh
         int m_button;
     };
 
+    /**
+     * Holds the new position of the mouse relative to the top left corner
+     */
     class SHINOBU_API MouseMovedEvent : public Event
     {
     public:

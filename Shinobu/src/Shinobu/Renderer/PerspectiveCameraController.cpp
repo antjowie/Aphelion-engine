@@ -1,14 +1,18 @@
 #include "Shinobu/Renderer/PerspectiveCameraController.h"
 
+#include "Shinobu/Event/MouseEvent.h"
+
 #include "Shinobu/Core/Input/Input.h"
 #include "Shinobu/Core/Input/KeyCodes.h"
+
+#include "Shinobu/Core/Application.h"
 
 namespace sh
 {
     PerspectiveCameraController::PerspectiveCameraController(float fovYRadians, float aspectRatio, float zNear, float zFar)
         : m_camera(fovYRadians, aspectRatio,zNear,zFar)
+        , m_isRotating(false)
     {
-
     }
 
     void PerspectiveCameraController::OnUpdate(Timestep ts)
@@ -34,5 +38,43 @@ namespace sh
 
     void PerspectiveCameraController::OnEvent(Event& e)
     {
+        EventDispatcher d(e);
+        
+        static bool isRotating = false;
+        static glm::vec2 prevPos(0);
+        d.Dispatch<MouseButtonPressedEvent>([&](MouseButtonPressedEvent& e)
+            {
+                if (e.GetButton() == ButtonCode::Right)
+                {
+                    Input::EnableCursor(false);
+                    isRotating = true;
+                    prevPos = Input::GetCursorPos();
+                }
+                return false;
+            });
+        d.Dispatch<MouseButtonReleasedEvent>([&](MouseButtonReleasedEvent& e)
+            {
+                if (e.GetButton() == ButtonCode::Right)
+                {
+                    Input::EnableCursor(true);
+                    isRotating = false;
+                }
+                return false;
+            });
+
+        if (isRotating)
+        {
+            d.Dispatch<MouseMovedEvent>([&](MouseMovedEvent& e)
+                {
+                    // TODO: Add a sensitivity variable for offset
+                    /*const */auto offset = glm::vec2(e.GetX(), e.GetY()) - prevPos;
+                    offset = offset / 25.f * glm::two_pi<float>();
+
+                    prevPos = Input::GetCursorPos();
+                    
+                    m_camera.transform.Rotate(Radians(glm::vec3(-offset.y, offset.x , 0)));
+                    return false;
+                });
+        }
     }
 }

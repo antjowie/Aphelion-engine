@@ -152,7 +152,9 @@ public:
             m_cube->AddVertexBuffer(vBuffer);
             m_cube->SetIndexBuffer(iBuffer);
         }
-        m_transform.SetPosition(glm::vec3(0, 0, -10));
+        m_transform.SetPosition(glm::vec3(0, 0, 10));
+
+        m_camera.GetCamera().transform.LookTowards(sh::Transform::GetWorldForward());
     }
 
     virtual void OnDetach() override { SH_INFO("Detached {0}", GetName()); }
@@ -190,13 +192,10 @@ public:
             glm::rotate(glm::mat4(1), rotZ, glm::vec3(0, 0, 1))
             ;
 
-        m_transform.SetPosition(transform[3]);
+        //m_transform.SetPosition(transform[3]);
 
         if(m_lookAtCube)
             m_camera.GetCamera().transform.LookAt(m_transform.GetPosition());
-        else
-            // TODO: Make sure that look at is a direction and not a position. 
-            m_camera.GetCamera().transform.LookTowards(sh::Transform::GetWorldForward());
 
         sh::Renderer::BeginScene(m_camera.GetCamera());
         sh::Renderer::Submit(m_shader, m_cube, m_transform.GetWorldMatrix());
@@ -205,7 +204,7 @@ public:
 
     virtual void OnGuiRender() override final
     {
-        if (!ImGui::Begin("Cube"))
+        if (!ImGui::Begin("Camera"))
         {
             ImGui::End();
             return;
@@ -215,11 +214,19 @@ public:
         m_camera.GetCamera().SetFOV(fov);
 
         glm::vec3 pos(m_camera.GetCamera().transform.GetPosition());
-        ImGui::DragFloat3("position", &sh::Degrees(pos).x);
+        ImGui::DragFloat3("position", &pos.x);
         
-        glm::vec3 t(m_transform.GetEulerRotation());
-        ImGui::DragFloat3("rotation", &sh::Degrees(t).x);
-        m_transform.SetRotation(sh::Radians(t));
+        {
+            glm::vec3 t(m_camera.GetCamera().transform.GetEulerRotation());
+            ImGui::DragFloat3("rotation", &sh::Degrees(t).x);
+            m_camera.GetCamera().transform.SetRotation(sh::Radians(t));
+        }
+
+        {
+            glm::vec3 t(m_transform.GetEulerRotation());
+            ImGui::DragFloat3("cube rotation", &sh::Degrees(t).x);
+            m_transform.SetRotation(sh::Radians(t));
+        }
 
         if (ImGui::Button("reset")) m_transform.SetRotation(glm::vec3(0));
         if (ImGui::Checkbox("look at cube", &m_lookAtCube)); // Yea we don't do anything here cuz we check in update

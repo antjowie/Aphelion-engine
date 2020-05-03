@@ -35,6 +35,9 @@ namespace sh
     public:
         virtual ~Window() = default;
 
+        virtual unsigned GetWidth() const = 0;
+        virtual unsigned GetHeight() const = 0;
+
         /**
          * Updates the buffers and polls the events
          */
