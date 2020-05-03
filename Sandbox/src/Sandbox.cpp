@@ -186,13 +186,13 @@ public:
         const float yOffset = glm::sin(glm::radians(et * 180.f));
         const glm::vec3 offset = glm::vec3(xOffset, yOffset, 0.f) * 3.f; 
         auto transform =
-            //glm::translate(glm::mat4(1), offset+ sh::Transform::GetWorldForward() * 10.f) *
+            glm::translate(glm::mat4(1), offset+ sh::Transform::GetWorldForward() * 10.f) *
             glm::rotate(glm::mat4(1), rotX, glm::vec3(1, 0, 0)) *
             glm::rotate(glm::mat4(1), rotY, glm::vec3(0, 1, 0)) *
             glm::rotate(glm::mat4(1), rotZ, glm::vec3(0, 0, 1))
             ;
 
-        //m_transform.SetPosition(transform[3]);
+        m_transform.SetPosition(transform[3]);
 
         if(m_lookAtCube)
             m_camera.GetCamera().transform.LookAt(m_transform.GetPosition());
