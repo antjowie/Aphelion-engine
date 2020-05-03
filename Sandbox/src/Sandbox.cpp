@@ -81,7 +81,7 @@ public:
     
     float fov;
 
-    sh::PerspectiveCamera m_camera;
+    sh::PerspectiveCameraController m_camera;
 
     bool m_lookAtCube = false;
     sh::Transform m_transform;
@@ -159,7 +159,7 @@ public:
 
     virtual void OnEvent(sh::Event& event) override
     {
-        //m_camera.OnEvent(event);
+        m_camera.OnEvent(event);
 
         sh::EventDispatcher d(event);
         d.Dispatch<sh::KeyPressedEvent>([&](sh::KeyPressedEvent& e)
@@ -172,27 +172,11 @@ public:
 
     virtual void OnUpdate(sh::Timestep ts) override final
     {
-        //m_camera.OnUpdate(ts);
+        m_camera.OnUpdate(ts);
         static float et = 0.f;
         et += ts;
 
         // Update camera
-        {
-            glm::vec3 offset(0);
-            constexpr glm::vec3 forward(sh::Transform::GetWorldForward());
-            constexpr glm::vec3 right(sh::Transform::GetWorldRight());
-            constexpr glm::vec3 up(sh::Transform::GetWorldUp());
-
-            if (sh::Input::IsKeyPressed(sh::KeyCode::W)) offset += forward;
-            if (sh::Input::IsKeyPressed(sh::KeyCode::A)) offset += -right;
-            if (sh::Input::IsKeyPressed(sh::KeyCode::S)) offset += -forward;
-            if (sh::Input::IsKeyPressed(sh::KeyCode::D)) offset += right;
-            if (sh::Input::IsKeyPressed(sh::KeyCode::E)) offset += up;
-            if (sh::Input::IsKeyPressed(sh::KeyCode::Q)) offset += -up;
-
-            m_camera.transform.SetPosition(m_camera.transform.GetPosition() + offset * ts.Seconds() * 5.f);
-        }
-
         const float rotX = glm::sin(glm::radians(et * 180.f));
         const float rotY = glm::cos(glm::radians(et * 90.f));
         const float rotZ = glm::sin(glm::cos(glm::radians(et * 180.f)));
@@ -200,20 +184,21 @@ public:
         const float yOffset = glm::sin(glm::radians(et * 180.f));
         const glm::vec3 offset = glm::vec3(xOffset, yOffset, 0.f) * 3.f; 
         auto transform =
-              glm::translate(glm::mat4(1), offset+ sh::Transform::GetWorldForward() * 10.f)
-            * glm::rotate(glm::mat4(1), rotX, glm::vec3(1, 0, 0))
-            * glm::rotate(glm::mat4(1), rotY, glm::vec3(0, 1, 0))
-            * glm::rotate(glm::mat4(1), rotZ, glm::vec3(0, 0, 1))
+            //glm::translate(glm::mat4(1), offset+ sh::Transform::GetWorldForward() * 10.f) *
+            glm::rotate(glm::mat4(1), rotX, glm::vec3(1, 0, 0)) *
+            glm::rotate(glm::mat4(1), rotY, glm::vec3(0, 1, 0)) *
+            glm::rotate(glm::mat4(1), rotZ, glm::vec3(0, 0, 1))
             ;
 
         m_transform.SetPosition(transform[3]);
 
         if(m_lookAtCube)
-            m_camera.transform.LookAt(m_transform.GetPosition());
+            m_camera.GetCamera().transform.LookAt(m_transform.GetPosition());
         else
-            m_camera.transform.LookAt(sh::Transform::GetWorldForward());
+            // TODO: Make sure that look at is a direction and not a position. 
+            m_camera.GetCamera().transform.LookTowards(sh::Transform::GetWorldForward());
 
-        sh::Renderer::BeginScene(m_camera);
+        sh::Renderer::BeginScene(m_camera.GetCamera());
         sh::Renderer::Submit(m_shader, m_cube, m_transform.GetWorldMatrix());
         sh::Renderer::EndScene();
     }
@@ -227,8 +212,11 @@ public:
         }
 
         ImGui::SliderAngle("fov", &fov, 0, 180);
-        m_camera.SetFOV(fov);
+        m_camera.GetCamera().SetFOV(fov);
 
+        glm::vec3 pos(m_camera.GetCamera().transform.GetPosition());
+        ImGui::DragFloat3("position", &sh::Degrees(pos).x);
+        
         glm::vec3 t(m_transform.GetEulerRotation());
         ImGui::DragFloat3("rotation", &sh::Degrees(t).x);
         m_transform.SetRotation(sh::Radians(t));

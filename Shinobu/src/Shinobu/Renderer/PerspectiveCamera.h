@@ -12,11 +12,11 @@ namespace sh
     class SHINOBU_API PerspectiveCamera
     {
     public:
-        PerspectiveCamera(float fovYRadians, float aspectRatio, float zNear= 0.1f, float zFar = 1000.f);
+        PerspectiveCamera(float fovY, float aspectRatio, float zNear, float zFar);
 
-        void SetProjection(float fovYRadians, float aspectRatio, float zNear, float zFar);
+        void SetProjection(float fovY, float aspectRatio, float zNear, float zFar);
 
-        void SetFOV(float fovYRadians) { m_fovY = fovYRadians; m_dirtyFlag = true; }
+        void SetFOV(float fovY) { m_fovY = fovY; m_dirtyFlag = true; }
         void SetAspectRatio(float aspectRatio) { m_aspectRatio = aspectRatio; m_dirtyFlag = true; }
         void SetNear(float zNear) { m_near = zNear; m_dirtyFlag = true; }
         void SetFar(float zFar) { m_far= zFar; m_dirtyFlag = true; }

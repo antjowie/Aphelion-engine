@@ -19,7 +19,12 @@ namespace sh
         static constexpr glm::vec3 GetWorldRight() { return glm::vec3(1, 0, 0); }
         static constexpr glm::vec3 GetWorldForward() { return glm::vec3(0, 0, 1); }
 
+        glm::vec3 GetUp() { return GetWorldMatrix()[1]; }
+        glm::vec3 GetRight() { return GetWorldMatrix()[0]; }
+        glm::vec3 GetForward() { return GetWorldMatrix()[2]; }
+
         void LookAt(const glm::vec3& target);
+        void LookTowards(const glm::vec3& direction);
 
         void SetPosition(const glm::vec3& pos) { m_position = pos; }
         void Move(const glm::vec3& offset) { m_position += offset; }

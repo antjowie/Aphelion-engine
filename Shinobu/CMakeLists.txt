@@ -44,8 +44,8 @@ add_library(Shinobu
     src/Shinobu/Renderer/OrthographicCameraController.cpp
     src/Shinobu/Renderer/PerspectiveCamera.h
     src/Shinobu/Renderer/PerspectiveCamera.cpp
-    # src/Shinobu/Renderer/PerspectiveCameraController.h
-    # src/Shinobu/Renderer/PerspectiveCameraController.cpp
+    src/Shinobu/Renderer/PerspectiveCameraController.h
+    src/Shinobu/Renderer/PerspectiveCameraController.cpp
     src/Shinobu/Renderer/RenderCommand.h
     src/Shinobu/Renderer/RenderCommand.cpp
     src/Shinobu/Renderer/Renderer.h

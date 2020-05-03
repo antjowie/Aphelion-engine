@@ -18,9 +18,10 @@
 
 #include "Shinobu/Renderer/Renderer.h"
 #include "Shinobu/Renderer/Renderer2D.h"
-#include "Shinobu/Renderer/PerspectiveCamera.h"
 #include "Shinobu/Renderer/OrthographicCamera.h"
 #include "Shinobu/Renderer/OrthographicCameraController.h"
+#include "Shinobu/Renderer/PerspectiveCamera.h"
+#include "Shinobu/Renderer/PerspectiveCameraController.h"
 #include "Shinobu/Renderer/Shader.h"
 #include "Shinobu/Renderer/Texture.h"
 

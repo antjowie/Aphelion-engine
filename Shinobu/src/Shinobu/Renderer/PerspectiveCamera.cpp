@@ -4,20 +4,20 @@
 
 namespace sh
 {
-    PerspectiveCamera::PerspectiveCamera(float fovYRadians, float aspectRatio, float zNear, float zFar)
+    PerspectiveCamera::PerspectiveCamera(float fovY, float aspectRatio, float zNear, float zFar)
         : m_dirtyFlag(true)
         , m_position(0)
-        , m_fovY(fovYRadians)
+        , m_fovY(fovY)
         , m_aspectRatio(aspectRatio)
         , m_near(zNear)
         , m_far(zFar)
     {
-        SetProjection(fovYRadians, aspectRatio, zNear, zFar);
+        SetProjection(fovY, aspectRatio, zNear, zFar);
     }
 
-    void PerspectiveCamera::SetProjection(float fovYRadians, float aspectRatio, float zNear, float zFar)
+    void PerspectiveCamera::SetProjection(float fovY, float aspectRatio, float zNear, float zFar)
     {
-        m_fovY = fovYRadians;
+        m_fovY = fovY;
         m_aspectRatio = aspectRatio;
         m_near = zNear;
         m_far = zFar;
