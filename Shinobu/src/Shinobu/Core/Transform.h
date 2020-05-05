@@ -19,9 +19,9 @@ namespace sh
         static constexpr glm::vec3 GetWorldRight() { return glm::vec3(1, 0, 0); }
         static constexpr glm::vec3 GetWorldForward() { return glm::vec3(0, 0, 1); }
 
-        glm::vec3 GetUp() { return GetWorldMatrix()[1]; }
-        glm::vec3 GetRight() { return GetWorldMatrix()[0]; }
-        glm::vec3 GetForward() { return GetWorldMatrix()[2]; }
+        glm::vec3 GetUp() const { return GetWorldMatrix()[1]; }
+        glm::vec3 GetRight() const { return GetWorldMatrix()[0]; }
+        glm::vec3 GetForward() const { return GetWorldMatrix()[2]; }
 
         void LookAt(const glm::vec3& target);
         void LookTowards(const glm::vec3& direction);
@@ -38,10 +38,17 @@ namespace sh
 
         glm::mat4 GetWorldMatrix() const;
 
+        friend bool operator==(const Transform&, const Transform&);
+
     private:
         glm::vec3 m_position;
         glm::vec3 m_euler;
     };
+
+    inline bool operator==(const Transform& lhs, const Transform& rhs)
+    {
+        return lhs.m_position == rhs.m_position && lhs.m_euler == rhs.m_euler;
+    }
 
     inline glm::vec3& Degrees(glm::vec3& radians) { return radians = radians / glm::pi<float>() * 180.f; }
     inline glm::vec3& Radians(glm::vec3& degrees) { return degrees = degrees / 180.f * glm::pi<float>(); }

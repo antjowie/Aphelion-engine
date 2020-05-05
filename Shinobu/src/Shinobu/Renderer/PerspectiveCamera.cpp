@@ -6,7 +6,6 @@ namespace sh
 {
     PerspectiveCamera::PerspectiveCamera(float fovY, float aspectRatio, float zNear, float zFar)
         : m_dirtyFlag(true)
-        , m_position(0)
         , m_fovY(fovY)
         , m_aspectRatio(aspectRatio)
         , m_near(zNear)
@@ -26,10 +25,10 @@ namespace sh
     }
 
     void PerspectiveCamera::CalculateMatrices() const
-    {
-        glm::quat quat;
-        
-        if (!m_dirtyFlag) return;
+    {   
+        static Transform oldT = transform;
+
+        if (!m_dirtyFlag && transform == oldT) return;
 
         m_projectionMatrix = glm::perspective(m_fovY, m_aspectRatio, m_near, m_far);
 
@@ -37,5 +36,6 @@ namespace sh
 
         m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
         m_dirtyFlag = false;
+        oldT = transform;
     }
 }

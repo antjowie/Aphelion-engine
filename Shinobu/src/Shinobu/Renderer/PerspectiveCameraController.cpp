@@ -72,7 +72,7 @@ namespace sh
 
                     prevPos = Input::GetCursorPos();
                     
-                    m_camera.transform.Rotate(Radians(glm::vec3(-offset.y, offset.x , 0)));
+                    m_camera.transform.Rotate(Radians(glm::vec3(-offset.y, -offset.x , 0)));
                     return false;
                 });
         }

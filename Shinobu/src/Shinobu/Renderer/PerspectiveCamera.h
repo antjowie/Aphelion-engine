@@ -30,7 +30,8 @@ namespace sh
         const glm::mat4& GetViewMatrix() const { CalculateMatrices(); return m_viewMatrix; }
         const glm::mat4& GetViewProjectionMatrix() const { CalculateMatrices(); return m_viewProjectionMatrix; }
 
-    public:
+
+    public: 
         Transform transform;
 
     private:
@@ -42,8 +43,6 @@ namespace sh
         mutable glm::mat4 m_viewMatrix;
         mutable glm::mat4 m_viewProjectionMatrix;
 
-        glm::quat m_quat;
-        glm::vec3 m_position;
         float m_fovY;
         float m_aspectRatio;
         float m_near;

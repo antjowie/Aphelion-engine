@@ -5,6 +5,9 @@
 
 namespace sh
 {
+    class SHINOBU_API VertexArray;
+    using VertexArrayRef = std::shared_ptr<VertexArray>;
+
     class SHINOBU_API VertexArray
     {
     public:
@@ -18,6 +21,6 @@ namespace sh
         
         virtual const std::shared_ptr<IndexBuffer>& GetIndexBuffer() const = 0;
 
-        static std::shared_ptr<VertexArray> Create();
+        static VertexArrayRef Create();
     };
 }

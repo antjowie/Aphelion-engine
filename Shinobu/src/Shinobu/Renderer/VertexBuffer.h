@@ -66,6 +66,9 @@ namespace sh
 		bool normalized;
 	};
 
+	class SHINOBU_API VertexBuffer;
+	using VertexBufferRef = std::shared_ptr<VertexBuffer>;
+
     class SHINOBU_API VertexBuffer
     {
     public:
@@ -79,12 +82,15 @@ namespace sh
         virtual void AddElement(const BufferElement& elem);
         virtual const std::vector<BufferElement>& GetElements() const;
 
-        static std::shared_ptr<VertexBuffer> Create(uint32_t size);
-        static std::shared_ptr<VertexBuffer> Create(const float* vertices, uint32_t size);
+        static VertexBufferRef Create(uint32_t size);
+        static VertexBufferRef Create(const float* vertices, uint32_t size);
 
     private:
         std::vector<BufferElement> m_elements;
     };
+
+	class SHINOBU_API IndexBuffer;
+	using IndexBufferRef = std::shared_ptr<IndexBuffer>;
 
     // Currently supports 32-bit index buffers
     class SHINOBU_API IndexBuffer
@@ -97,6 +103,6 @@ namespace sh
 
         virtual uint32_t GetCount() const = 0;
 
-        static std::shared_ptr<IndexBuffer> Create(const uint32_t* indices, uint32_t count);
+        static IndexBufferRef Create(const uint32_t* indices, uint32_t count);
     };
 }
