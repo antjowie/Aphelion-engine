@@ -6,6 +6,9 @@
 
 namespace sh
 {
+    class SHINOBU_API Shader;
+    using ShaderRef = std::shared_ptr<Shader>;
+
     class SHINOBU_API Shader
     {
     public:
@@ -23,7 +26,7 @@ namespace sh
         virtual void SetVec3(const char* name, const float* val) const = 0;
         virtual void SetVec4(const char* name, const float* val) const = 0;
 
-        static std::shared_ptr<Shader> Create(const std::string& filepath);
-        static std::shared_ptr<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
+        static ShaderRef Create(const std::string& filepath);
+        static ShaderRef Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
     };
 }

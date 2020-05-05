@@ -6,6 +6,9 @@
 
 namespace sh
 {
+    class SHINOBU_API Texture;
+    using TextureRef = std::shared_ptr<Texture>;
+
     class SHINOBU_API Texture
     {
     public:
@@ -23,7 +26,7 @@ namespace sh
     class SHINOBU_API Texture2D : public Texture
     {
     public:
-        static std::shared_ptr<Texture2D> Create(uint32_t width, uint32_t height);
-        static std::shared_ptr<Texture2D> Create(const char* path);
+        static TextureRef Create(uint32_t width, uint32_t height);
+        static TextureRef Create(const char* path);
     };
 }

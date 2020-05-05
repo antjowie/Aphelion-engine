@@ -6,7 +6,7 @@
 
 namespace sh
 {
-    std::shared_ptr<Texture2D> Texture2D::Create(uint32_t width, uint32_t height)
+    TextureRef Texture2D::Create(uint32_t width, uint32_t height)
     {
         switch (RendererAPI::GetAPI())
         {
@@ -17,7 +17,7 @@ namespace sh
         //return std::shared_ptr<Texture2D>();
     }
 
-    std::shared_ptr<Texture2D> Texture2D::Create(const char* path)
+    TextureRef Texture2D::Create(const char* path)
     {
         switch (RendererAPI::GetAPI())
         {
