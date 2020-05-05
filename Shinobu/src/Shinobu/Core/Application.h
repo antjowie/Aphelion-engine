@@ -41,6 +41,4 @@ namespace sh
 
         static Application* m_instance;
     };
-
-    extern std::unique_ptr<Application> CreateApplication();
 } // namespace sh
