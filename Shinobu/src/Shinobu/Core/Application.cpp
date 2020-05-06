@@ -10,14 +10,14 @@ namespace sh
 {
     Application* Application::m_instance = nullptr;
 
-    Application::Application()
+    Application::Application(WindowProps props)
         : m_imguiLayer(nullptr)
         , m_isRunning(true)
     {
         SH_CORE_ASSERT(!m_instance,"Can not create multiple Applications");
         m_instance = this;
 
-        m_window = Window::Create();
+        m_window = Window::Create(props);
         m_window->SetEventCallback(SH_BIND_EVENT_FN(Application::OnEvent));
         m_window->SetVSync(true);
 

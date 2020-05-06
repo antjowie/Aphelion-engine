@@ -18,7 +18,7 @@ namespace sh
     class SHINOBU_API Application
     {
     public:
-        Application();
+        Application(WindowProps props = {});
         virtual ~Application() = default;
 
         void Run();
