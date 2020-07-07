@@ -16,6 +16,8 @@ namespace sh
      * We do this because you can pass a layer that you wan't to remove such as a debug layer. 
      *
      * If you have removed a layer from the LayerStack, you have to deallocate it yourself. 
+     *
+     * TODO: Pushing pointers will be invalidated when the vector resizes. This will cause a runtime error
      */
     class SHINOBU_API LayerStack
     {

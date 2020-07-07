@@ -167,7 +167,8 @@ add_subdirectory(thirdParty/imgui)
 add_subdirectory(thirdParty/Glad)
 add_subdirectory(thirdParty/stb_image)
 add_subdirectory(thirdParty/glm)
+add_subdirectory(thirdParty/enet)
 
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD} CACHE BOOL "" FORCE)
   
-target_link_libraries(Shinobu PUBLIC glm spdlog glfw imgui Glad stb_image)
+target_link_libraries(Shinobu PUBLIC glm spdlog glfw imgui Glad stb_image enet)

@@ -10,7 +10,13 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
-      "variables": []
+      "variables": [
+        {
+          "name": "BUILD_SHARED_LIBS",
+          "value": "False",
+          "type": "BOOL"
+        }
+      ]
     },
     {
       "name": "x64-Release",
@@ -25,7 +31,7 @@
       "variables": [
         {
           "name": "BUILD_SHARED_LIBS",
-          "value": "True",
+          "value": "False",
           "type": "BOOL"
         }
       ]

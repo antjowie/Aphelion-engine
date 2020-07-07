@@ -10,3 +10,8 @@
 [submodule "Shinobu/thirdParty/glm"]
 	path = Shinobu/thirdParty/glm
 	url = https://github.com/g-truc/glm
+[submodule "Shinobu/thirdParty/enet"]
+	path = Shinobu/thirdParty/enet
+	url = https://github.com/antjowie/enet
+[submodule "thirdParty/enet"]
+	url = https://github.com/antjowie/enet
