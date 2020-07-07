@@ -8,6 +8,8 @@ Ultimately, I want to be able to use this engine for all my game development nee
 
 ## Build instructions
 The project makes use of CMake so building should be straightforward. Simply do the following in a command prompt/terminal (on Windows):
+> NOTE: As of right now, the core module can't be build as a dll since it defines the entry point and the executable needs to have an entry point.
+
 ```
 git clone https://github.com/antjowie/Shinobu-engine.git shinobu-engine
 cd shinobu-engine
