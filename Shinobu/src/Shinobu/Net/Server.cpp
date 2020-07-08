@@ -96,11 +96,12 @@ namespace sh
             break;
 
         case ENET_EVENT_TYPE_RECEIVE:
-            sh::Packet packet;
-            
             packet.size = event.packet->dataLength;
             uint8_t* data = event.packet->data;
             packet.buffer = sh::Packet::Buffer(data, data + packet.size);
+            packet.sender = event.peer;
+
+            SH_CORE_TRACE("Server received a packet of size {}", packet.size);
 
             enet_packet_destroy(event.packet);
             return true;

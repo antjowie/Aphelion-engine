@@ -7,6 +7,7 @@
 #include <bitsery/traits/string.h>
 
 struct _ENetPacket;
+struct _ENetPeer;
 
 namespace sh
 {
@@ -35,6 +36,9 @@ namespace sh
 
         size_t size; // Set by ENet when received, used in deserializing
         Buffer buffer;
+
+        // Data
+        _ENetPeer* sender = nullptr;
     };
 
     template <typename T> SHINOBU_API Packet Serialize(const T& data)
@@ -48,6 +52,9 @@ namespace sh
     {
         T data;
         auto state = bitsery::quickDeserialization<Packet::InputAdapter>({ packet.buffer.begin(),packet.size }, data);
+
+        //same as serialization, but returns deserialization state as a pair
+        //first = error code, second = if buffer was successfully read from begin to the end.
         SH_CORE_ASSERT(state.first == bitsery::ReaderError::NoError && state.second, "Packet deserializing failed");
         return data;
     }

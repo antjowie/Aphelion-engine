@@ -96,12 +96,29 @@ public:
         m_camera.OnUpdate(ts);
 
         sh::Packet p;
-        if (m_server.IsHosting()) while (m_server.Poll(p));
-        if (m_client.IsConnected()) while (m_client.Poll(p));
-        if (m_client.IsConnecting())
+        if (m_server.IsHosting())
         {
-
+            while (m_server.Poll(p))
+            {
+                auto data = sh::Deserialize<sh::ExampleData>(p);
+                SH_CORE_TRACE("Server received: {}", data.message);
+                
+                // You prob don't ever wanna broadcast the ip of a connected person
+                data.message = std::to_string(p.sender->address.host)+ ": " + data.message;
+                m_server.Broadcast(sh::Serialize(data));
+            }
+            m_server.Flush();
         }
+        if (m_client.IsConnected())
+        {
+            while (m_client.Poll(p))
+            {
+                auto data = sh::Deserialize<sh::ExampleData>(p);
+                SH_CORE_TRACE("Client received: {}", data.message);
+            }
+            m_client.Flush();
+        }
+
 
         sh::Renderer2D::BeginScene(m_camera.GetCamera());
         //// Draw a quad
@@ -143,9 +160,17 @@ public:
             {
                 ToggleClient();
             }
-            if (ImGui::IsItemActive())
+            if (m_client.IsConnected())
             {
-                ImGui::Text("Hello");
+                static char msg[128] = "";
+
+                ImGui::InputText("message",msg, 128);
+                if (ImGui::Button("send"))
+                {
+                    sh::ExampleData data;
+                    data.message = msg;
+                    m_client.Submit(sh::Serialize(data));
+                }
             }
         }
         ImGui::End();

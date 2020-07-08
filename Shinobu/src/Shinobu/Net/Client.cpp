@@ -20,7 +20,7 @@ namespace sh
     {
         if(IsConnected()) Disconnect();
         cancelConnecting = true;
-        m_connectFuture.wait();
+        if(m_connectFuture.valid()) m_connectFuture.wait();
 
         enet_host_destroy(m_socket);
     }
@@ -168,11 +168,10 @@ namespace sh
             return Poll(packet);
             break;
         case ENET_EVENT_TYPE_RECEIVE:
-            sh::Packet packet;
-
             packet.size = event.packet->dataLength;
             uint8_t* data = event.packet->data;
             packet.buffer = sh::Packet::Buffer(data, data + packet.size);
+            packet.sender = event.peer; // Should always be server
 
             enet_packet_destroy(event.packet);
             return true;
