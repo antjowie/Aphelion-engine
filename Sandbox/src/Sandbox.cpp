@@ -16,8 +16,28 @@ public:
     float yPos = 0.f;
     sh::OrthographicCameraController m_camera;
 
-    sh::Server server;
-    sh::Client client;
+    sh::Server m_server;
+    sh::Client m_client;
+
+    void ToggleServer()
+    {
+        if (m_server.IsHosting()) m_server.Shutdown();
+        else m_server.Host(25565);
+    }
+
+    void ToggleClient()
+    {
+        // Future destructor is blocking so we have to retrieve value once 
+        // if it is there and hasn't been retrieved before
+        static std::future<bool> connect;
+        static std::future<void> disconnect;
+
+        if (connect.valid()) connect.get();
+        if (disconnect.valid()) disconnect.get();
+
+        if (m_client.IsConnected()) disconnect = m_client.Disconnect();
+        else connect = m_client.Connect("localhost", 25565);
+    }
 
     virtual void OnAttach() override 
     {
@@ -29,35 +49,35 @@ public:
         tex = sh::Texture2D::Create("res/image.png");
 
         // using ConnectCB = std::function<void(Server&, ENetPeer* connection)>;
-        server.SetConnectCB([](sh::Server& server, ENetPeer* connection)
+        m_server.SetConnectCB([](sh::Server& m_server, ENetPeer* connection)
             {
                 char ip[64];
                 enet_address_get_host_ip(&connection->address, ip, 64);
                 SH_INFO("Server opened connection with {}", ip);
             });
-        server.SetDisconnectCB([](sh::Server& server, ENetPeer* connection)
+        m_server.SetDisconnectCB([](sh::Server& m_server, ENetPeer* connection)
             {
                 char ip[64];
                 enet_address_get_host_ip(&connection->address, ip, 64);
                 SH_INFO("Server closed connection with {}", ip);
             });
+    }
+    
+    virtual void OnDetach() override 
+    { 
+        SH_INFO("Detached {0}", GetName()); 
 
-
-        server.Host(25565);
-        std::thread t(&sh::Client::Connect, &client, "localhost", 25565);
-        while (!client.IsConnected())
+        // If user runs client, we need to keep updating the server so that the server still sends disconnect packets
+        if (m_client.IsConnected() && m_server.IsHosting())
         {
-            sh::Packet* p = nullptr;
-            while(server.Poll(p));
-            if (client.IsConnected())
+            auto future = m_client.Disconnect(); 
+            while (future.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
             {
-                if(t.joinable()) t.join();
-                while(client.Poll(p));
+                sh::Packet* p = nullptr;
+                m_server.Poll(p);
             }
         }
     }
-    
-    virtual void OnDetach() override { SH_INFO("Detached {0}", GetName()); }
 
     virtual void OnEvent(sh::Event& event) override 
     {
@@ -75,6 +95,14 @@ public:
     virtual void OnUpdate(sh::Timestep ts) override final
     {
         m_camera.OnUpdate(ts);
+
+        sh::Packet* p = nullptr;
+        if (m_server.IsHosting()) while (m_server.Poll(p));
+        if (m_client.IsConnected()) while (m_client.Poll(p));
+        if (m_client.IsConnecting())
+        {
+
+        }
 
         sh::Renderer2D::BeginScene(m_camera.GetCamera());
         //// Draw a quad
@@ -99,6 +127,24 @@ public:
         }
         ImGui::SliderAngle("rotation", &radians);
         ImGui::SliderFloat("yPos", &yPos,-10.f,10.f);
+        ImGui::End();
+        
+        if (!ImGui::Begin("Network"))
+        {
+            // Early out if the window is collapsed, as an optimization.
+            ImGui::End();
+            return;
+        }
+        {
+            bool hosting = m_server.IsHosting();
+            bool connected = m_client.IsConnected() | m_client.IsConnecting();
+
+            if (ImGui::Checkbox("Server", &hosting)) ToggleServer();
+            if (ImGui::Checkbox("Client", &connected))
+            {
+                if(!m_client.IsConnecting()) ToggleClient();
+            }
+        }
         ImGui::End();
     }
 };

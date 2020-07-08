@@ -6,11 +6,7 @@ namespace sh
 {
     LayerStack::~LayerStack()
     {
-        for (auto layer : m_layers)
-        {
-            layer->OnDetach();
-            delete layer;
-        }
+        Clear();
     }
 
     void LayerStack::PushLayer(Layer* layer)
@@ -57,5 +53,16 @@ namespace sh
         {
             SH_CORE_WARN("Tried to remove overlay {0} but could not find it", overlay->GetName());
         }
+    }
+    
+    void LayerStack::Clear()
+    {
+        for (auto layer : m_layers)
+        {
+            layer->OnDetach();
+            delete layer;
+        }
+        m_layers.clear();
+        m_layerIndex = 0;
     }
 }

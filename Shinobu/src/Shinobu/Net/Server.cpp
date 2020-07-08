@@ -44,6 +44,7 @@ namespace sh
         // TODO: Gracefully disconnect clients
         SH_CORE_WARN("Server forcibly shut down!");
         enet_host_destroy(m_socket);
+        m_socket = nullptr;
     }
 
     std::vector<ENetPeer*> Server::GetConnections() const

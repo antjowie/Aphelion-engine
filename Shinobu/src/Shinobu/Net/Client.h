@@ -1,10 +1,12 @@
 #pragma once
 #include "Shinobu/Core/Core.h"
+#include "Shinobu/Core/Time.h"
 #include "Shinobu/Net/Packet.h"
 
 #include <enet/enet.h>
 #include <functional>
 #include <string>
+#include <future>
 
 namespace sh
 {
@@ -17,9 +19,13 @@ namespace sh
         Client(const Client&) = delete;
     
         bool IsConnected() const;
-    
-        bool Connect(const std::string& host, unsigned port);
-        void Disconnect();
+        /** 
+         * Returns true while connecting
+         */
+        bool IsConnecting() const;
+
+        std::future<bool> Connect(const std::string& host, unsigned port, const Timestep& timeout = Timestep(5));
+        std::future<void> Disconnect(const Timestep& timeout = Timestep(5));
     
         void Submit(const Packet& packet);
         void Flush();
@@ -27,6 +33,8 @@ namespace sh
         bool Poll(Packet* packet);
     
     private:
+        bool m_isConnecting;
+
         ENetHost* m_socket;
         ENetPeer* m_server;
     };

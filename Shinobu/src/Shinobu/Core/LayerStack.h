@@ -54,6 +54,8 @@ namespace sh
          */
         void PopOverlay(Layer* overlay);
 
+        void Clear();
+
         inline std::vector<Layer*>::iterator begin() { return m_layers.begin(); }
         inline std::vector<Layer*>::iterator end() { return m_layers.end(); }
 

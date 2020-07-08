@@ -20,7 +20,7 @@ namespace sh
 
         int status = enet_initialize();
         if (status == 0) SH_CORE_TRACE("Enet initialized");
-        else SH_CORE_ERROR("Enet failed to initialize with error code {}", status);
+        else SH_CORE_ERROR("ENet failed to initialize with error code {}", status);
 
         m_window = Window::Create(props);
         m_window->SetEventCallback(SH_BIND_EVENT_FN(Application::OnEvent));
@@ -35,7 +35,10 @@ namespace sh
 
     Application::~Application()
     {
+        m_layerStack.Clear();
+
         enet_deinitialize();
+        SH_CORE_TRACE("ENet destroyed");
 
         m_instance = nullptr;
     }

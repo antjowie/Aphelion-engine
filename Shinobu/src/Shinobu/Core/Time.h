@@ -9,7 +9,7 @@ namespace sh
     class SHINOBU_API Timestep
     {
     public:
-        explicit Timestep(float seconds) : m_seconds(seconds) {}
+        Timestep(float seconds) : m_seconds(seconds) {}
 
         operator float() const { return m_seconds; }
         float Seconds() const { return m_seconds; }
