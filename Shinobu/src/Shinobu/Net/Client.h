@@ -10,7 +10,7 @@
 
 namespace sh
 {
-    class SHINOBU_API Client
+    class SHINOBU_API Client : public NonCopyable
     {
     public:
         Client();
