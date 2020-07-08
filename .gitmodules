@@ -15,3 +15,6 @@
 	url = https://github.com/antjowie/enet
 [submodule "thirdParty/enet"]
 	url = https://github.com/antjowie/enet
+[submodule "Shinobu/thirdParty/bitsery"]
+	path = Shinobu/thirdParty/bitsery
+	url = https://github.com/fraillt/bitsery

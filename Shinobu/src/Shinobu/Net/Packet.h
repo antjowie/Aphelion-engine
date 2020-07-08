@@ -1,4 +1,27 @@
 #pragma once
+#include "Shinobu/Core/Core.h"
+
+namespace sh
+{
+    // TODO: This will need to be moved to its own file if we are 
+    // going to serialize others things as well
+    struct SHINOBU_API BinaryBuffer
+    {
+    
+    };
+    
+    /**
+     * A packet is a piece of data that is transmitted via the network
+     * It is what the client and server send to each other
+     */
+    struct SHINOBU_API Packet
+    {
+    
+    };
+}
+
+// Legacy code
+#if 0
 #include <cereal/archives/portable_binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/types/memory.hpp>
@@ -49,3 +72,4 @@ std::stringstream PacketToBinary(const T& packet)
 }
 std::unique_ptr<Packet> PacketFromBinary(std::stringstream& binary);
 std::unique_ptr<Packet> PacketFromBinary(unsigned char* binary, unsigned count);
+#endif

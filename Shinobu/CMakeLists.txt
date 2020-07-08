@@ -37,6 +37,13 @@ add_library(Shinobu
     src/Shinobu/ImGui/ImGuiLayer.h
     src/Shinobu/ImGui/ImGuiLayer.cpp
 
+    src/Shinobu/Net/Client.h
+    src/Shinobu/Net/Client.cpp
+    src/Shinobu/Net/Packet.h
+    src/Shinobu/Net/Packet.cpp
+    src/Shinobu/Net/Server.h
+    src/Shinobu/Net/Server.cpp
+
     src/Shinobu/Renderer/GraphicsContext.h
     src/Shinobu/Renderer/GraphicsContext.cpp
     src/Shinobu/Renderer/OrthographicCamera.h
@@ -158,16 +165,25 @@ endif()
 # I'm not sure if there is a better way of doing it
 set(BUILD_SHARED_LIBS_OLD ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS "OFF" CACHE BOOL "" FORCE)
-
-add_subdirectory(thirdParty/spdlog)
 set(GLFW_BUILD_DOCS "OFF" CACHE BOOL "")
-add_subdirectory(thirdParty/glfw)
-add_subdirectory(thirdParty/imgui)
-add_subdirectory(thirdParty/Glad)
-add_subdirectory(thirdParty/stb_image)
-add_subdirectory(thirdParty/glm)
+
+add_subdirectory(thirdParty/bitsery)
 add_subdirectory(thirdParty/enet)
+add_subdirectory(thirdParty/Glad)
+add_subdirectory(thirdParty/glfw)
+add_subdirectory(thirdParty/glm)
+add_subdirectory(thirdParty/imgui)
+add_subdirectory(thirdParty/spdlog)
+add_subdirectory(thirdParty/stb_image)
 
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD} CACHE BOOL "" FORCE)
   
-target_link_libraries(Shinobu PUBLIC glm spdlog glfw imgui Glad stb_image enet)
+target_link_libraries(Shinobu PUBLIC 
+    bitsery
+    enet
+    Glad
+    glfw
+    glm
+    imgui
+    spdlog
+    stb_image)

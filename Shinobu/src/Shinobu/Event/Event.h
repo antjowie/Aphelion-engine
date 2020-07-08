@@ -19,11 +19,11 @@ namespace sh
     enum EventCategory
     {
         None = 0,
-        EventCategoryApplication    = BIT(0), // Application events are program related events such as shutdown
-        EventCategoryInput          = BIT(1), // Input are related to the way user interacts
-        EventCategoryKeyboard       = BIT(2), 
-        EventCategoryMouse          = BIT(3),
-        EventCategoryMouseButton    = BIT(4)
+        EventCategoryApplication    = Bit(0), // Application events are program related events such as shutdown
+        EventCategoryInput          = Bit(1), // Input are related to the way user interacts
+        EventCategoryKeyboard       = Bit(2), 
+        EventCategoryMouse          = Bit(3),
+        EventCategoryMouseButton    = Bit(4)
     };
 
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return type; } \

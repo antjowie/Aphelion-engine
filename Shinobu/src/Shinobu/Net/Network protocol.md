@@ -1,3 +1,4 @@
+# This document is no longer applicable but will keep research for reference purposes
 # Revision 2
 ## Core design
 The core principle is to use the command pattern. The server will send command packets to the clients. These can be deferred to the game world.

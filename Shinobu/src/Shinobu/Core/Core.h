@@ -84,6 +84,20 @@
 #define SH_VERIFY(x, msg) { x; SH_ASSERT(x,msg); }
 #define SH_CORE_VERIFY(x, msg) { x; SH_CORE_ASSERT(x,msg); } 
 
-constexpr inline SHINOBU_API unsigned BIT(unsigned bit) { return 1 << bit; }
-
 #define SH_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+
+/**
+ * Utilities
+ */
+namespace sh
+{
+    constexpr inline SHINOBU_API unsigned Bit(unsigned bit) { return 1 << bit; }
+
+    class SHINOBU_API NonCopyable
+    {
+    public:
+        NonCopyable() = default;
+        NonCopyable(const NonCopyable&) = delete;
+        NonCopyable& operator=(const NonCopyable&) = delete;
+    };
+}

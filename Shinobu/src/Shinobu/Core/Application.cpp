@@ -36,6 +36,8 @@ namespace sh
     Application::~Application()
     {
         enet_deinitialize();
+
+        m_instance = nullptr;
     }
 
     void Application::Run()

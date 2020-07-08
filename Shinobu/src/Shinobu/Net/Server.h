@@ -1,56 +1,65 @@
 #pragma once
 
-#include "Net/Packet.h"
+#include "Shinobu/Core/Core.h"
+#include "Shinobu/Net/Packet.h"
 
 #include <enet/enet.h>
 #include <functional>
+#include <vector>
 
-class Server
+namespace sh
 {
-public:
-    // TODO: Change ENetAddress to an actual address instead of using enet
-    using ConnectCB = std::function<void(Server&, ENetAddress user)>;
+    class SHINOBU_API Server : public NonCopyable
+    {
+    public:
+        // TODO: Maybe wrap ENetPeer
+        using ConnectCB = std::function<void(Server&, ENetPeer* connection)>;
 
-public:
-    Server();
-    ~Server();
+    public:
+        Server();
+        ~Server();
 
-    bool IsHosting() const;
+        bool IsHosting() const;
 
-    bool Host(unsigned port);
-    void Shutdown();
+        bool Host(unsigned port);
+        void Shutdown();
 
-    template <typename T>
-    void Broadcast(const T& packet);
-    // Returns true if a packet has been received
-    bool Poll(std::shared_ptr<Packet>& packet);
+        std::vector<ENetPeer*> GetConnections() const;
 
-    void SetConnectCB(ConnectCB cb) { m_connectCB = cb; }
-    void SetDisconnectCB(ConnectCB cb) { m_disconnectCB = cb; }
+        void Broadcast(const Packet& packet);
+        void Submit(const Packet& packet, ENetPeer* connection);
+        void Flush();
 
-private:
-    ENetHost* m_socket;
+        // Returns true if a packet has been received
+        bool Poll(Packet* packet);
 
-    ConnectCB m_connectCB;
-    ConnectCB m_disconnectCB;
-};
+        void SetConnectCB(ConnectCB cb) { m_connectCB = cb; }
+        void SetDisconnectCB(ConnectCB cb) { m_disconnectCB = cb; }
 
-template<typename T>
-inline void Server::Broadcast(const T& packet)
-{
-    auto stream = PacketToBinary(packet);
+    private:
+        ENetHost* m_socket;
     
-    //std::stringstream copy;
-    //copy << stream.str();
-    //
-    //auto val = PacketFromBinary(copy);
-
-    //SH_CORE_TRACE("Gave ID {0}", static_cast<JoinResponsePacket*>(val.get())->userID);
-
-    //stream.seekg(0, std::ios::end);
-    auto buffer = stream.str();
-    ENetPacket* pck = enet_packet_create(buffer.data(), buffer.size(), ENET_PACKET_FLAG_RELIABLE);
-
-    enet_host_broadcast(m_socket, 0, pck);
-    enet_host_flush(m_socket);
+        ConnectCB m_connectCB;
+        ConnectCB m_disconnectCB;
+    };
 }
+
+//template<typename T>
+//inline void Server::Broadcast(const T& packet)
+//{
+//    auto stream = PacketToBinary(packet);
+//    
+//    //std::stringstream copy;
+//    //copy << stream.str();
+//    //
+//    //auto val = PacketFromBinary(copy);
+//
+//    //SH_CORE_TRACE("Gave ID {0}", static_cast<JoinResponsePacket*>(val.get())->userID);
+//
+//    //stream.seekg(0, std::ios::end);
+//    auto buffer = stream.str();
+//    ENetPacket* pck = enet_packet_create(buffer.data(), buffer.size(), ENET_PACKET_FLAG_RELIABLE);
+//
+//    enet_host_broadcast(m_socket, 0, pck);
+//    enet_host_flush(m_socket);
+//}

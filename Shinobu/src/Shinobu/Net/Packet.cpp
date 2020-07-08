@@ -1,5 +1,6 @@
-#include "Net/Packet.h"
+#include "Shinobu/Net/Packet.h"
 
+#if 0
 std::unique_ptr<Packet> PacketFromBinary(unsigned char* binary, unsigned count)
 {
     // TODO: Find a way to make a stream use an existing buffer
@@ -24,3 +25,5 @@ std::unique_ptr<Packet> PacketFromBinary(std::stringstream& binary)
 
     return std::move(packet);
 }
+
+#endif

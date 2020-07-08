@@ -1,6 +1,6 @@
 #include <Shinobu/Common.h>
-
-#include <enet/enet.h>
+#include <Shinobu/Net/Client.h>
+#include <Shinobu/Net/Server.h>
 
 //#include <glm/gtc/matrix_transform.hpp>
 
@@ -16,6 +16,9 @@ public:
     float yPos = 0.f;
     sh::OrthographicCameraController m_camera;
 
+    sh::Server server;
+    sh::Client client;
+
     virtual void OnAttach() override 
     {
         // 1) Important: globals are not shared across DLL boundaries! If you use DLLs or any form of hot-reloading: you will need to call
@@ -25,6 +28,33 @@ public:
 
         tex = sh::Texture2D::Create("res/image.png");
 
+        // using ConnectCB = std::function<void(Server&, ENetPeer* connection)>;
+        server.SetConnectCB([](sh::Server& server, ENetPeer* connection)
+            {
+                char ip[64];
+                enet_address_get_host_ip(&connection->address, ip, 64);
+                SH_INFO("Server opened connection with {}", ip);
+            });
+        server.SetDisconnectCB([](sh::Server& server, ENetPeer* connection)
+            {
+                char ip[64];
+                enet_address_get_host_ip(&connection->address, ip, 64);
+                SH_INFO("Server closed connection with {}", ip);
+            });
+
+
+        server.Host(25565);
+        std::thread t(&sh::Client::Connect, &client, "localhost", 25565);
+        while (!client.IsConnected())
+        {
+            sh::Packet* p = nullptr;
+            while(server.Poll(p));
+            if (client.IsConnected())
+            {
+                if(t.joinable()) t.join();
+                while(client.Poll(p));
+            }
+        }
     }
     
     virtual void OnDetach() override { SH_INFO("Detached {0}", GetName()); }
