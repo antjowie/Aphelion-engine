@@ -1,6 +1,6 @@
 #pragma once
 #include "Shinobu/Core/Core.h"
-#include "Shinobu/Core/Timestep.h"
+#include "Shinobu/Core/Time.h"
 #include "Shinobu/Event/Event.h"
 
 #include "Shinobu/Renderer/OrthographicCamera.h"

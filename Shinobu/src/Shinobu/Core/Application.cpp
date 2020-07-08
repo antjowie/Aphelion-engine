@@ -1,10 +1,11 @@
 #include "Shinobu/Core/Application.h"
-
-#include "Shinobu/Core/Timestep.h"
+#include "Shinobu/Core/Time.h"
 
 #include "Shinobu/ImGui/ImGuiLayer.h"
 #include "Shinobu/Renderer/Renderer.h"
 #include "Shinobu/Renderer/RenderCommand.h"
+
+#include <enet/enet.h>
 
 namespace sh
 {
@@ -17,6 +18,10 @@ namespace sh
         SH_CORE_ASSERT(!m_instance,"Can not create multiple Applications");
         m_instance = this;
 
+        int status = enet_initialize();
+        if (status == 0) SH_CORE_TRACE("Enet initialized");
+        else SH_CORE_ERROR("Enet failed to initialize with error code {}", status);
+
         m_window = Window::Create(props);
         m_window->SetEventCallback(SH_BIND_EVENT_FN(Application::OnEvent));
         m_window->SetVSync(true);
@@ -28,15 +33,18 @@ namespace sh
         m_layerStack.PushOverlay(m_imguiLayer);
     }
 
+    Application::~Application()
+    {
+        enet_deinitialize();
+    }
+
     void Application::Run()
     {
-        // TODO: Add our own timer instead of relying on ImGui
-        float oldTime = ImGui::GetTime();
+        sh::Time time;
         while (m_isRunning)
         {
-            float elapsedTime = ImGui::GetTime() - oldTime;
-            oldTime = ImGui::GetTime();
-            const Timestep step(elapsedTime);
+            const Timestep step(time.Elapsed());
+            time.Reset();
 
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {

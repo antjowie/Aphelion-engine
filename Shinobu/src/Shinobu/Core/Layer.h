@@ -9,7 +9,7 @@
 
 #include "Shinobu/Core/Core.h"
 #include "Shinobu/Event/Event.h"
-#include "Shinobu/Core/Timestep.h"
+#include "Shinobu/Core/Time.h"
 
 namespace sh
 {

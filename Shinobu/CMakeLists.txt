@@ -17,8 +17,7 @@ add_library(Shinobu
     src/Shinobu/Core/LayerStack.cpp
     src/Shinobu/Core/Log.h
     src/Shinobu/Core/Log.cpp
-    src/Shinobu/Core/Timer.h
-    src/Shinobu/Core/Timestep.h
+    src/Shinobu/Core/Time.h
     src/Shinobu/Core/Transform.h
     src/Shinobu/Core/Transform.cpp
     src/Shinobu/Core/Window.h

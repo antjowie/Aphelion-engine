@@ -4,9 +4,12 @@
  */ 
 
 #include "Shinobu/Core/Application.h"
-#include <Shinobu/Core/EntryPoint.h>
+#include "Shinobu/Core/EntryPoint.h"
 #include "Shinobu/Core/Layer.h"
+#include "Shinobu/Core/LayerStack.h"
 #include "Shinobu/Core/Log.h"
+#include "Shinobu/Core/Time.h"
+#include "Shinobu/Core/Transform.h"
 
 #include "Shinobu/Core/Input/Input.h"
 #include "Shinobu/Core/Input/KeyCodes.h"

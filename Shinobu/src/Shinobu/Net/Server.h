@@ -18,7 +18,7 @@ public:
     bool IsHosting() const;
 
     bool Host(unsigned port);
-    void Close();
+    void Shutdown();
 
     template <typename T>
     void Broadcast(const T& packet);
@@ -29,7 +29,7 @@ public:
     void SetDisconnectCB(ConnectCB cb) { m_disconnectCB = cb; }
 
 private:
-    ENetHost* m_host;
+    ENetHost* m_socket;
 
     ConnectCB m_connectCB;
     ConnectCB m_disconnectCB;
@@ -51,6 +51,6 @@ inline void Server::Broadcast(const T& packet)
     auto buffer = stream.str();
     ENetPacket* pck = enet_packet_create(buffer.data(), buffer.size(), ENET_PACKET_FLAG_RELIABLE);
 
-    enet_host_broadcast(m_host, 0, pck);
-    enet_host_flush(m_host);
+    enet_host_broadcast(m_socket, 0, pck);
+    enet_host_flush(m_socket);
 }

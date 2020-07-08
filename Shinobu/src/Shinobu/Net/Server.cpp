@@ -1,7 +1,7 @@
 #include "Server.h"
 
 Server::Server()
-    : m_host(nullptr)
+    : m_socket(nullptr)
     , m_connectCB(nullptr)
     , m_disconnectCB(nullptr)
 {
@@ -14,7 +14,7 @@ Server::~Server()
 
 bool Server::IsHosting() const
 {
-    return m_host;
+    return m_socket;
 }
 
 bool Server::Host(unsigned port)
@@ -23,9 +23,9 @@ bool Server::Host(unsigned port)
     enet_address_set_host(&address, "localhost");
     address.port = 25565;
 
-    m_host = enet_host_create(&address, 32, 1, 0, 0);
+    m_socket = enet_host_create(&address, 32, 1, 0, 0);
 
-    if (m_host == nullptr)
+    if (m_socket == nullptr)
     {
         SH_ERROR("An error occurred while trying to create an ENet server host");
         return false;
@@ -35,20 +35,20 @@ bool Server::Host(unsigned port)
     return true;
 }
 
-void Server::Close()
+void Server::Shutdown()
 {
     SH_ASSERT(IsHosting(), "Can't shutdown a server that is not hosting");
 
     // TODO: Gracefully disconnect clients
     SH_WARN("Server forcibly shut down!");
-    enet_host_destroy(m_host);
+    enet_host_destroy(m_socket);
 }
 
 bool Server::Poll(std::shared_ptr<Packet>& packet)
 {
     ENetEvent event;
 
-    int status =  enet_host_service(m_host,&event,0);
+    int status =  enet_host_service(m_socket,&event,0);
     SH_ASSERT(status >= 0, "Server returned with error");
     
     if (status == 0)

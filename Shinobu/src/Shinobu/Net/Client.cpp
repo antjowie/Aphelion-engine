@@ -3,10 +3,10 @@
 #include <Shinobu/Core/Timer.h>
 
 Client::Client()
-    : m_host(enet_host_create(nullptr, 1, 1, 0, 0))
-    , m_client(nullptr)
+    : m_socket(enet_host_create(nullptr, 1, 1, 0, 0))
+    , m_server(nullptr)
 {
-    if (m_host == nullptr)
+    if (m_socket == nullptr)
     {
         SH_ERROR("An error occurred while trying to create an ENet client host");
     }
@@ -15,12 +15,13 @@ Client::Client()
 Client::~Client()
 {
     if(IsConnected()) Disconnect();
+    enet_host_destroy(m_socket);
 }
 
 
 bool Client::IsConnected() const
 {
-    return m_host->connectedPeers == 1;
+    return m_socket->connectedPeers == 1;
 }
 
 bool Client::Connect(const std::string& host, unsigned port)
@@ -30,16 +31,17 @@ bool Client::Connect(const std::string& host, unsigned port)
     enet_address_set_host(&address, host.c_str());
     address.port = port;
 
-    m_client = enet_host_connect(m_host, &address, 1, 0);
-    if (m_client == nullptr)
+    m_server = enet_host_connect(m_socket, &address, 1, 0);
+    if (m_server == nullptr)
     {
-        SH_ERROR("No available peers for initiating an ENet connection");
+        SH_ERROR("No available peers for initiating an ENet connection, increase host peer count");
         return false;
     }
 
+    // TODO: Send an event upon successfull connection (basically thread this cuz it can hold for 5 seconds)
     /* Wait up to 5 seconds for the connection attempt to succeed. */
     SH_TRACE("Attempting connection with {0}:{1}", address.host, port);
-    if (enet_host_service(m_host, &event, 5000) > 0 &&
+    if (enet_host_service(m_socket, &event, 5000) > 0 &&
         event.type == ENET_EVENT_TYPE_CONNECT)
     {
         SH_INFO("Successfully connected with {0}:{1}", address.host, port);
@@ -49,7 +51,7 @@ bool Client::Connect(const std::string& host, unsigned port)
         /* Either the 5 seconds are up or a disconnect event was */
         /* received. Reset the peer in the event the 5 seconds   */
         /* had run out without any significant event.            */
-        enet_peer_reset(m_client);
+        enet_peer_reset(m_server);
         SH_ERROR("Failed to connect with {0}:{1}", address.host, port);
         return false;
     }
@@ -61,14 +63,14 @@ void Client::Disconnect()
     SH_ASSERT(IsConnected(), "Client can't disconnect if they are not connected!");
 
     // Attempt graceful disconnect
-    enet_peer_disconnect(m_client, 0);
+    enet_peer_disconnect(m_server, 0);
 
     sh::Timer timer;
 
     while (timer.Seconds() < 5.f)
     {
         ENetEvent event;
-        while (enet_host_service(m_host, &event, 0) > 0)
+        while (enet_host_service(m_socket, &event, 0) > 0)
         {
             if (event.type == ENET_EVENT_TYPE_RECEIVE)
                 enet_packet_destroy(event.packet);
@@ -81,14 +83,14 @@ void Client::Disconnect()
     }
     
     SH_WARN("Forcefully disconnected form the server");
-    enet_peer_reset(m_client);
+    enet_peer_reset(m_server);
 }
 
 bool Client::Poll(std::shared_ptr<Packet>& packet)
 {
     ENetEvent event;
 
-    int status = enet_host_service(m_host, &event, 0);
+    int status = enet_host_service(m_socket, &event, 0);
     SH_ASSERT(status >= 0, "Client returned with error");
 
     if (status == 0)

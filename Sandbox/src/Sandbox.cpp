@@ -42,7 +42,6 @@ public:
         });
     }
 
-
     virtual void OnUpdate(sh::Timestep ts) override final
     {
         m_camera.OnUpdate(ts);

@@ -19,7 +19,7 @@ namespace sh
     {
     public:
         Application(WindowProps props = {});
-        virtual ~Application() = default;
+        virtual ~Application();
 
         void Run();
 

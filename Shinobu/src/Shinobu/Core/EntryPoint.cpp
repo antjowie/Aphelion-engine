@@ -2,9 +2,11 @@
 
 int main(int argc, char** argv)
 {
+    // Initialize systems
     sh::Log::Init();
-    SH_CORE_INFO("Logger initialized");
+    SH_CORE_TRACE("Logger initialized");
 
+    // Execute engine
     auto instance = sh::CreateApplication();
     instance->Run();
 

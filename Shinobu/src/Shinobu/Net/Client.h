@@ -22,8 +22,8 @@ public:
     bool Poll(std::shared_ptr<Packet>& packet);
 
 private:
-    ENetHost* m_host;
-    ENetPeer* m_client;
+    ENetHost* m_socket;
+    ENetPeer* m_server;
 };
 
 template<typename T>
@@ -36,6 +36,6 @@ inline void Client::SendPacket(const T& packet)
     stream.seekg(0, std::ios::end);
     ENetPacket* pck = enet_packet_create(stream.rdbuf(), stream.tellg(), ENET_PACKET_FLAG_RELIABLE);
 
-    enet_peer_send(m_client, 0, pck);
-    enet_host_flush(m_host);
+    enet_peer_send(m_server, 0, pck);
+    enet_host_flush(m_socket);
 }
