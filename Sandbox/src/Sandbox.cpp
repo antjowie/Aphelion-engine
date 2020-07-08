@@ -27,16 +27,9 @@ public:
 
     void ToggleClient()
     {
-        // Future destructor is blocking so we have to retrieve value once 
-        // if it is there and hasn't been retrieved before
-        static std::future<bool> connect;
-        static std::future<void> disconnect;
 
-        if (connect.valid()) connect.get();
-        if (disconnect.valid()) disconnect.get();
-
-        if (m_client.IsConnected()) disconnect = m_client.Disconnect();
-        else connect = m_client.Connect("localhost", 25565);
+        if (m_client.IsConnected() || m_client.IsConnecting()) m_client.Disconnect();
+        else m_client.Connect("localhost", 25565);
     }
 
     virtual void OnAttach() override 
@@ -47,6 +40,12 @@ public:
         //ImGui::SetCurrentContext(sh::ImGuiLayer::GetContext());
 
         tex = sh::Texture2D::Create("res/image.png");
+
+        sh::ExampleData data;
+        data.message = "Hello world lol I'm packet";
+        auto packet = sh::Serialize(data);
+        auto newData = sh::Deserialize<sh::ExampleData>(packet);
+        SH_CORE_TRACE(newData.message);
 
         // using ConnectCB = std::function<void(Server&, ENetPeer* connection)>;
         m_server.SetConnectCB([](sh::Server& m_server, ENetPeer* connection)
@@ -73,7 +72,7 @@ public:
             auto future = m_client.Disconnect(); 
             while (future.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
             {
-                sh::Packet* p = nullptr;
+                sh::Packet p;
                 m_server.Poll(p);
             }
         }
@@ -96,7 +95,7 @@ public:
     {
         m_camera.OnUpdate(ts);
 
-        sh::Packet* p = nullptr;
+        sh::Packet p;
         if (m_server.IsHosting()) while (m_server.Poll(p));
         if (m_client.IsConnected()) while (m_client.Poll(p));
         if (m_client.IsConnecting())
@@ -142,7 +141,11 @@ public:
             if (ImGui::Checkbox("Server", &hosting)) ToggleServer();
             if (ImGui::Checkbox("Client", &connected))
             {
-                if(!m_client.IsConnecting()) ToggleClient();
+                ToggleClient();
+            }
+            if (ImGui::IsItemActive())
+            {
+                ImGui::Text("Hello");
             }
         }
         ImGui::End();

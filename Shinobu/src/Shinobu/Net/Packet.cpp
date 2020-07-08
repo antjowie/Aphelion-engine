@@ -1,5 +1,15 @@
 #include "Shinobu/Net/Packet.h"
 
+#include "enet/enet.h"
+
+namespace sh
+{
+    _ENetPacket* MakeENetPacket(const Packet& packet)
+    {
+        return enet_packet_create(packet.buffer.data(), packet.buffer.size(), ENET_PACKET_FLAG_UNSEQUENCED);
+    }
+}
+
 #if 0
 std::unique_ptr<Packet> PacketFromBinary(unsigned char* binary, unsigned count)
 {

@@ -57,12 +57,22 @@ namespace sh
         return connections;
     }
 
+    void Server::Broadcast(const Packet& packet)
+    {
+        enet_host_broadcast(m_socket, 0, sh::MakeENetPacket(packet));
+    }
+
+    void Server::Submit(const Packet& packet, ENetPeer* connection)
+    {
+        enet_peer_send(connection, 0, sh::MakeENetPacket(packet));
+    }
+
     void Server::Flush()
     {
         enet_host_flush(m_socket);
     }
 
-    bool Server::Poll(Packet* packet)
+    bool Server::Poll(Packet& packet)
     {
         ENetEvent event;
 
@@ -86,10 +96,11 @@ namespace sh
             break;
 
         case ENET_EVENT_TYPE_RECEIVE:
-            auto* data = event.packet->data;
-            auto length = event.packet->dataLength;
-
-            //packet = std::shared_ptr<Packet>(PacketFromBinary(data, length).release());
+            sh::Packet packet;
+            
+            packet.size = event.packet->dataLength;
+            uint8_t* data = event.packet->data;
+            packet.buffer = sh::Packet::Buffer(data, data + packet.size);
 
             enet_packet_destroy(event.packet);
             return true;

@@ -4,9 +4,24 @@
 #include <bitsery/bitsery.h>
 #include <bitsery/adapter/buffer.h>
 #include <bitsery/traits/vector.h>
+#include <bitsery/traits/string.h>
+
+struct _ENetPacket;
 
 namespace sh
 {
+    struct ExampleData
+    {
+        std::string message;
+    };
+
+    //define how object should be serialized/deserialized
+    template <typename S>
+    void serialize(S& s, ExampleData& o) 
+    {
+        s.text1b(o.message,128);
+    }
+    
     /**
      * A packet is a piece of data that is transmitted via the network
      * It is what the client and server send to each other
@@ -16,38 +31,66 @@ namespace sh
         //some helper types
         using Buffer = std::vector<uint8_t>;
         using OutputAdapter = bitsery::OutputBufferAdapter<Buffer>;
-        using InputAdapter = bitsery::InputBufferAdapter<Buffer>;    
+        using InputAdapter = bitsery::InputBufferAdapter<Buffer>;
 
+        size_t size; // Set by ENet when received, used in deserializing
         Buffer buffer;
     };
 
-    template <typename T> SHINOBU_API T Deserialize(Packet& packet)
-    {
-
-    }
-    
     template <typename T> SHINOBU_API Packet Serialize(const T& data)
     {
-        //set some random data
-        //MyStruct data{ 8941, MyEnum::V2, {15.0f, -8.5f, 0.045f} };
-        //MyStruct res{};
+        Packet packet;
+        packet.size = bitsery::quickSerialization<Packet::OutputAdapter>(packet.buffer, data);
+        return packet;
+    }
 
-        //create buffer to store data
-        Packet::Buffer buffer;
-        //use quick serialization function,
-        //it will use default configuration to setup all the nesessary steps
-        //and serialize data to container
-        auto writtenSize = bitsery::quickSerialization<Packet::OutputAdapter>(buffer, data);
+    template <typename T> SHINOBU_API T Deserialize(Packet& packet)
+    {
+        T data;
+        auto state = bitsery::quickDeserialization<Packet::InputAdapter>({ packet.buffer.begin(),packet.size }, data);
+        SH_CORE_ASSERT(state.first == bitsery::ReaderError::NoError && state.second, "Packet deserializing failed");
+        return data;
+    }
+
+    _ENetPacket* SHINOBU_API MakeENetPacket(const Packet& packet);
+    
+#if 0
+    int main() {
+        //set some random data
+        MyStruct data{ 8941, MyEnum::V2, 0.045 };
+        MyStruct res{};
+
+        //open file stream for writing and reading
+        auto fileName = "test_file.bin";
+        std::fstream s{ fileName, s.binary | s.trunc | s.out };
+        if (!s.is_open()) {
+            std::cout << "cannot open " << fileName << " for writing\n";
+            return 0;
+        }
+
+        //we cannot use quick serialization function, because streams cannot use writtenBytesCount method
+        bitsery::Serializer<bitsery::OutputBufferedStreamAdapter> ser{ s };
+        ser.object(data);
+        //flush to writer
+        ser.adapter().flush();
+        s.close();
+        //reopen for reading
+
+        s.open(fileName, s.binary | s.in);
+        if (!s.is_open()) {
+            std::cout << "cannot open " << fileName << " for reading\n";
+            return 0;
+}
 
         //same as serialization, but returns deserialization state as a pair
         //first = error code, second = is buffer was successfully read from begin to the end.
-        auto state = bitsery::quickDeserialization<InputAdapter>({ buffer.begin(), writtenSize }, res);
+        auto state = bitsery::quickDeserialization<bitsery::InputStreamAdapter>(s, res);
 
         assert(state.first == bitsery::ReaderError::NoError && state.second);
-        assert(data.fs == res.fs && data.i == res.i && data.e == res.e);
-    }
+        assert(data.f == res.f && data.i == res.i && data.e == res.e);
+}
 
-#if 0
+
     //include bitsery.h to get serialization and deserialization classes
     #include <bitsery/bitsery.h>
     //in ordered to serialize/deserialize data to buffer, include buffer adapter

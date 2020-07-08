@@ -3,6 +3,8 @@
 
 namespace sh
 {
+    static std::atomic_bool cancelConnecting = false;
+
     Client::Client()
         : m_isConnecting(false)
         , m_socket(enet_host_create(nullptr, 1, 1, 0, 0))
@@ -17,6 +19,9 @@ namespace sh
     Client::~Client()
     {
         if(IsConnected()) Disconnect();
+        cancelConnecting = true;
+        m_connectFuture.wait();
+
         enet_host_destroy(m_socket);
     }
 
@@ -30,14 +35,15 @@ namespace sh
         return m_isConnecting;
     }
 
-    std::future<bool> Client::Connect(const std::string& host, unsigned port, const Timestep& timeout)
+    std::shared_future<bool> Client::Connect(const std::string& host, unsigned port, const Timestep& timeout)
     {
         if (m_isConnecting)
         {
-            SH_CORE_WARN("Client is already attempting connection!");
-            return std::async([] {return false; });
+            SH_CORE_WARN("The client is already attempting to connect! Cancel this by calling Disconnect");
+            return m_connectFuture;
         }
-        return std::async(std::launch::async, [&, host, port, timeout]
+
+        m_connectFuture = std::async(std::launch::async, [&, host, port, timeout]
             {
                 m_isConnecting = true;
 
@@ -55,7 +61,7 @@ namespace sh
                 
                 SH_CORE_TRACE("Attempting connection with {0}:{1}", address.host, port);
                 sh::Time timer;
-                while (timer.Total().Seconds() < timeout.MilliSeconds())
+                while (timer.Total().Seconds() < timeout.MilliSeconds() && !cancelConnecting)
                 {
                     while(enet_host_service(m_socket, &event, 0) > 0)
                         switch (event.type)
@@ -70,17 +76,36 @@ namespace sh
                             SH_CORE_WARN("Received arbitrary type {} from {}:{}", event.type, address.host, port);
                         }
                 }
-                // Timed out
+                // Timed out or connection cancelled
                 enet_peer_reset(m_server);
-                SH_CORE_WARN("Server did not respond in time out period ({} seconds)", timeout);
+                if (cancelConnecting)
+                {
+                    SH_CORE_TRACE("Aborting connection attempt successful");
+                    cancelConnecting = false;
+                }
+                else
+                {
+                    SH_CORE_WARN("Server did not respond in time out period ({} seconds)", timeout);
+                }
                 m_isConnecting = false;
                 return false;
             });
+
+        return m_connectFuture;
     }
 
-    std::future<void> Client::Disconnect(const Timestep& timeout)
+    std::shared_future<void> Client::Disconnect(const Timestep& timeout)
     {
-        return std::async(std::launch::async, [&, timeout]
+        static std::shared_future<void> future;
+
+        if (m_isConnecting)
+        {
+            SH_CORE_TRACE("Aborting connection attempt...");
+            cancelConnecting = true;
+            return future;
+        }
+
+        future = std::async(std::launch::async, [&, timeout]
             {
                 SH_CORE_ASSERT(IsConnected(), "Client can't disconnect if they are not connected!");
                 SH_CORE_TRACE("Attempting disconnect from server...");
@@ -108,6 +133,12 @@ namespace sh
                 enet_peer_reset(m_server);
                 return;
             });
+        return future;
+    }
+
+    void Client::Submit(const Packet& packet)
+    {
+        enet_peer_send(m_server,0,sh::MakeENetPacket(packet));
     }
 
     void Client::Flush()
@@ -115,7 +146,7 @@ namespace sh
         enet_host_flush(m_socket);
     }
 
-    bool Client::Poll(Packet* packet)
+    bool Client::Poll(Packet& packet)
     {
         ENetEvent event;
 
@@ -137,10 +168,11 @@ namespace sh
             return Poll(packet);
             break;
         case ENET_EVENT_TYPE_RECEIVE:
-            auto* data = event.packet->data;
-            auto length = event.packet->dataLength;
+            sh::Packet packet;
 
-            //packet = PacketFromBinary(data, length);
+            packet.size = event.packet->dataLength;
+            uint8_t* data = event.packet->data;
+            packet.buffer = sh::Packet::Buffer(data, data + packet.size);
 
             enet_packet_destroy(event.packet);
             return true;

@@ -20,20 +20,22 @@ namespace sh
     
         bool IsConnected() const;
         /** 
-         * Returns true while connecting
+         * Returns true only while connecting
          */
         bool IsConnecting() const;
 
-        std::future<bool> Connect(const std::string& host, unsigned port, const Timestep& timeout = Timestep(5));
-        std::future<void> Disconnect(const Timestep& timeout = Timestep(5));
+        std::shared_future<bool> Connect(const std::string& host, unsigned port, const Timestep& timeout = Timestep(5));
+        std::shared_future<void> Disconnect(const Timestep& timeout = Timestep(5));
     
         void Submit(const Packet& packet);
         void Flush();
     
-        bool Poll(Packet* packet);
+        bool Poll(Packet& packet);
     
     private:
         bool m_isConnecting;
+        std::shared_future<bool> m_connectFuture;
+
 
         ENetHost* m_socket;
         ENetPeer* m_server;

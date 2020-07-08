@@ -31,7 +31,7 @@ namespace sh
         void Flush();
 
         // Returns true if a packet has been received
-        bool Poll(Packet* packet);
+        bool Poll(Packet& packet);
 
         void SetConnectCB(ConnectCB cb) { m_connectCB = cb; }
         void SetDisconnectCB(ConnectCB cb) { m_disconnectCB = cb; }
