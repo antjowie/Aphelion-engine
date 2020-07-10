@@ -28,6 +28,15 @@ namespace sh
     }
 
     /**
+     * A function to stamp an component value of an entity to another entity
+     */
+    template<typename T>
+    void Stamp(const entt::registry& from, const entt::entity src, entt::registry& to, const entt::entity dst) 
+    {
+        to.emplace_or_replace<T>(dst, from.get<T>(src));
+    }
+
+    /**
      * The ECS is the gameplay system that this engine uses. 
      * It is globally accessible and updates by the gameplay layer
      */
@@ -36,7 +45,7 @@ namespace sh
     public:
         /**
          * The registry stores entities and their components
-         * 
+         *
          * TODO: Wrap entt instead of directly accessing it
          */
         class Registry
@@ -48,6 +57,19 @@ namespace sh
             entt::registry m_reg;
         };
 
+        using CloneFunc = std::function<void(entt::registry& from, entt::registry& to)>;
+        using StampFunc = std::function<void
+        (const entt::registry& from, const entt::entity src, entt::registry& to, const entt::entity dst)>;
+        using SystemFunc = std::function<void(Registry& reg)>;
+
+        struct CompData
+        {
+            std::string_view name;
+            CloneFunc clone;
+            StampFunc stamp;
+        };
+
+    public:
         static Registry& GetRegistry() { return m_reg; };
 
         /**
@@ -57,11 +79,13 @@ namespace sh
          * (hopefully meaning that every machine allocates the same component ID). I have not however verified this.
          */
         template <typename T>
-        static void RegisterComponent(T t)
+        static void RegisterComponent()
         {
-            auto id = entt::type_info<T>::id;
-            SH_CORE_ASSERT(m_cloneFns.count(id) == 0, "Component has already been registered");
-            //m_cloneFns[id] = Clone<T>;
+            auto id = entt::type_info<T>::id();
+            SH_CORE_ASSERT(m_compData.count(id) == 0, "Component has already been registered");
+            m_compData[id].clone = Clone<T>;
+            m_compData[id].stamp = Stamp<T>;
+            m_compData[id].name = entt::type_info<T>::name();
         }
 
         /**
@@ -82,11 +106,10 @@ namespace sh
         static void ClearSystems();
         static void UpdateSystems();
 
-        using CloneFunc = std::function<void(entt::registry& from, entt::registry& to)>;
-        using SystemFunc = std::function<void(Registry& reg)>;
-    private:
+        static const std::unordered_map<entt::id_type, CompData>& GetComponentData();
 
-        static std::unordered_map<entt::id_type, CloneFunc> m_cloneFns;
+    private:
+        static std::unordered_map<entt::id_type, CompData> m_compData;
         static std::vector<SystemFunc> m_systems;
         static Registry m_reg;
     };

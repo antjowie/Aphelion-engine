@@ -2,7 +2,7 @@
 
 namespace sh
 {
-    //std::unordered_map<entt::id_type, ECS::CloneFunc> ECS::m_cloneFns;
+    std::unordered_map<entt::id_type, ECS::CompData> ECS::m_compData;
     std::vector<ECS::SystemFunc> ECS::m_systems;
     ECS::Registry ECS::m_reg;
 
@@ -20,5 +20,10 @@ namespace sh
     {
         for (auto& system : m_systems)
             system(m_reg);
+    }
+
+    const std::unordered_map<entt::id_type, ECS::CompData>& ECS::GetComponentData()
+    {
+        return m_compData;
     }
 }

@@ -59,6 +59,15 @@ public:
         //    In your debugger, add GImGui to your watch window and notice how its value changes depending on which location you are currently stepping into.
         //ImGui::SetCurrentContext(sh::ImGuiLayer::GetContext());
         sh::ECS::RegisterSystem(TestSystem);
+        sh::ECS::RegisterComponent<Foo>();
+        sh::ECS::RegisterComponent<Bar>();
+
+        const auto& compData = sh::ECS::GetComponentData();
+        for(const auto & comp : compData)
+        {
+            SH_TRACE("Component {} id: {}", comp.second.name, comp.first);
+        }
+
         //sh::ECS::SystemFunc sys = TestSystem;
         //sys(reg);
 
