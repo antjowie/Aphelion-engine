@@ -2,8 +2,11 @@
 #include <Shinobu/Net/Client.h>
 #include <Shinobu/Net/Server.h>
 
+#include <Shinobu/ECS/ECSLayer.h>
+
 //#include <glm/gtc/matrix_transform.hpp>
 #include <entt/entt.hpp>
+
 
 struct Foo
 {
@@ -15,6 +18,11 @@ struct Bar
 {
     float val;
 };
+
+void TestSystem(sh::ECS::Registry& reg)
+{
+    SH_TRACE("UPDATE dt: {}", sh::Time::dt);
+}
 
 class ExampleLayer2D : public sh::Layer
 {
@@ -50,6 +58,10 @@ public:
         //    SetCurrentContext() (with the pointer you got from CreateContext) from each unique static/DLL boundary, and after each hot-reloading.
         //    In your debugger, add GImGui to your watch window and notice how its value changes depending on which location you are currently stepping into.
         //ImGui::SetCurrentContext(sh::ImGuiLayer::GetContext());
+        sh::ECS::RegisterSystem(TestSystem);
+        //sh::ECS::SystemFunc sys = TestSystem;
+        //sys(reg);
+
         entt::registry reg;
         auto e0 = reg.create();
         
@@ -374,6 +386,7 @@ public:
 std::unique_ptr<sh::Application> sh::CreateApplication()
 {
     auto app = std::make_unique<sh::Application>();
+    app->GetLayerStack().PushLayer(new ECSLayer);
     app->GetLayerStack().PushLayer(new ExampleLayer2D);
 
     return app;

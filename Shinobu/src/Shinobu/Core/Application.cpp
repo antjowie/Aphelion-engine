@@ -45,11 +45,12 @@ namespace sh
 
     void Application::Run()
     {
-        sh::Time time;
+        sh::Timer time;
         while (m_isRunning)
         {
             const Timestep step(time.Elapsed());
             time.Reset();
+            Time::dt = step;
 
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {

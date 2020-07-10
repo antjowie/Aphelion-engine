@@ -19,12 +19,20 @@ namespace sh
         float m_seconds;
     };
 
-    class SHINOBU_API Time
+    /**
+     * Global accessible time value
+     */
+    struct SHINOBU_API Time
+    {
+        static Timestep dt;
+    };
+
+    class SHINOBU_API Timer
     {
     public:
         using Clock = std::chrono::high_resolution_clock;
     
-        Time()
+        Timer()
             : m_begin(Clock::now())
             , m_last(m_begin)
         { }
@@ -39,7 +47,7 @@ namespace sh
             return Timestep((Clock::now() - m_last).count() * 1e-9f); 
         }
 
-        Time& Reset()
+        Timer& Reset()
         {
             m_last = Clock::now();
             return *this;

@@ -32,6 +32,10 @@ add_library(Shinobu
     src/Shinobu/Event/Event.h
     src/Shinobu/Event/KeyEvent.h
     src/Shinobu/Event/MouseEvent.h
+    
+    src/Shinobu/ECS/ECS.h
+    src/Shinobu/ECS/ECS.cpp
+    src/Shinobu/ECS/ECSLayer.h
 
     src/Shinobu/ImGui/ImGuiBuild.cpp
     src/Shinobu/ImGui/ImGuiLayer.h
@@ -88,8 +92,7 @@ add_library(Shinobu
     src/Platform/OpenGL/OpenGLVertexArray.h
     src/Platform/OpenGL/OpenGLVertexArray.cpp
     src/Platform/OpenGL/OpenGLVertexBuffer.h
-    src/Platform/OpenGL/OpenGLVertexBuffer.cpp
-)
+    src/Platform/OpenGL/OpenGLVertexBuffer.cpp "src/Shinobu/Core/Time.cpp")
 
 
 target_precompile_headers(Shinobu 
@@ -165,8 +168,8 @@ endif()
 # I'm not sure if there is a better way of doing it
 set(BUILD_SHARED_LIBS_OLD ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS "OFF" CACHE BOOL "" FORCE)
-set(GLFW_BUILD_DOCS "OFF" CACHE BOOL "")
-set(BUILD_TESTING "OFF" CACHE BOOL "")
+set(GLFW_BUILD_DOCS "OFF" CACHE BOOL "" FORCE)
+set(BUILD_TESTING "OFF" CACHE BOOL "" FORCE)
 
 add_subdirectory(thirdParty/bitsery)
 add_subdirectory(thirdParty/enet)

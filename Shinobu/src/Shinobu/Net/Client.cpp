@@ -60,7 +60,7 @@ namespace sh
                 }
                 
                 SH_CORE_TRACE("Attempting connection with {0}:{1}", address.host, port);
-                sh::Time timer;
+                sh::Timer timer;
                 while (timer.Total().Seconds() < timeout.MilliSeconds() && !cancelConnecting)
                 {
                     while(enet_host_service(m_socket, &event, 0) > 0)
@@ -112,7 +112,7 @@ namespace sh
 
                 // Attempt graceful disconnect
                 enet_peer_disconnect(m_server, 0);
-                sh::Time timer;
+                sh::Timer timer;
 
                 while (timer.Total().Seconds() < timeout.MilliSeconds())
                 {
