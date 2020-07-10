@@ -24,6 +24,49 @@ void TestSystem(sh::ECS::Registry& reg)
     SH_TRACE("UPDATE dt: {}", sh::Time::dt);
 }
 
+/**
+ * This system will propagate packets through the ECS
+ * Although I might put it in its own layer and communicate 
+ * them via events. I'm not too sure yet
+ *
+ * Honestly, systems should NOT contain state so it seems like the most obvious solution
+ * Buuut, ECS layer should then also propogate events to the ECS and I don't know yet how it will do that
+ */
+class NetworkSystem
+{
+public:
+    void operator()(sh::ECS::Registry& reg)
+    {
+        sh::Packet p;
+        if (m_server.IsHosting())
+        {
+            while (m_server.Poll(p))
+            {
+                auto data = sh::Deserialize<sh::ExampleData>(p);
+                SH_CORE_TRACE("Server received: {}", data.message);
+
+                // You prob don't ever wanna broadcast the ip of a connected person
+                data.message = std::to_string(p.sender->address.host) + ": " + data.message;
+                m_server.Broadcast(sh::Serialize(data));
+            }
+            m_server.Flush();
+        }
+        if (m_client.IsConnected())
+        {
+            while (m_client.Poll(p))
+            {
+                auto data = sh::Deserialize<sh::ExampleData>(p);
+                SH_CORE_TRACE("Client received: {}", data.message);
+            }
+            m_client.Flush();
+        }
+    }
+
+private:
+    sh::Server m_server;
+    sh::Client m_client;
+};
+
 class ExampleLayer2D : public sh::Layer
 {
 public:
@@ -47,54 +90,49 @@ public:
 
     void ToggleClient()
     {
-
         if (m_client.IsConnected() || m_client.IsConnecting()) m_client.Disconnect();
         else m_client.Connect("localhost", 25565);
     }
 
     virtual void OnAttach() override 
     {
-        // 1) Important: globals are not shared across DLL boundaries! If you use DLLs or any form of hot-reloading: you will need to call
-        //    SetCurrentContext() (with the pointer you got from CreateContext) from each unique static/DLL boundary, and after each hot-reloading.
-        //    In your debugger, add GImGui to your watch window and notice how its value changes depending on which location you are currently stepping into.
-        //ImGui::SetCurrentContext(sh::ImGuiLayer::GetContext());
-        sh::ECS::RegisterSystem(TestSystem);
+        //sh::ECS::RegisterSystem(TestSystem);
         sh::ECS::RegisterComponent<Foo>();
         sh::ECS::RegisterComponent<Bar>();
 
-        const auto& compData = sh::ECS::GetComponentData();
-        for(const auto & comp : compData)
-        {
-            SH_TRACE("Component {} id: {}", comp.second.name, comp.first);
-        }
+        //const auto& compData = sh::ECS::GetComponentData();
+        //for(const auto & comp : compData)
+        //{
+        //    SH_TRACE("Component {} id: {}", comp.second.name, comp.first);
+        //}
 
         //sh::ECS::SystemFunc sys = TestSystem;
         //sys(reg);
 
-        entt::registry reg;
-        auto e0 = reg.create();
-        
-        auto foo = reg.emplace<Foo>(e0);
-        foo.x = 10;
-        foo.y = 20;
-        auto bar = reg.emplace<Bar>(e0);
-        bar.val = 5.5f;
+        //entt::registry reg;
+        //auto e0 = reg.create();
+        //
+        //auto foo = reg.emplace<Foo>(e0);
+        //foo.x = 10;
+        //foo.y = 20;
+        //auto bar = reg.emplace<Bar>(e0);
+        //bar.val = 5.5f;
 
-        SH_INFO("--- ID INFO ---\nFoo id: {}\nBar id: {}", entt::type_info<Foo>::id(), entt::type_info<Bar>::id());
-        
-        reg.visit([](entt::id_type id)
-            {
-                SH_TRACE(id);
-            });
+        //SH_INFO("--- ID INFO ---\nFoo id: {}\nBar id: {}", entt::type_info<Foo>::id(), entt::type_info<Bar>::id());
+        //
+        //reg.visit([](entt::id_type id)
+        //    {
+        //        SH_TRACE(id);
+        //    });
+
+        // Test packet serializing
+        //sh::ExampleData data;
+        //data.message = "Hello world lol I'm packet";
+        //auto packet = sh::Serialize(data);
+        //auto newData = sh::Deserialize<sh::ExampleData>(packet);
+        //SH_CORE_TRACE(newData.message);
 
         tex = sh::Texture2D::Create("res/image.png");
-
-        sh::ExampleData data;
-        data.message = "Hello world lol I'm packet";
-        auto packet = sh::Serialize(data);
-        auto newData = sh::Deserialize<sh::ExampleData>(packet);
-        SH_CORE_TRACE(newData.message);
-
         // using ConnectCB = std::function<void(Server&, ENetPeer* connection)>;
         m_server.SetConnectCB([](sh::Server& m_server, ENetPeer* connection)
             {
@@ -150,9 +188,9 @@ public:
             {
                 auto data = sh::Deserialize<sh::ExampleData>(p);
                 SH_CORE_TRACE("Server received: {}", data.message);
-                
+
                 // You prob don't ever wanna broadcast the ip of a connected person
-                data.message = std::to_string(p.sender->address.host)+ ": " + data.message;
+                data.message = std::to_string(p.sender->address.host) + ": " + data.message;
                 m_server.Broadcast(sh::Serialize(data));
             }
             m_server.Flush();
