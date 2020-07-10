@@ -99,6 +99,7 @@ public:
         //sh::ECS::RegisterSystem(TestSystem);
         sh::ECS::RegisterComponent<Foo>();
         sh::ECS::RegisterComponent<Bar>();
+        sh::ECS::RegisterComponent<sh::ExampleData>();
 
         //const auto& compData = sh::ECS::GetComponentData();
         //for(const auto & comp : compData)
@@ -187,11 +188,11 @@ public:
             while (m_server.Poll(p))
             {
                 auto data = sh::Deserialize<sh::ExampleData>(p);
-                SH_CORE_TRACE("Server received: {}", data.message);
+                SH_CORE_TRACE("Server received ({}): {}", p.id.value, data.message);
 
                 // You prob don't ever wanna broadcast the ip of a connected person
                 data.message = std::to_string(p.sender->address.host) + ": " + data.message;
-                m_server.Broadcast(sh::Serialize(data));
+                m_server.Broadcast(p);
             }
             m_server.Flush();
         }
@@ -200,7 +201,7 @@ public:
             while (m_client.Poll(p))
             {
                 auto data = sh::Deserialize<sh::ExampleData>(p);
-                SH_CORE_TRACE("Client received: {}", data.message);
+                SH_CORE_TRACE("Client received ({}): {}", p.id.value, data.message);
             }
             m_client.Flush();
         }
@@ -255,7 +256,9 @@ public:
                 {
                     sh::ExampleData data;
                     data.message = msg;
-                    m_client.Submit(sh::Serialize(data));
+                    auto p = sh::Serialize(data, entt::type_info<sh::ExampleData>::id());
+                    SH_CORE_TRACE("Client send ({}): {}", p.id.value, data.message);
+                    m_client.Submit(p);
                 }
             }
         }

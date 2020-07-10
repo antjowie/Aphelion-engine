@@ -6,8 +6,10 @@
 #include <bitsery/traits/vector.h>
 #include <bitsery/traits/string.h>
 
-struct _ENetPacket;
-struct _ENetPeer;
+#include "enet/enet.h"
+
+//struct _ENetPacket;
+//struct _ENetPeer;
 
 namespace sh
 {
@@ -29,35 +31,90 @@ namespace sh
      */
     struct SHINOBU_API Packet
     {
-        //some helper types
         using Buffer = std::vector<uint8_t>;
         using OutputAdapter = bitsery::OutputBufferAdapter<Buffer>;
         using InputAdapter = bitsery::InputBufferAdapter<Buffer>;
+        // Bitsery needs a class to serialize
+        struct ID 
+        {
+            ID& operator= (unsigned rhs) { value = rhs; return *this; }
+            operator unsigned() { return value; }
+            unsigned value; 
+        }; 
 
+        ID id;
         size_t size; // Set by ENet when received, used in deserializing
-        Buffer buffer;
-
-        // Data
         _ENetPeer* sender = nullptr;
+
+        Buffer buffer;
     };
 
-    template <typename T> SHINOBU_API Packet Serialize(const T& data)
+    template <typename S>
+    void serialize(S& s, Packet::ID& o)
+    {
+        s.value4b(o.value);
+    }
+
+    template <typename T> SHINOBU_API Packet Serialize(const T& data, unsigned id = 0)
     {
         Packet packet;
-        packet.size = bitsery::quickSerialization<Packet::OutputAdapter>(packet.buffer, data);
+        //packet.size = bitsery::quickSerialization<Packet::OutputAdapter>(packet.meta.dataBuffer, data);
+        //size_t quickSerialization(OutputAdapter adapter, const T & value) {
+        //    Serializer<OutputAdapter> ser{ std::move(adapter) };
+
+        //packet.id = 10;
+        packet.id = id;
+
+        bitsery::Serializer<Packet::OutputAdapter> ser{ packet.buffer };
+        ser.object(packet.id);
+
+        ser.object(data);
+        ser.adapter().flush();
+        packet.size = ser.adapter().writtenBytesCount();
+
         return packet;
     }
 
     template <typename T> SHINOBU_API T Deserialize(Packet& packet)
     {
         T data;
-        auto state = bitsery::quickDeserialization<Packet::InputAdapter>({ packet.buffer.begin(),packet.size }, data);
+
+        //auto state = bitsery::quickDeserialization<Packet::InputAdapter>({ packet.buffer.begin(),packet.size }, data);
+        //std::pair<ReaderError, bool> quickDeserialization(InputAdapter adapter, T & value) {
+        //    Deserializer<InputAdapter> des{ std::move(adapter) };
+
+        bitsery::Deserializer<Packet::InputAdapter> des{ packet.buffer.begin(), packet.size };
+        des.object(packet.id);
+        
+        des.object(data);
 
         //same as serialization, but returns deserialization state as a pair
         //first = error code, second = if buffer was successfully read from begin to the end.
+        auto state = std::make_pair(des.adapter().error(), des.adapter().isCompletedSuccessfully());
         SH_CORE_ASSERT(state.first == bitsery::ReaderError::NoError && state.second, "Packet deserializing failed");
         return data;
     }
 
-    _ENetPacket* SHINOBU_API MakeENetPacket(const Packet& packet);
+    inline _ENetPacket* SHINOBU_API PackENetPacket(const Packet& packet)
+    {
+        return enet_packet_create(packet.buffer.data(), packet.size, ENET_PACKET_FLAG_UNSEQUENCED);
+    }
+
+    /** 
+     * This will destroy the packet that is passed
+     */
+    inline Packet SHINOBU_API UnpackENetPacket(_ENetPacket* packet)
+    {
+        Packet p;
+        p.size = packet->dataLength;
+        uint8_t* data = packet->data;
+        p.buffer = sh::Packet::Buffer(data, data + p.size);
+
+        bitsery::Deserializer<Packet::InputAdapter> des{ p.buffer.begin(), p.size };
+        des.object(p.id);
+
+        enet_packet_destroy(packet);
+
+        return p;
+    }
 }

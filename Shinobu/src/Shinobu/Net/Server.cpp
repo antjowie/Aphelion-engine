@@ -59,12 +59,12 @@ namespace sh
 
     void Server::Broadcast(const Packet& packet)
     {
-        enet_host_broadcast(m_socket, 0, sh::MakeENetPacket(packet));
+        enet_host_broadcast(m_socket, 0, sh::PackENetPacket(packet));
     }
 
     void Server::Submit(const Packet& packet, ENetPeer* connection)
     {
-        enet_peer_send(connection, 0, sh::MakeENetPacket(packet));
+        enet_peer_send(connection, 0, sh::PackENetPacket(packet));
     }
 
     void Server::Flush()
@@ -96,14 +96,10 @@ namespace sh
             break;
 
         case ENET_EVENT_TYPE_RECEIVE:
-            packet.size = event.packet->dataLength;
-            uint8_t* data = event.packet->data;
-            packet.buffer = sh::Packet::Buffer(data, data + packet.size);
+            packet = UnpackENetPacket(event.packet);
             packet.sender = event.peer;
 
             SH_CORE_TRACE("Server received a packet of size {}", packet.size);
-
-            enet_packet_destroy(event.packet);
             return true;
             break;
         }

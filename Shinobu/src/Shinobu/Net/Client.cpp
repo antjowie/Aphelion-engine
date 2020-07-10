@@ -138,7 +138,7 @@ namespace sh
 
     void Client::Submit(const Packet& packet)
     {
-        enet_peer_send(m_server,0,sh::MakeENetPacket(packet));
+        enet_peer_send(m_server,0,sh::PackENetPacket(packet));
     }
 
     void Client::Flush()
@@ -168,12 +168,9 @@ namespace sh
             return Poll(packet);
             break;
         case ENET_EVENT_TYPE_RECEIVE:
-            packet.size = event.packet->dataLength;
-            uint8_t* data = event.packet->data;
-            packet.buffer = sh::Packet::Buffer(data, data + packet.size);
-            packet.sender = event.peer; // Should always be server
+            packet = UnpackENetPacket(event.packet);
+            packet.sender = event.peer;
 
-            enet_packet_destroy(event.packet);
             return true;
             break;
         }
