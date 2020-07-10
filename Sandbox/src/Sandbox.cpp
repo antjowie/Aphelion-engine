@@ -214,6 +214,9 @@ public:
                 {
                 case entt::type_info<sh::ExampleData>::id():
                 {
+                    auto reg = sh::ECS::GetRegistry();
+
+
                     auto data = sh::Deserialize<sh::ExampleData>(p);
 
                     data.message = std::to_string(p.sender->address.host) + ": " + data.message;

@@ -43,6 +43,8 @@ namespace sh
     class ECS
     {
     public:
+        using Entity = entt::entity;
+
         /**
          * The registry stores entities and their components
          *
@@ -51,7 +53,15 @@ namespace sh
         class Registry
         {
         public:
-            entt::registry& Get();
+            // Expose underlying registry, these should not be used but I've added
+            // them for the time being so that I can abstract them later
+            inline entt::registry& Get() { return m_reg; }
+            inline const entt::registry& Get() const { return m_reg; }
+
+            /**
+             * Asserts if the hint entity can't be created
+             */
+            Entity Create(Entity hint);
 
         private:
             entt::registry m_reg;
@@ -106,6 +116,7 @@ namespace sh
         static void ClearSystems();
         static void UpdateSystems();
 
+        // Should be used for debugging purposes
         static const std::unordered_map<entt::id_type, CompData>& GetComponentData();
 
     private:
