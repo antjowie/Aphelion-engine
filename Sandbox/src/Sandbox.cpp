@@ -3,6 +3,18 @@
 #include <Shinobu/Net/Server.h>
 
 //#include <glm/gtc/matrix_transform.hpp>
+#include <entt/entt.hpp>
+
+struct Foo
+{
+    int x; 
+    int y;
+};
+
+struct Bar
+{
+    float val;
+};
 
 class ExampleLayer2D : public sh::Layer
 {
@@ -38,6 +50,21 @@ public:
         //    SetCurrentContext() (with the pointer you got from CreateContext) from each unique static/DLL boundary, and after each hot-reloading.
         //    In your debugger, add GImGui to your watch window and notice how its value changes depending on which location you are currently stepping into.
         //ImGui::SetCurrentContext(sh::ImGuiLayer::GetContext());
+        entt::registry reg;
+        auto e0 = reg.create();
+        
+        auto foo = reg.emplace<Foo>(e0);
+        foo.x = 10;
+        foo.y = 20;
+        auto bar = reg.emplace<Bar>(e0);
+        bar.val = 5.5f;
+
+        SH_INFO("--- ID INFO ---\nFoo id: {}\nBar id: {}", entt::type_info<Foo>::id(), entt::type_info<Bar>::id());
+        
+        reg.visit([](entt::id_type id)
+            {
+                SH_TRACE(id);
+            });
 
         tex = sh::Texture2D::Create("res/image.png");
 

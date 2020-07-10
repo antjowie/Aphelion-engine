@@ -166,9 +166,11 @@ endif()
 set(BUILD_SHARED_LIBS_OLD ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS "OFF" CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS "OFF" CACHE BOOL "")
+set(BUILD_TESTING "OFF" CACHE BOOL "")
 
 add_subdirectory(thirdParty/bitsery)
 add_subdirectory(thirdParty/enet)
+add_subdirectory(thirdParty/entt)
 add_subdirectory(thirdParty/Glad)
 add_subdirectory(thirdParty/glfw)
 add_subdirectory(thirdParty/glm)
@@ -181,6 +183,7 @@ set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD} CACHE BOOL "" FORCE)
 target_link_libraries(Shinobu PUBLIC 
     bitsery
     enet
+    EnTT
     Glad
     glfw
     glm

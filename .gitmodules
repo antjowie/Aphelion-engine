@@ -18,3 +18,6 @@
 [submodule "Shinobu/thirdParty/bitsery"]
 	path = Shinobu/thirdParty/bitsery
 	url = https://github.com/fraillt/bitsery
+[submodule "Shinobu/thirdParty/entt"]
+	path = Shinobu/thirdParty/entt
+	url = https://github.com/skypjack/entt
