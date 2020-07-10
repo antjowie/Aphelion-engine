@@ -12,12 +12,22 @@ struct Foo
 {
     int x; 
     int y;
+
+    template <typename S>
+    void serialize(S& s) {
+        s.value4b(x);
+        s.value4b(y);
+    }
 };
 
 struct Bar
 {
     float val;
 };
+template <typename S>
+void serialize(S& s, Bar& o) {
+    s.value4b(o.val);
+}
 
 void TestSystem(sh::ECS::Registry& reg)
 {
@@ -187,12 +197,46 @@ public:
         {
             while (m_server.Poll(p))
             {
-                auto data = sh::Deserialize<sh::ExampleData>(p);
-                SH_CORE_TRACE("Server received ({}): {}", p.id.value, data.message);
+                SH_CORE_TRACE("Server received type ({}): ", sh::ECS::GetComponentData().at(p.id).name);
+
+                /**
+                 * TODO:
+                 * This ugly centralized switch is something that I want to prevent.
+                 * To do that, I'll take some ideas from the Overwatch and Unity lecture that I've looked at
+                 * Essentially, I'm thinking of a system with 2 components. For example:
+                 * PredictTransform and Transform
+                 * Transform is authorative and is where the ECS will forward it's values to
+                 * while the client is free to modify the PredictTransform component. This
+                 * allows us to easily distinguish between the two. More importantly, it allows
+                 * the ECS to just update values directly instead of the user having to handle it
+                 */
+                switch (p.id)
+                {
+                case entt::type_info<sh::ExampleData>::id():
+                {
+                    auto data = sh::Deserialize<sh::ExampleData>(p);
+
+                    data.message = std::to_string(p.sender->address.host) + ": " + data.message;
+                    
+                    SH_CORE_TRACE("Server received ({}): {}", p.id.value, data.message);
+                    m_server.Broadcast(p);
+                }
+                break;
+
+                case entt::type_info<Foo>::id():
+                {
+                    auto data = sh::Deserialize<Foo>(p);
+                }
+                break;
+
+                case entt::type_info<Bar>::id():
+                {
+                    auto data = sh::Deserialize<Bar>(p);
+                }
+                break;
+                }
 
                 // You prob don't ever wanna broadcast the ip of a connected person
-                data.message = std::to_string(p.sender->address.host) + ": " + data.message;
-                m_server.Broadcast(p);
             }
             m_server.Flush();
         }
@@ -200,6 +244,8 @@ public:
         {
             while (m_client.Poll(p))
             {
+                SH_CORE_TRACE("Client received type ({}): ", sh::ECS::GetComponentData().at(p.id).name);
+
                 auto data = sh::Deserialize<sh::ExampleData>(p);
                 SH_CORE_TRACE("Client received ({}): {}", p.id.value, data.message);
             }
@@ -260,6 +306,25 @@ public:
                     SH_CORE_TRACE("Client send ({}): {}", p.id.value, data.message);
                     m_client.Submit(p);
                 }
+                if (ImGui::Button("Foo"))
+                {
+                    Foo data;
+                    //data.message = msg;
+                    auto id = entt::type_info<Foo>::id();
+                    auto p = sh::Serialize(data, id);
+                    SH_CORE_TRACE("Client send (Foo)");
+                    m_client.Submit(p);
+                }
+                if (ImGui::Button("Bar"))
+                {
+                    Bar data;
+                    //data.message = msg;
+                    auto id = entt::type_info<Bar>::id();
+                    auto p = sh::Serialize(data, id);
+                    SH_CORE_TRACE("Client send (Bar)");
+                    m_client.Submit(p);
+                }
+
             }
         }
         ImGui::End();
