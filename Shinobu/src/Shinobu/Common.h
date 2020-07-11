@@ -15,6 +15,8 @@
 #include "Shinobu/Core/Input/KeyCodes.h"
 #include "Shinobu/Core/Input/MouseCodes.h"
 
+#include "Shinobu/ECS/ECS.h"
+
 #include "Shinobu/Event/Event.h"
 #include "Shinobu/Event/KeyEvent.h"
 #include "Shinobu/Event/MouseEvent.h"

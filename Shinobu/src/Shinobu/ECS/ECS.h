@@ -61,6 +61,7 @@ namespace sh
             /**
              * Asserts if the hint entity can't be created
              */
+            Entity Create();
             Entity Create(Entity hint);
 
         private:
@@ -83,7 +84,9 @@ namespace sh
         static Registry& GetRegistry() { return m_reg; };
 
         /**
-         * Be sure to register components. This is needed for serializing component data
+         * Be sure to register components. 
+         * Registering components allows us to serialize the components and
+         * it allows us to store metadata such as the name of the component
          *
          * NOTE: Current implementation relies on entt type id. It is said that this is consistent across boundaries
          * (hopefully meaning that every machine allocates the same component ID). I have not however verified this.
@@ -106,11 +109,11 @@ namespace sh
          * T should be a callable 
          */
         template <typename T>
-        static void RegisterSystem(T t)
+        static void RegisterSystem(T&& t)
         {
             static_assert(std::is_invocable_v<T, Registry&>, 
                 "T should be callable, make sure operator() is overloaded with argument Registry");
-            m_systems.push_back(t);
+            m_systems.push_back(std::forward<T>(t));
         }
 
         static void ClearSystems();

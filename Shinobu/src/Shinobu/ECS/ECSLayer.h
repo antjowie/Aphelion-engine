@@ -11,6 +11,8 @@ namespace sh
      * 
      * It takes care of updating the ECS. For example, we want a different update frequency when we update the physics.
      * ECSLayer takes care of that
+     *
+     * The ECSLayer will also listen for packet events that may be submitted and feed them to the ECS
      */
     class SHINOBU_API ECSLayer : public Layer
     {

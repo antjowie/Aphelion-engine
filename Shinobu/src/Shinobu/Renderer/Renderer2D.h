@@ -15,16 +15,16 @@ namespace sh
             : Render2DData(pos, size, color, 0) {}
         Render2DData(const glm::vec2 & pos, const glm::vec2 & size, const glm::vec4 & color, float radians)
             : pos(pos), size(size), color(color), radians(radians) {}
-        Render2DData(const glm::vec2 & pos, const glm::vec2 & size, const std::shared_ptr<Texture> & texture, const glm::vec4 & tint = glm::vec4(1))
+        Render2DData(const glm::vec2 & pos, const glm::vec2 & size, const sh::TextureRef& texture, const glm::vec4& tint = glm::vec4(1))
             : Render2DData(pos, size, texture, 0, tint) {}
-        Render2DData(const glm::vec2 & pos, const glm::vec2 & size, const std::shared_ptr<Texture> & texture, float radians, const glm::vec4 & tint = glm::vec4(1))
+        Render2DData(const glm::vec2& pos, const glm::vec2& size, const sh::TextureRef& texture, float radians, const glm::vec4 & tint = glm::vec4(1))
             : pos(pos), size(size), texture(texture), radians(radians), color(tint) {}
 
-        glm::vec2 pos;
-        glm::vec2 size;
-        glm::vec4 color;
-        float radians;
-        std::shared_ptr<Texture> texture;
+        glm::vec2 pos = glm::vec2(0.f);
+        glm::vec2 size = glm::vec2(1.f);
+        glm::vec4 color = glm::vec4(1.f);
+        float radians = 0.f;
+        sh::TextureRef texture = nullptr;
     };
 
     /**

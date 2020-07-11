@@ -21,6 +21,14 @@ namespace sh
         virtual uint32_t GetHeight() const = 0;
 
         virtual void SetData(void* data, uint32_t size) = 0;
+
+        // Not sure if this function belongs here, since a path is not necessarily associated
+        // with a texture. The texture is just the wrapper around data that our render api uses.
+        // This should rather be inside of a resource manager class that maps paths to texture objects
+        //
+        // TODO: Create a resource manager class (for serialization purposes, right now I just store the path
+        // inside of the components)
+        //virtual const std::string& GetPath()
     };
 
     class SHINOBU_API Texture2D : public Texture

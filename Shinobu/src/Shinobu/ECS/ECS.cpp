@@ -6,6 +6,11 @@ namespace sh
     std::vector<ECS::SystemFunc> ECS::m_systems;
     ECS::Registry ECS::m_reg;
 
+    ECS::Entity ECS::Registry::Create()
+    {
+        return m_reg.create();
+    }
+
     ECS::Entity ECS::Registry::Create(Entity hint)
     {
         auto id = m_reg.create(hint);
@@ -16,6 +21,10 @@ namespace sh
         //
         // For example, a system that the Source engine uses is if the entity does not yet exist, 
         // create it. And only then. (I think)
+        //
+        // I HAVE A WAY BETTER SOLUTION!
+        // Create a network ID component which stores the network ID of the entity.
+        // This allows us to always refer to the same object
         SH_CORE_ASSERT(id == hint, "Could not recreate the hint ID");
         return id;
     }

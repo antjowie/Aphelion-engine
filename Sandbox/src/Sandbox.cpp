@@ -5,77 +5,8 @@
 #include <Shinobu/ECS/ECSLayer.h>
 
 //#include <glm/gtc/matrix_transform.hpp>
-#include <entt/entt.hpp>
-
-
-struct Foo
-{
-    int x; 
-    int y;
-
-    template <typename S>
-    void serialize(S& s) {
-        s.value4b(x);
-        s.value4b(y);
-    }
-};
-
-struct Bar
-{
-    float val;
-};
-template <typename S>
-void serialize(S& s, Bar& o) {
-    s.value4b(o.val);
-}
-
-void TestSystem(sh::ECS::Registry& reg)
-{
-    SH_TRACE("UPDATE dt: {}", sh::Time::dt);
-}
-
-/**
- * This system will propagate packets through the ECS
- * Although I might put it in its own layer and communicate 
- * them via events. I'm not too sure yet
- *
- * Honestly, systems should NOT contain state so it seems like the most obvious solution
- * Buuut, ECS layer should then also propogate events to the ECS and I don't know yet how it will do that
- */
-class NetworkSystem
-{
-public:
-    void operator()(sh::ECS::Registry& reg)
-    {
-        sh::Packet p;
-        if (m_server.IsHosting())
-        {
-            while (m_server.Poll(p))
-            {
-                auto data = sh::Deserialize<sh::ExampleData>(p);
-                SH_CORE_TRACE("Server received: {}", data.message);
-
-                // You prob don't ever wanna broadcast the ip of a connected person
-                data.message = std::to_string(p.sender->address.host) + ": " + data.message;
-                m_server.Broadcast(sh::Serialize(data));
-            }
-            m_server.Flush();
-        }
-        if (m_client.IsConnected())
-        {
-            while (m_client.Poll(p))
-            {
-                auto data = sh::Deserialize<sh::ExampleData>(p);
-                SH_CORE_TRACE("Client received: {}", data.message);
-            }
-            m_client.Flush();
-        }
-    }
-
-private:
-    sh::Server m_server;
-    sh::Client m_client;
-};
+#include "Component.h"
+#include "System.h"
 
 class ExampleLayer2D : public sh::Layer
 {
@@ -84,9 +15,6 @@ public:
         : sh::Layer("Example Layer") 
         , m_camera(16.f/9.f){}
 
-    std::shared_ptr<sh::Texture> tex;
-    float radians = 0.f;
-    float yPos = 0.f;
     sh::OrthographicCameraController m_camera;
 
     sh::Server m_server;
@@ -106,44 +34,23 @@ public:
 
     virtual void OnAttach() override 
     {
-        //sh::ECS::RegisterSystem(TestSystem);
-        sh::ECS::RegisterComponent<Foo>();
-        sh::ECS::RegisterComponent<Bar>();
-        sh::ECS::RegisterComponent<sh::ExampleData>();
+        sh::ECS::RegisterComponent<Transform>();
+        sh::ECS::RegisterComponent<Sprite>();
 
-        //const auto& compData = sh::ECS::GetComponentData();
-        //for(const auto & comp : compData)
-        //{
-        //    SH_TRACE("Component {} id: {}", comp.second.name, comp.first);
-        //}
+        // Can't register emtpy structs which makes sense cuz theres nothing to serialize
+        // Tho this also means there is no runtime information? maybe there is no info available?
+        //sh::ECS::RegisterComponent<Player>();
 
-        //sh::ECS::SystemFunc sys = TestSystem;
-        //sys(reg);
+        sh::ECS::RegisterSystem(InputSystem);
+        sh::ECS::RegisterSystem(DrawSystem(m_camera.GetCamera()));
 
-        //entt::registry reg;
-        //auto e0 = reg.create();
-        //
-        //auto foo = reg.emplace<Foo>(e0);
-        //foo.x = 10;
-        //foo.y = 20;
-        //auto bar = reg.emplace<Bar>(e0);
-        //bar.val = 5.5f;
+        // Temp: Create entity locally. Server should send this
+        auto& reg = sh::ECS::GetRegistry();
+        auto entity = reg.Create();
+        reg.Get().emplace<Transform>(entity, glm::vec2(0.f));
+        reg.Get().emplace<Sprite>(entity, "res/image.png", nullptr);
+        reg.Get().emplace<Player>(entity);
 
-        //SH_INFO("--- ID INFO ---\nFoo id: {}\nBar id: {}", entt::type_info<Foo>::id(), entt::type_info<Bar>::id());
-        //
-        //reg.visit([](entt::id_type id)
-        //    {
-        //        SH_TRACE(id);
-        //    });
-
-        // Test packet serializing
-        //sh::ExampleData data;
-        //data.message = "Hello world lol I'm packet";
-        //auto packet = sh::Serialize(data);
-        //auto newData = sh::Deserialize<sh::ExampleData>(packet);
-        //SH_CORE_TRACE(newData.message);
-
-        tex = sh::Texture2D::Create("res/image.png");
         // using ConnectCB = std::function<void(Server&, ENetPeer* connection)>;
         m_server.SetConnectCB([](sh::Server& m_server, ENetPeer* connection)
             {
@@ -214,9 +121,7 @@ public:
                 {
                 case entt::type_info<sh::ExampleData>::id():
                 {
-                    auto reg = sh::ECS::GetRegistry();
-
-
+                    //auto reg = sh::ECS::GetRegistry();
                     auto data = sh::Deserialize<sh::ExampleData>(p);
 
                     data.message = std::to_string(p.sender->address.host) + ": " + data.message;
@@ -254,33 +159,10 @@ public:
             }
             m_client.Flush();
         }
-
-
-        sh::Renderer2D::BeginScene(m_camera.GetCamera());
-        //// Draw a quad
-        //sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(0.f), glm::vec2(1.f), glm::vec4(1.f)));
-        //// Draw a rotated quad
-        //sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(1.f,0.1f), glm::vec2(1.f), glm::vec4(0.5f,1.f,1.f,1.f), radians));
-        //// Draw a textured quad
-        //sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(0.f,yPos), glm::vec2(3.f),tex));
-
-        sh::Renderer2D::Submit(sh::Render2DData(glm::vec2(0.f), glm::vec2(1.f), tex, radians, glm::vec4(0.5f, 1.f, 1.f, 1.f)));
-
-        sh::Renderer2D::EndScene();
     }
 
     virtual void OnGuiRender() override final
     {
-        if (!ImGui::Begin("Renderer 2D"))
-        {
-            // Early out if the window is collapsed, as an optimization.
-            ImGui::End();
-            return;
-        }
-        ImGui::SliderAngle("rotation", &radians);
-        ImGui::SliderFloat("yPos", &yPos,-10.f,10.f);
-        ImGui::End();
-        
         if (!ImGui::Begin("Network"))
         {
             // Early out if the window is collapsed, as an optimization.
