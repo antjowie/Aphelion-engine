@@ -8,6 +8,10 @@
 
 #include "enet/enet.h"
 
+// Net code is coupled to ECS
+// This is bad and should not be a thing
+#include "entt/core/type_info.hpp"
+
 //struct _ENetPacket;
 //struct _ENetPeer;
 
@@ -38,11 +42,12 @@ namespace sh
         struct ID 
         {
             ID& operator= (unsigned rhs) { value = rhs; return *this; }
-            operator unsigned() { return value; }
+            operator unsigned int() const { return value; }
             unsigned value; 
         }; 
 
         ID id;
+        ID entity; // TODO: Coupled to ECS, should probably be changed
         size_t size; // Set by ENet when received, used in deserializing
         _ENetPeer* sender = nullptr;
 
@@ -63,10 +68,14 @@ namespace sh
         //    Serializer<OutputAdapter> ser{ std::move(adapter) };
 
         //packet.id = 10;
-        packet.id = id;
+        // TODO: Uncouple from net code
+        // Coupled to net code
+        packet.id = entt::type_info<T>::id();
+        packet.entity = id;
 
         bitsery::Serializer<Packet::OutputAdapter> ser{ packet.buffer };
         ser.object(packet.id);
+        ser.object(packet.entity);
 
         ser.object(data);
         ser.adapter().flush();
@@ -85,7 +94,8 @@ namespace sh
 
         bitsery::Deserializer<Packet::InputAdapter> des{ packet.buffer.begin(), packet.size };
         des.object(packet.id);
-        
+        des.object(packet.entity);
+
         des.object(data);
 
         //same as serialization, but returns deserialization state as a pair
@@ -112,6 +122,7 @@ namespace sh
 
         bitsery::Deserializer<Packet::InputAdapter> des{ p.buffer.begin(), p.size };
         des.object(p.id);
+        des.object(p.entity);
 
         enet_packet_destroy(packet);
 

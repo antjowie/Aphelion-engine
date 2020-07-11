@@ -8,8 +8,13 @@
 #include <vector>
 #include <functional>
 
+// Coupled to packet. Gotta do something about this
+#include "Shinobu/Net/Packet.h"
+
 namespace sh
 {
+    using Entity = entt::entity;
+
     /**
      * A function to clone components from one registry to another
      */
@@ -37,40 +42,74 @@ namespace sh
     }
 
     /**
+     * The registry stores entities and their components
+     *
+     * TODO: Wrap entt instead of directly accessing it
+     */
+    class Registry
+    {
+    public:
+        // Expose underlying registry, these should not be used but I've added
+        // them for the time being so that I can abstract them later
+        inline entt::registry& Get() { return m_reg; }
+        inline const entt::registry& Get() const { return m_reg; }
+
+        /**
+         * Asserts if the hint entity can't be created
+         */
+        Entity Create();
+        Entity Create(Entity hint);
+
+    private:
+        entt::registry m_reg;
+    };
+
+    // ===============================
+    // Ugly code that couples the ECS to the netcode
+    // ===============================
+
+    /**
+     * Unpacks a packet
+     * TODO: This couples the ECS to our netcode. The ECS should not bother thinking about netcode
+     */
+    template<typename T>
+    void Unpack(Entity e, Packet& packet)
+    {
+        auto& reg = ECS::GetRegistry().Get();
+        if (!reg.has<T>(e)) reg.emplace<T>(e);
+        
+        reg.get<T>(e) = Deserialize<T>(packet);
+    }
+
+    // This is needed since the ID on the client does not always match with the server
+    // (spawning predicted entities, not everyone has the same entities)
+    // TODO: Move this into some kind of netcode interface since it couples the ECS for no reason
+    // I also think that the user should not be thinking about which id context they are referring to
+    // it should be handled by a server client layer. 
+    // But how would it know which components contain entity IDs? Since it has to convert them
+    // to server IDs. I don't know yet so for now the client is responsible for converting it themselves.
+    static std::unordered_map<sh::Entity, sh::Entity> netToLocal;
+    inline sh::Entity LocalIDToNet(Entity localID) {
+        for (auto e : netToLocal)
+            if (e.second == localID) return e.first;
+        SH_CORE_ERROR("Local ID {} can't be mapped to a network ID", localID);
+    }
+
+    // ================================
+
+    /**
      * The ECS is the gameplay system that this engine uses. 
      * It is globally accessible and updates by the gameplay layer
      */
     class ECS
     {
     public:
-        using Entity = entt::entity;
-
-        /**
-         * The registry stores entities and their components
-         *
-         * TODO: Wrap entt instead of directly accessing it
-         */
-        class Registry
-        {
-        public:
-            // Expose underlying registry, these should not be used but I've added
-            // them for the time being so that I can abstract them later
-            inline entt::registry& Get() { return m_reg; }
-            inline const entt::registry& Get() const { return m_reg; }
-
-            /**
-             * Asserts if the hint entity can't be created
-             */
-            Entity Create();
-            Entity Create(Entity hint);
-
-        private:
-            entt::registry m_reg;
-        };
-
         using CloneFunc = std::function<void(entt::registry& from, entt::registry& to)>;
-        using StampFunc = std::function<void
-        (const entt::registry& from, const entt::entity src, entt::registry& to, const entt::entity dst)>;
+        using StampFunc = std::function<void(
+                const entt::registry& from, const entt::entity src,
+                entt::registry& to, const entt::entity dst)>;
+        using UnpackFunc = std::function<void (Entity e, Packet& packet)>;
+
         using SystemFunc = std::function<void(Registry& reg)>;
 
         struct CompData
@@ -78,6 +117,7 @@ namespace sh
             std::string_view name;
             CloneFunc clone;
             StampFunc stamp;
+            UnpackFunc unpack;
         };
 
     public:
@@ -98,6 +138,7 @@ namespace sh
             SH_CORE_ASSERT(m_compData.count(id) == 0, "Component has already been registered");
             m_compData[id].clone = Clone<T>;
             m_compData[id].stamp = Stamp<T>;
+            m_compData[id].unpack = Unpack<T>;
             m_compData[id].name = entt::type_info<T>::name();
         }
 
@@ -127,5 +168,4 @@ namespace sh
         static std::vector<SystemFunc> m_systems;
         static Registry m_reg;
     };
-
 }

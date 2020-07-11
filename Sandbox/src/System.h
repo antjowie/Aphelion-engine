@@ -6,7 +6,27 @@
 #include <Shinobu/Renderer/Renderer2D.h>
 #include <Shinobu/Core/Input/Input.h>
 
-void InputSystem(sh::ECS::Registry& reg)
+void SpawnSystem(sh::Registry& reg)
+{
+    auto view = reg.Get().view<SpawnEntity>();
+    for (auto& e : view)
+    {
+        auto& c = view.get<SpawnEntity>(e);
+
+        switch (c.type)
+        {
+        case SpawnEntity::Type::Player:
+            SH_INFO("Spawned a player");
+            reg.Get().emplace_or_replace<Transform>(e) = c.t;
+            reg.Get().emplace_or_replace<Sprite>(e) = c.sprite;
+            break;
+        }
+
+    }
+    reg.Get().clear<SpawnEntity>();
+}
+
+void InputSystem(sh::Registry& reg)
 {
     auto view = reg.Get().view<Transform, Player>();
     for (auto& e : view)
@@ -26,7 +46,7 @@ class DrawSystem
 public:
     DrawSystem(sh::OrthographicCamera& ortho) : m_ortho(&ortho) {}
 
-    void operator() (sh::ECS::Registry& reg)
+    void operator() (sh::Registry& reg)
     {
         auto view = reg.Get().view<Transform, Sprite>();
 
@@ -77,7 +97,7 @@ private:
 class NetworkSystem
 {
 public:
-    void operator()(sh::ECS::Registry& reg)
+    void operator()(sh::Registry& reg)
     {
         sh::Packet p;
         if (m_server.IsHosting())
@@ -109,7 +129,7 @@ private:
     sh::Client m_client;
 };
 
-void TestSystem(sh::ECS::Registry& reg)
+void TestSystem(sh::Registry& reg)
 {
     SH_TRACE("UPDATE dt: {}", sh::Time::dt);
 }

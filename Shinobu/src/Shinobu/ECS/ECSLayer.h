@@ -9,8 +9,8 @@ namespace sh
      * The ECS layer updates the gameplay system
      * The client can hook into the gameplay system to define cusom behavior
      * 
-     * It takes care of updating the ECS. For example, we want a different update frequency when we update the physics.
-     * ECSLayer takes care of that
+     * It takes care of updating the ECS. For example, we want a different update 
+     * frequency when we update the physics. ECSLayer takes care of that
      *
      * The ECSLayer will also listen for packet events that may be submitted and feed them to the ECS
      */

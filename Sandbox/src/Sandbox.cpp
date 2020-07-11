@@ -34,31 +34,66 @@ public:
 
     virtual void OnAttach() override 
     {
+        sh::ECS::RegisterComponent<Player>();
         sh::ECS::RegisterComponent<Transform>();
         sh::ECS::RegisterComponent<Sprite>();
-
+        sh::ECS::RegisterComponent<SpawnEntity>();
+        
         // Can't register emtpy structs which makes sense cuz theres nothing to serialize
         // Tho this also means there is no runtime information? maybe there is no info available?
         //sh::ECS::RegisterComponent<Player>();
 
+        sh::ECS::RegisterSystem(SpawnSystem);
         sh::ECS::RegisterSystem(InputSystem);
         sh::ECS::RegisterSystem(DrawSystem(m_camera.GetCamera()));
 
         // Temp: Create entity locally. Server should send this
-        auto& reg = sh::ECS::GetRegistry();
-        auto entity = reg.Create();
-        reg.Get().emplace<Transform>(entity, glm::vec2(0.f));
-        reg.Get().emplace<Sprite>(entity, "res/image.png", nullptr);
-        reg.Get().emplace<Player>(entity);
+        //auto& reg = sh::ECS::GetRegistry();
+        //auto entity = reg.Create();
+        //reg.Get().emplace<Transform>(entity, glm::vec2(0.f));
+        //reg.Get().emplace<Sprite>(entity, "res/image.png", nullptr);
+        //reg.Get().emplace<Player>(entity);
 
         // using ConnectCB = std::function<void(Server&, ENetPeer* connection)>;
-        m_server.SetConnectCB([](sh::Server& m_server, ENetPeer* connection)
+        m_server.SetConnectCB([](sh::Server& server, ENetPeer* connection)
             {
                 char ip[64];
                 enet_address_get_host_ip(&connection->address, ip, 64);
                 SH_INFO("Server opened connection with {}", ip);
+
+                // Create the new player
+                auto& reg = sh::ECS::GetRegistry();
+                auto entity = reg.Create();
+                reg.Get().emplace<Transform>(entity, glm::vec2(0.f));
+                auto& sprite = reg.Get().emplace<Sprite>(entity);
+                sprite.image = "res/image.png";
+                sprite.LoadTexture();
+
+                // Submit the new player
+                server.Submit(sh::Serialize(Player(), unsigned(entity)), connection);
+
+                // Send all existing users to that player
+                auto view = reg.Get().view<Transform, Sprite>();
+                for (auto e : view)
+                {
+                    auto& t = reg.Get().get<Transform>(e);
+                    auto& s = reg.Get().get<Sprite>(e);
+
+                    SpawnEntity spawn;
+                    spawn.type = SpawnEntity::Player;
+                    spawn.t = t;
+                    spawn.sprite = s;
+                    server.Submit(sh::Serialize(spawn, unsigned(e)), connection);
+                }
+
+                // Broadcast new player
+                SpawnEntity e;
+                e.type = SpawnEntity::Player;
+                e.t.pos = glm::vec2(0.f);
+                e.sprite.image = "res/image.png";
+                server.Broadcast(sh::Serialize(e, unsigned(entity)));
             });
-        m_server.SetDisconnectCB([](sh::Server& m_server, ENetPeer* connection)
+        m_server.SetDisconnectCB([](sh::Server& server, ENetPeer* connection)
             {
                 char ip[64];
                 enet_address_get_host_ip(&connection->address, ip, 64);
@@ -102,9 +137,30 @@ public:
         sh::Packet p;
         if (m_server.IsHosting())
         {
+            auto& reg = sh::ECS::GetRegistry();
+         
             while (m_server.Poll(p))
             {
-                SH_CORE_TRACE("Server received type ({}): ", sh::ECS::GetComponentData().at(p.id).name);
+                // TODO: Normally you would handle the input here but for now no verifiction
+                // TODO: If the client is hosting the server as well they will both interact with one
+                // world since the ECS is static. This must be refactored because otherwise
+                // the client will render everything on the server view
+                // which in our game (minecraft clone) should not be the case
+                
+
+                // Get the right entity and check if server entity exists in view
+                // Not sure why it has to be of this type, should just be a uint32_t (at the time of writing this)
+                // In server case, netID is already the correct ID
+                auto netID = sh::Entity(p.entity.value);
+                
+                SH_TRACE("Client received type ({}) for entity {}",
+                    sh::ECS::GetComponentData().at(p.id).name,
+                    netID);
+
+                // TODO: Add an interface for this
+                sh::ECS::GetComponentData().at(p.id).unpack(netID, p);
+
+                continue;
 
                 /**
                  * TODO:
@@ -124,9 +180,10 @@ public:
                     //auto reg = sh::ECS::GetRegistry();
                     auto data = sh::Deserialize<sh::ExampleData>(p);
 
+                    // You prob don't ever wanna broadcast the ip of a connected person
                     data.message = std::to_string(p.sender->address.host) + ": " + data.message;
                     
-                    SH_CORE_TRACE("Server received ({}): {}", p.id.value, data.message);
+                    SH_TRACE("Server received ({}): {}", p.id.value, data.message);
                     m_server.Broadcast(p);
                 }
                 break;
@@ -144,19 +201,48 @@ public:
                 break;
                 }
 
-                // You prob don't ever wanna broadcast the ip of a connected person
             }
+
+            // Broadcast all the positions that the server has
+            // TEMP: Send all player pos, this should prob happen in a system
+            auto view = reg.Get().view<Transform>();
+            for (auto e : view)
+            {
+                auto t = reg.Get().get<Transform>(e);
+                m_server.Broadcast(sh::Serialize(t, (unsigned)e));
+            }
+
             m_server.Flush();
         }
         if (m_client.IsConnected())
         {
+            auto& reg = sh::ECS::GetRegistry();
             while (m_client.Poll(p))
             {
-                SH_CORE_TRACE("Client received type ({}): ", sh::ECS::GetComponentData().at(p.id).name);
+                // Get the right entity and check if server entity exists in view
+                // Not sure why it has to be of this type, should just be a uint32_t (at the time of writing this)
+                auto netID = sh::Entity(p.entity.value);
+                                
+                auto match = sh::netToLocal.find(netID);
+                if (match == sh::netToLocal.end()) { sh::netToLocal[netID] = reg.Create(); }
 
-                auto data = sh::Deserialize<sh::ExampleData>(p);
-                SH_CORE_TRACE("Client received ({}): {}", p.id.value, data.message);
+                sh::Entity local = sh::netToLocal[netID];
+                SH_TRACE("Client received type ({}) for entity (local: {} net: {})", 
+                    sh::ECS::GetComponentData().at(p.id).name,
+                    local,netID);
+
+                // TODO: Add an interface for this
+                sh::ECS::GetComponentData().at(p.id).unpack(local, p);
             }
+
+            // TEMP: Send owned player pos
+            auto view = reg.Get().view<Transform, Player>();
+            for (auto e : view)
+            {
+                auto t = reg.Get().get<Transform>(e);
+                m_client.Submit(sh::Serialize(t,(unsigned)sh::LocalIDToNet(e)));
+            }
+
             m_client.Flush();
         }
     }
@@ -188,7 +274,7 @@ public:
                     sh::ExampleData data;
                     data.message = msg;
                     auto p = sh::Serialize(data, entt::type_info<sh::ExampleData>::id());
-                    SH_CORE_TRACE("Client send ({}): {}", p.id.value, data.message);
+                    SH_TRACE("Client send ({}): {}", p.id.value, data.message);
                     m_client.Submit(p);
                 }
                 if (ImGui::Button("Foo"))
@@ -197,7 +283,7 @@ public:
                     //data.message = msg;
                     auto id = entt::type_info<Foo>::id();
                     auto p = sh::Serialize(data, id);
-                    SH_CORE_TRACE("Client send (Foo)");
+                    SH_TRACE("Client send (Foo)");
                     m_client.Submit(p);
                 }
                 if (ImGui::Button("Bar"))
@@ -206,7 +292,7 @@ public:
                     //data.message = msg;
                     auto id = entt::type_info<Bar>::id();
                     auto p = sh::Serialize(data, id);
-                    SH_CORE_TRACE("Client send (Bar)");
+                    SH_TRACE("Client send (Bar)");
                     m_client.Submit(p);
                 }
 

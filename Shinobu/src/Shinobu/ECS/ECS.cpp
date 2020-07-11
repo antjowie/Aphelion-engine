@@ -4,14 +4,14 @@ namespace sh
 {
     std::unordered_map<entt::id_type, ECS::CompData> ECS::m_compData;
     std::vector<ECS::SystemFunc> ECS::m_systems;
-    ECS::Registry ECS::m_reg;
+    Registry ECS::m_reg;
 
-    ECS::Entity ECS::Registry::Create()
+    Entity Registry::Create()
     {
         return m_reg.create();
     }
 
-    ECS::Entity ECS::Registry::Create(Entity hint)
+    Entity Registry::Create(Entity hint)
     {
         auto id = m_reg.create(hint);
         // I've added this assert since there may be an issue when we predict new entities
