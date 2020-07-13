@@ -9,11 +9,14 @@
 #include <functional>
 
 // Coupled to packet. Gotta do something about this
+// Or should I? Is there any way to get the template argument during
+// runtime?
 #include "Shinobu/Net/Packet.h"
 
 namespace sh
 {
     using Entity = entt::entity;
+    class Registry;
 
     /**
      * A function to clone components from one registry to another
@@ -41,29 +44,6 @@ namespace sh
         to.emplace_or_replace<T>(dst, from.get<T>(src));
     }
 
-    /**
-     * The registry stores entities and their components
-     *
-     * TODO: Wrap entt instead of directly accessing it
-     */
-    class Registry
-    {
-    public:
-        // Expose underlying registry, these should not be used but I've added
-        // them for the time being so that I can abstract them later
-        inline entt::registry& Get() { return m_reg; }
-        inline const entt::registry& Get() const { return m_reg; }
-
-        /**
-         * Asserts if the hint entity can't be created
-         */
-        Entity Create();
-        Entity Create(Entity hint);
-
-    private:
-        entt::registry m_reg;
-    };
-
     // ===============================
     // Ugly code that couples the ECS to the netcode
     // ===============================
@@ -73,12 +53,12 @@ namespace sh
      * TODO: This couples the ECS to our netcode. The ECS should not bother thinking about netcode
      */
     template<typename T>
-    void Unpack(Entity e, Packet& packet)
+    void Unpack(Registry& reg, Entity e, Packet& packet)
     {
-        auto& reg = ECS::GetRegistry().Get();
-        if (!reg.has<T>(e)) reg.emplace<T>(e);
-        
-        reg.get<T>(e) = Deserialize<T>(packet);
+        auto& r = reg.Get();
+        if (!r.has<T>(e)) r.emplace<T>(e);
+
+        r.get<T>(e) = Deserialize<T>(packet);
     }
 
     // This is needed since the ID on the client does not always match with the server
@@ -95,20 +75,20 @@ namespace sh
         SH_CORE_ERROR("Local ID {} can't be mapped to a network ID", localID);
     }
 
-    // ================================
-
     /**
-     * The ECS is the gameplay system that this engine uses. 
-     * It is globally accessible and updates by the gameplay layer
+     * The registry stores entities and their components
+     *
+     * TODO: Wrap entt instead of directly accessing it
      */
-    class ECS
+    class Registry
     {
     public:
+
         using CloneFunc = std::function<void(entt::registry& from, entt::registry& to)>;
         using StampFunc = std::function<void(
-                const entt::registry& from, const entt::entity src,
-                entt::registry& to, const entt::entity dst)>;
-        using UnpackFunc = std::function<void (Entity e, Packet& packet)>;
+            const entt::registry& from, const entt::entity src,
+            entt::registry& to, const entt::entity dst)>;
+        using UnpackFunc = std::function<void(Registry& reg, Entity e, Packet& packet)>;
 
         using SystemFunc = std::function<void(Registry& reg)>;
 
@@ -120,11 +100,23 @@ namespace sh
             UnpackFunc unpack;
         };
 
+
     public:
-        static Registry& GetRegistry() { return m_reg; };
+        // Expose underlying registry, these should not be used but I've added
+        // them for the time being so that I can abstract them later
+        inline entt::registry& Get() { return m_reg; }
+        inline const entt::registry& Get() const { return m_reg; }
 
         /**
-         * Be sure to register components. 
+         * Asserts if the hint entity can't be created
+         */
+        Entity Create();
+        Entity Create(Entity hint);
+
+        //void Unpack();
+        
+        /**
+         * Be sure to register components.
          * Registering components allows us to serialize the components and
          * it allows us to store metadata such as the name of the component
          *
@@ -143,29 +135,32 @@ namespace sh
         }
 
         /**
-         * You can register systems here so you don't have to update them yourself. 
+         * You can register systems here so you don't have to update them yourself.
          * Of course, nothing is stopping you from doing so. But the ECS will in the future
          * parallize read only systems.
          *
-         * T should be a callable 
+         * T should be a callable
          */
         template <typename T>
-        static void RegisterSystem(T&& t)
+        void RegisterSystem(T&& t)
         {
-            static_assert(std::is_invocable_v<T, Registry&>, 
-                "T should be callable, make sure operator() is overloaded with argument Registry");
+            static_assert(std::is_invocable_v<T, Registry&>,
+                "T should be callable, make sure operator() is overloaded with argument Registry&");
             m_systems.push_back(std::forward<T>(t));
         }
 
-        static void ClearSystems();
-        static void UpdateSystems();
+        void ClearSystems();
+        void UpdateSystems();
 
+#ifdef SH_DEBUG
         // Should be used for debugging purposes
-        static const std::unordered_map<entt::id_type, CompData>& GetComponentData();
+        const std::unordered_map<entt::id_type, CompData>& GetComponentData() const { return m_compData; }
+#endif
 
     private:
         static std::unordered_map<entt::id_type, CompData> m_compData;
-        static std::vector<SystemFunc> m_systems;
-        static Registry m_reg;
+        std::vector<SystemFunc> m_systems;
+        
+        entt::registry m_reg;
     };
 }

@@ -17,6 +17,8 @@ namespace sh
     class SHINOBU_API ECSLayer : public Layer
     {
     public:
+        //ECS m_ecs;
+
         //ECSLayer();
         //void Begin();
         //void End();
@@ -26,7 +28,7 @@ namespace sh
         //virtual void OnEvent(Event& event) override final;
         virtual void OnUpdate(Timestep dt) override final
         {
-            ECS::UpdateSystems();
+            //ECS::UpdateSystems();
         }
         //virtual void OnGuiRender() override final;
     };

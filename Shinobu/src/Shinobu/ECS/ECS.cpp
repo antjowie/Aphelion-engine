@@ -2,10 +2,8 @@
 
 namespace sh
 {
-    std::unordered_map<entt::id_type, ECS::CompData> ECS::m_compData;
-    std::vector<ECS::SystemFunc> ECS::m_systems;
-    Registry ECS::m_reg;
-
+    std::unordered_map<entt::id_type, Registry::CompData> Registry::m_compData;
+    
     Entity Registry::Create()
     {
         return m_reg.create();
@@ -29,19 +27,14 @@ namespace sh
         return id;
     }
     
-    void ECS::ClearSystems()
+    void Registry::ClearSystems()
     {
         m_systems.clear();
     }
 
-    void ECS::UpdateSystems()
+    void Registry::UpdateSystems()
     {
         for (auto& system : m_systems)
-            system(m_reg);
-    }
-
-    const std::unordered_map<entt::id_type, ECS::CompData>& ECS::GetComponentData()
-    {
-        return m_compData;
+            system(*this);
     }
 }
