@@ -10,6 +10,7 @@ namespace sh
         , m_socket(enet_host_create(nullptr, 1, 1, 0, 0))
         , m_server(nullptr)
     {
+        cancelConnecting = false;
         if (m_socket == nullptr)
         {
             SH_CORE_ERROR("An error occurred while trying to create an ENet client host");
@@ -18,7 +19,8 @@ namespace sh
 
     Client::~Client()
     {
-        if(IsConnected()) Disconnect();
+        // TODO: We don't wait for ack, should publish an event so that main game knows
+        if(IsConnected()) Disconnect(0).wait();
         cancelConnecting = true;
         if(m_connectFuture.valid()) m_connectFuture.wait();
 
@@ -124,6 +126,7 @@ namespace sh
                         else if (event.type == ENET_EVENT_TYPE_DISCONNECT)
                         {
                             SH_CORE_TRACE("Gracefully disconnected from server");
+                            enet_peer_reset(m_server);
                             return;
                         }
                     }

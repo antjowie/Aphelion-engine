@@ -22,6 +22,7 @@ namespace sh
     class SHINOBU_API LayerStack
     {
     public:
+        LayerStack();
         ~LayerStack();
 
         /**

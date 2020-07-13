@@ -4,6 +4,11 @@
 
 namespace sh
 {
+    LayerStack::LayerStack()
+    {
+        m_layers.reserve(6);
+    }
+    
     LayerStack::~LayerStack()
     {
         Clear();
@@ -11,17 +16,19 @@ namespace sh
 
     void LayerStack::PushLayer(Layer* layer)
     {
+        SH_CORE_TRACE("Pushed layer {0}. Current layer count ({1})", layer->GetName(), m_layerIndex);
         m_layers.emplace(m_layers.begin() + m_layerIndex, layer);
         layer->OnAttach();
         m_layerIndex++;
-        SH_CORE_TRACE("Pushed layer {0}. Current layer count ({1})", layer->GetName(), m_layerIndex);
+        SH_CORE_ASSERT(m_layers.size() <= 6, "Can't push more than 6 layers. Otherwise the vector resizes");
     }
 
     void LayerStack::PushOverlay(Layer* overlay)
     {
+        SH_CORE_TRACE("Pushed overlay {0}. Current overlay count ({1})", overlay->GetName(), m_layers.size() - m_layerIndex);
         m_layers.emplace_back(overlay);
         overlay->OnAttach();
-        SH_CORE_TRACE("Pushed overlay {0}. Current overlay count ({1})", overlay->GetName(), m_layers.size() - m_layerIndex);
+        SH_CORE_ASSERT(m_layers.size() <= 6, "Can't push more than 6 layers. Otherwise the vector resizes");
     }
 
     void LayerStack::PopLayer(Layer* layer)

@@ -108,6 +108,7 @@ namespace sh
     inline _ENetPacket* SHINOBU_API PackENetPacket(const Packet& packet)
     {
         return enet_packet_create(packet.buffer.data(), packet.size, ENET_PACKET_FLAG_UNSEQUENCED);
+        //return enet_packet_create(packet.buffer.data(), packet.size, ENET_PACKET_FLAG_RELIABLE);
     }
 
     /** 
