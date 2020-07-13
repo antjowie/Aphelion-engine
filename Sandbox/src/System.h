@@ -2,7 +2,7 @@
 
 #include "Component.h"
 
-#include <Shinobu/ECS/ECS.h>
+#include <Shinobu/ECS/Registry.h>
 #include <Shinobu/Renderer/Renderer2D.h>
 #include <Shinobu/Core/Input/Input.h>
 

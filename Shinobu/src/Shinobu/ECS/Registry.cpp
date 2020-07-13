@@ -1,4 +1,4 @@
-#include "Shinobu/ECS/ECS.h"
+#include "Shinobu/ECS/Registry.h"
 
 namespace sh
 {

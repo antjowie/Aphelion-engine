@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Shinobu/Renderer/Texture.h>
-#include <SHinobu/ECS/ECS.h>
+#include <Shinobu/ECS/Registry.h>
 #include <glm/vec2.hpp>
 #include <string>
 

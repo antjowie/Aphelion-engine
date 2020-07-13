@@ -18,6 +18,7 @@ add_library(Shinobu
     src/Shinobu/Core/Log.h
     src/Shinobu/Core/Log.cpp
     src/Shinobu/Core/Time.h
+    src/Shinobu/Core/Time.cpp
     src/Shinobu/Core/Transform.h
     src/Shinobu/Core/Transform.cpp
     src/Shinobu/Core/Window.h
@@ -33,9 +34,8 @@ add_library(Shinobu
     src/Shinobu/Event/KeyEvent.h
     src/Shinobu/Event/MouseEvent.h
     
-    src/Shinobu/ECS/ECS.h
-    src/Shinobu/ECS/ECS.cpp
-    src/Shinobu/ECS/ECSLayer.h
+    src/Shinobu/ECS/Registry.h
+    src/Shinobu/ECS/Registry.cpp
 
     src/Shinobu/ImGui/ImGuiBuild.cpp
     src/Shinobu/ImGui/ImGuiLayer.h
@@ -92,7 +92,7 @@ add_library(Shinobu
     src/Platform/OpenGL/OpenGLVertexArray.h
     src/Platform/OpenGL/OpenGLVertexArray.cpp
     src/Platform/OpenGL/OpenGLVertexBuffer.h
-    src/Platform/OpenGL/OpenGLVertexBuffer.cpp "src/Shinobu/Core/Time.cpp")
+    src/Platform/OpenGL/OpenGLVertexBuffer.cpp)
 
 
 target_precompile_headers(Shinobu 

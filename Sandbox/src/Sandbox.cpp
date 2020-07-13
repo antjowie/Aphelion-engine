@@ -2,7 +2,7 @@
 #include <Shinobu/Net/Client.h>
 #include <Shinobu/Net/Server.h>
 
-#include <Shinobu/ECS/ECSLayer.h>
+#include <Shinobu/ECS/Registry.h>
 
 //#include <glm/gtc/matrix_transform.hpp>
 #include "Component.h"
@@ -481,7 +481,7 @@ public:
 std::unique_ptr<sh::Application> sh::CreateApplication()
 {
     auto app = std::make_unique<sh::Application>();
-    app->GetLayerStack().PushLayer(new ECSLayer);
+    //app->GetLayerStack().PushLayer(new ECSLayer);
     app->GetLayerStack().PushLayer(new ExampleLayer2D);
 
     return app;
