@@ -49,8 +49,7 @@ public:
         if (!m_client.IsConnected()) return;
 
         m_camera.OnUpdate(ts);
-        m_reg.UpdateSystems();
-
+        
         // Handle packets
         sh::Packet p;
         auto& reg = m_reg;
@@ -72,6 +71,9 @@ public:
             m_reg.GetComponentData().at(p.id).unpack(m_reg, local, p);
         }
 
+        // Update user
+        m_reg.UpdateSystems();
+        
         // TEMP: Send owned player pos
         auto view = reg.Get().view<Transform, Player>();
         for (auto e : view)
@@ -79,7 +81,6 @@ public:
             auto t = reg.Get().get<Transform>(e);
             m_client.Submit(sh::Serialize(t, (unsigned)sh::LocalIDToNet(e)));
         }
-
         // Flush every second
         m_client.Flush();
         //static sh::Timer time;
@@ -165,45 +166,43 @@ public:
         if (!m_server.IsHosting()) return;
 
         m_camera.OnUpdate(ts);
+
+        auto& reg = m_reg;
+     
+        sh::Packet p;
+        while (m_server.Poll(p))
+        {
+            // TODO: Normally you would handle the input here but for now no verifiction
+            // TODO: If the client is hosting the server as well they will both interact with one
+            // world since the ECS is static. This must be refactored because otherwise
+            // the client will render everything on the server view
+            // which in our game (minecraft clone) should not be the case
+            
+            // Get the right entity and check if server entity exists in view
+            // Not sure why it has to be of this type, should just be a uint32_t (at the time of writing this)
+            // In server case, netID is already the correct ID
+            auto netID = sh::Entity(p.entity.value);
+            
+            SH_TRACE("Server received type ({}) for entity {}",
+                m_reg.GetComponentData().at(p.id).name,
+                netID);
+
+            // TODO: Add an interface for this
+            m_reg.GetComponentData().at(p.id).unpack(m_reg, netID, p);
+        }
+
         m_reg.UpdateSystems();
 
-        if (m_server.IsHosting())
+        // Broadcast all the positions that the server has
+        // TEMP: Send all player pos, this should prob happen in a system
+        auto view = reg.Get().view<Transform>();
+        for (auto e : view)
         {
-            auto& reg = m_reg;
-         
-            sh::Packet p;
-            while (m_server.Poll(p))
-            {
-                // TODO: Normally you would handle the input here but for now no verifiction
-                // TODO: If the client is hosting the server as well they will both interact with one
-                // world since the ECS is static. This must be refactored because otherwise
-                // the client will render everything on the server view
-                // which in our game (minecraft clone) should not be the case
-                
-                // Get the right entity and check if server entity exists in view
-                // Not sure why it has to be of this type, should just be a uint32_t (at the time of writing this)
-                // In server case, netID is already the correct ID
-                auto netID = sh::Entity(p.entity.value);
-                
-                SH_TRACE("Server received type ({}) for entity {}",
-                    m_reg.GetComponentData().at(p.id).name,
-                    netID);
-
-                // TODO: Add an interface for this
-                m_reg.GetComponentData().at(p.id).unpack(m_reg, netID, p);
-            }
-
-            // Broadcast all the positions that the server has
-            // TEMP: Send all player pos, this should prob happen in a system
-            auto view = reg.Get().view<Transform>();
-            for (auto e : view)
-            {
-                auto& t = reg.Get().get<Transform>(e);
-                m_server.Broadcast(sh::Serialize(t, (unsigned)e));
-            }
-
-            m_server.Flush();
+            auto& t = reg.Get().get<Transform>(e);
+            m_server.Broadcast(sh::Serialize(t, (unsigned)e));
         }
+
+        m_server.Flush();
     }
 };
 
