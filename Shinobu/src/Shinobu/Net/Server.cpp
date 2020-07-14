@@ -23,6 +23,7 @@ namespace sh
     {
         ENetAddress address;
         enet_address_set_host(&address, "localhost");
+        address.host = ENET_HOST_ANY;
         address.port = 25565;
 
         m_socket = enet_host_create(&address, 32, 1, 0, 0);
@@ -33,7 +34,10 @@ namespace sh
             return false;
         }
 
-        SH_CORE_INFO("Hosting! Listening on {0}:{1}", address.host, port);
+        char hostIP[128];
+        enet_address_get_host_ip(&address, hostIP, 128);
+
+        SH_CORE_INFO("Hosting! Listening on {0}:{1}", hostIP, port);
         return true;
     }
 
@@ -99,7 +103,7 @@ namespace sh
             packet = UnpackENetPacket(event.packet);
             packet.sender = event.peer;
 
-            SH_CORE_TRACE("Server received a packet of size {}", packet.size);
+            //SH_CORE_TRACE("Server received a packet of size {}", packet.size);
             return true;
             break;
         }

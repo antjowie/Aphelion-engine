@@ -27,6 +27,12 @@ namespace sh
         return id;
     }
     
+    void Registry::HandlePacket(Entity entity, Packet& packet)
+    {
+        //m_compData[compID].unpack(m_reg, entity, packet);
+        m_compData.at(packet.id).unpack(*this, entity, packet);
+    }
+
     void Registry::ClearSystems()
     {
         m_systems.clear();

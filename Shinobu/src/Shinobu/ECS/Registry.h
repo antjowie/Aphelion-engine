@@ -113,7 +113,7 @@ namespace sh
         Entity Create();
         Entity Create(Entity hint);
 
-        //void Unpack();
+        void HandlePacket(Entity entity, Packet& packet);
         
         /**
          * Be sure to register components.

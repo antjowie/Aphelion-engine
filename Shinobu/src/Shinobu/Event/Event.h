@@ -10,10 +10,21 @@ namespace sh
     enum class EventType
     {
         None = 0,
+        // Window events
         WindowClose, WindowResize,
+
+        // Input events
         KeyPressed, KeyReleased, KeyTyped,
         MouseButtonPressed, MouseButtonReleased, 
-        MouseMoved, MouseScrolled
+        MouseMoved, MouseScrolled,
+
+        // Net event
+        ClientConnectRequest, ClientConnectResponse,
+        ClientDisconnectRequest, ClientDisconnectResponse, 
+        ClientSendPacket, ClientReceivePacket,
+        ServerHostRequest, ServerHostResponse,
+        ServerDisconnectRequest, ServerDisconnectResponse,
+        ServerSendPacket, ServerReceivePacket,
     };
 
     enum EventCategory
@@ -23,7 +34,8 @@ namespace sh
         EventCategoryInput          = Bit(1), // Input are related to the way user interacts
         EventCategoryKeyboard       = Bit(2), 
         EventCategoryMouse          = Bit(3),
-        EventCategoryMouseButton    = Bit(4)
+        EventCategoryMouseButton    = Bit(4),
+        EventCategoryNet            = Bit(5),
     };
 
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return type; } \

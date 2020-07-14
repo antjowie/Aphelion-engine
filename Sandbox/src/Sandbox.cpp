@@ -30,7 +30,7 @@ public:
         m_reg.RegisterSystem(SpawnSystem);
         m_reg.RegisterSystem(InputSystem);
         m_reg.RegisterSystem(DrawSystem(m_camera.GetCamera()));
-        m_client.Connect("localhost", 25565);
+        m_client.Connect("127.0.0.1", 25565);
     }
 
     virtual void OnEvent(sh::Event& event) override
@@ -63,12 +63,11 @@ public:
             if (match == sh::netToLocal.end()) { sh::netToLocal[netID] = reg.Create(); }
 
             sh::Entity local = sh::netToLocal[netID];
-            SH_TRACE("Client received type ({}) for entity (local: {} net: {})", 
-                m_reg.GetComponentData().at(p.id).name,
-                local,netID);
+            //SH_TRACE("Client received type ({}) for entity (local: {} net: {})", 
+            //    m_reg.GetComponentData().at(p.id).name,
+            //    local,netID);
 
-            // TODO: Add an interface for this
-            m_reg.GetComponentData().at(p.id).unpack(m_reg, local, p);
+            m_reg.HandlePacket(netID, p);
         }
 
         // Update user
@@ -183,12 +182,12 @@ public:
             // In server case, netID is already the correct ID
             auto netID = sh::Entity(p.entity.value);
             
-            SH_TRACE("Server received type ({}) for entity {}",
-                m_reg.GetComponentData().at(p.id).name,
-                netID);
+            //SH_TRACE("Server received type ({}) for entity {}",
+            //    m_reg.GetComponentData().at(p.id).name,
+            //    netID);
 
-            // TODO: Add an interface for this
-            m_reg.GetComponentData().at(p.id).unpack(m_reg, netID, p);
+            m_reg.HandlePacket(netID, p);
+            //m_reg.GetComponentData().at(p.id).unpack(m_reg, netID, p);
         }
 
         m_reg.UpdateSystems();

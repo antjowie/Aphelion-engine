@@ -51,8 +51,13 @@ namespace sh
 
                 ENetAddress address;
                 ENetEvent event;
-                enet_address_set_host(&address, host.c_str());
                 address.port = port;
+                SH_CORE_VERIFY(
+                    enet_address_set_host_ip(&address, host.c_str()) == 0,
+                    "Failed to parse address from text ip");
+
+                char serverIP[128];
+                enet_address_get_host_ip(&address, serverIP, 128);
 
                 m_server = enet_host_connect(m_socket, &address, 1, 0);
                 if (m_server == nullptr)
@@ -60,22 +65,22 @@ namespace sh
                     SH_CORE_ERROR("No available peers for initiating an ENet connection, increase host peer count");
                     return false;
                 }
-                
-                SH_CORE_TRACE("Attempting connection with {0}:{1}", address.host, port);
+
+                SH_CORE_TRACE("Attempting connection with {0}:{1}", serverIP, port);
                 sh::Timer timer;
-                while (timer.Total().Seconds() < timeout.MilliSeconds() && !cancelConnecting)
+                while (timer.Total().Seconds() < timeout.Seconds() || !cancelConnecting)
                 {
                     while(enet_host_service(m_socket, &event, 0) > 0)
                         switch (event.type)
                         {
                         case ENET_EVENT_TYPE_CONNECT:
                         {
-                            SH_CORE_TRACE("Established connection with {}:{}", address.host, port);
+                            SH_CORE_TRACE("Established connection with {}:{}", serverIP, port);
                             m_isConnecting = false;
                             return true;
                         }
                         default:
-                            SH_CORE_WARN("Received arbitrary type {} from {}:{}", event.type, address.host, port);
+                            SH_CORE_WARN("Received arbitrary type {} from {}:{}", event.type, serverIP, port);
                         }
                 }
                 // Timed out or connection cancelled
@@ -116,7 +121,7 @@ namespace sh
                 enet_peer_disconnect(m_server, 0);
                 sh::Timer timer;
 
-                while (timer.Total().Seconds() < timeout.MilliSeconds())
+                while (timer.Total().Seconds() < timeout.Seconds())
                 {
                     ENetEvent event;
                     while (enet_host_service(m_socket, &event, 0) > 0)
