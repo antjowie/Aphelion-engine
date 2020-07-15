@@ -64,8 +64,12 @@ namespace sh
     
     void LayerStack::Clear()
     {
-        for (auto layer : m_layers)
+        if (m_layers.empty()) return;
+
+        SH_CORE_INFO("Clearing layers...");
+        for (auto layer : sh::Reverse(m_layers))
         {
+            SH_CORE_TRACE("Popped layer {}", layer->GetName());
             layer->OnDetach();
             delete layer;
         }

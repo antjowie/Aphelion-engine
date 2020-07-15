@@ -9,12 +9,13 @@
 class ClientLayer : public sh::Layer
 {
 public:
-    ClientLayer() : m_camera(16.f / 9.f) {}
+    ClientLayer() : Layer("ClientLayer"), m_camera(16.f / 9.f) {}
 
     static sh::Entity LocalIDToNet(sh::Entity localID);
     static sh::Entity NetIDtoLocal(sh::Entity netID);
 
     virtual void OnAttach() override;
+    virtual void OnDetach() override;
     virtual void OnEvent(sh::Event& event) override;
     virtual void OnUpdate(sh::Timestep ts) override;
 
@@ -35,7 +36,7 @@ private:
 class ServerLayer : public sh::Layer
 {
 public:
-    ServerLayer() : m_camera(16.f / 9.f) {}
+    ServerLayer() : Layer("ServerLayer"), m_camera(16.f / 9.f) {}
 
     virtual void OnEvent(sh::Event& event) override;
     virtual void OnAttach() override;
@@ -49,6 +50,7 @@ private:
 class MainMenuLayer : public sh::Layer
 {
 public:
+    MainMenuLayer() : Layer("MainMenuLayer") {}
     sh::Layer* m_client = nullptr;
     sh::Layer* m_server = nullptr;
 

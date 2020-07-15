@@ -100,4 +100,15 @@ namespace sh
         NonCopyable(const NonCopyable&) = delete;
         NonCopyable& operator=(const NonCopyable&) = delete;
     };
+
+    template <typename T> 
+    class Reverse
+    {
+    public:
+        explicit Reverse(T& container) : m_container{ container } {}
+        auto begin() const { return std::rbegin(m_container); }
+        auto end() const { return std::rend(m_container); }
+    private:
+        T& m_container;
+    };
 }

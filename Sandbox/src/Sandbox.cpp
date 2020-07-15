@@ -92,6 +92,12 @@ void ClientLayer::OnAttach()
     sh::Application::Get().OnEvent(sh::ClientConnectRequestEvent("127.0.0.1", 25565));
 }
 
+void ClientLayer::OnDetach()
+{
+    sh::Application::Get().OnEvent(sh::ClientDisconnectRequestEvent());
+    m_netToLocal.clear();
+}
+
 void ClientLayer::OnEvent(sh::Event& event)
 {
     m_camera.OnEvent(event);
@@ -112,7 +118,7 @@ void ClientLayer::OnEvent(sh::Event& event)
             //    m_reg.GetComponentData().at(p.id).name,
             //    local,netID);
 
-            m_reg.HandlePacket(netID, p);
+            m_reg.HandlePacket(local, p);
 
             return false;
         })) return;

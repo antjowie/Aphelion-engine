@@ -7,16 +7,15 @@ namespace sh
     static std::shared_future<bool> connectFuture;
     static std::shared_future<bool> disconnectFuture;
 
-    inline bool HasValue(const std::shared_future<bool>& future)
+    inline bool HasValue(std::shared_future<bool>& future)
     {
-
         return future.valid() && future.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
     }
 
     void NetClientLayer::OnDetach()
     {
-        connectFuture.wait();
-        disconnectFuture.wait();
+        if(connectFuture.valid()) connectFuture.wait();
+        if(disconnectFuture.valid()) disconnectFuture.wait();
     }
 
     void NetClientLayer::OnEvent(Event& event)
@@ -34,14 +33,14 @@ namespace sh
 
         if (d.Dispatch<ClientDisconnectRequestEvent>([&](ClientDisconnectRequestEvent& e)
             {
-                connectFuture = client.Disconnect();
+                disconnectFuture = client.Disconnect();
                 return false;
             })) return;
 
         // Packet events
-        if (!client.IsConnected())
+        if (!client.IsConnected() && event.GetEventType() != EventType::ClientDisconnectResponse)
         {
-            SH_CORE_WARN("ClientLayer received a client net event but client isn't connected");
+            SH_CORE_WARN("NetClientLayer received {} but client isn't connected", event.GetName());
             return;
         }
 
@@ -55,8 +54,16 @@ namespace sh
     void NetClientLayer::OnUpdate(Timestep ts)
     {
         // If we attempt connection
-        if (HasValue(connectFuture)) m_cb(ClientConnectResponseEvent(connectFuture.get()));
-        if (HasValue(disconnectFuture)) m_cb(ClientDisconnectResponseEvent(disconnectFuture.get()));
+        if (HasValue(connectFuture))
+        {
+            m_cb(ClientConnectResponseEvent(connectFuture.get()));
+            connectFuture = std::shared_future<bool>(); // This resets the future
+        }
+        if (HasValue(disconnectFuture))
+        {
+            m_cb(ClientDisconnectResponseEvent(disconnectFuture.get()));
+            disconnectFuture = std::shared_future<bool>(); // This resets the future
+        }
 
         auto& client = NetClient::Get();
         if (!client.IsConnected()) return;
