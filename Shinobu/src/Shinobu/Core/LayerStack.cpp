@@ -66,16 +66,31 @@ namespace sh
     {
         if (m_layers.empty()) return;
 
+        //SH_CORE_INFO("Clearing layers...");
+        //for (auto layer : sh::Reverse(m_layers))
+        //{
+        //    const auto& name = layer->GetName();
+        //    SH_CORE_TRACE("Popping layer {}", name);
+        //    layer->OnDetach();
+        //    delete layer;
+        //    SH_CORE_TRACE("Popped layer {}", name);
+        //}
+        //m_layers.clear();
+
         SH_CORE_INFO("Clearing layers...");
-        for (auto layer : sh::Reverse(m_layers))
+        for (auto i = m_layers.size() - 1;; i--)
         {
-            const auto& name = layer->GetName();
+            auto* layer = m_layers[i];
+            auto name = layer->GetName();
             SH_CORE_TRACE("Popping layer {}", name);
             layer->OnDetach();
+            m_layers.pop_back();
             delete layer;
             SH_CORE_TRACE("Popped layer {}", name);
+
+            if (i == 0) break;
         }
-        m_layers.clear();
+
         m_layerIndex = 0;
     }
 }
