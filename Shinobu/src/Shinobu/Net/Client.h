@@ -10,13 +10,12 @@
 
 namespace sh
 {
-    class SHINOBU_API Client : public NonCopyable
+    class SHINOBU_API NetClient : public NonCopyable
     {
     public:
-        Client();
-        ~Client();
+        NetClient(const NetClient&) = delete;
 
-        Client(const Client&) = delete;
+        static NetClient& Get();
     
         bool IsConnected() const;
         /** 
@@ -25,7 +24,7 @@ namespace sh
         bool IsConnecting() const;
 
         std::shared_future<bool> Connect(const std::string& host, unsigned port, const Timestep& timeout = Timestep(5));
-        std::shared_future<void> Disconnect(const Timestep& timeout = Timestep(5));
+        std::shared_future<bool> Disconnect(const Timestep& timeout = Timestep(5));
     
         void Submit(const Packet& packet);
         void Flush();
@@ -33,9 +32,11 @@ namespace sh
         bool Poll(Packet& packet);
     
     private:
+        NetClient();
+        ~NetClient();
+
         bool m_isConnecting;
         std::shared_future<bool> m_connectFuture;
-
 
         ENetHost* m_socket;
         ENetPeer* m_server;
@@ -43,7 +44,7 @@ namespace sh
 }
 
 //template<typename T>
-//inline void Client::SendPacket(const T& packet)
+//inline void NetClient::SendPacket(const T& packet)
 //{
 //    // Serialze the archive to binary
 //    //auto stream = PacketToBinary(packet);

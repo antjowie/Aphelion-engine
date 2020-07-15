@@ -2,27 +2,32 @@
 
 namespace sh
 {
-    Server::Server()
+    NetServer::NetServer()
         : m_socket(nullptr)
         , m_connectCB(nullptr)
         , m_disconnectCB(nullptr)
     {
     }
 
-    Server::~Server()
+    NetServer::~NetServer()
     {
         if (IsHosting()) Shutdown();
     }
 
-    bool Server::IsHosting() const
+    NetServer& NetServer::Get()
+    {
+        static NetServer instance;
+        return instance;
+    }
+
+    bool NetServer::IsHosting() const
     {
         return m_socket;
     }
 
-    bool Server::Host(unsigned port)
+    bool NetServer::Host(unsigned port)
     {
         ENetAddress address;
-        enet_address_set_host(&address, "localhost");
         address.host = ENET_HOST_ANY;
         address.port = 25565;
 
@@ -41,7 +46,7 @@ namespace sh
         return true;
     }
 
-    void Server::Shutdown()
+    void NetServer::Shutdown()
     {
         SH_CORE_ASSERT(IsHosting(), "Can't shutdown a server that is not hosting");
 
@@ -51,7 +56,7 @@ namespace sh
         m_socket = nullptr;
     }
 
-    std::vector<ENetPeer*> Server::GetConnections() const
+    std::vector<ENetPeer*> NetServer::GetConnections() const
     {
         std::vector<ENetPeer*> connections;
         for (int i = 0; i < m_socket->peerCount; i++)
@@ -61,26 +66,26 @@ namespace sh
         return connections;
     }
 
-    void Server::Broadcast(const Packet& packet)
+    void NetServer::Broadcast(const Packet& packet)
     {
         enet_host_broadcast(m_socket, 0, sh::PackENetPacket(packet));
     }
 
-    void Server::Submit(const Packet& packet, ENetPeer* connection)
+    void NetServer::Submit(const Packet& packet, ENetPeer* connection)
     {
         enet_peer_send(connection, 0, sh::PackENetPacket(packet));
     }
 
-    void Server::Flush()
+    void NetServer::Flush()
     {
         enet_host_flush(m_socket);
     }
 
-    bool Server::Poll(Packet& packet)
+    bool NetServer::Poll(Packet& packet)
     {
         ENetEvent event;
 
-        int status =  enet_host_service(m_socket,&event,0);
+        int status = enet_host_service(m_socket,&event,0);
         SH_CORE_ASSERT(status >= 0, "Server returned with error");
     
         if (status == 0)

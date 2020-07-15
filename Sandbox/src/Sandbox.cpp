@@ -1,327 +1,8 @@
-#include <Shinobu/Common.h>
-#include <Shinobu/Net/Client.h>
-#include <Shinobu/Net/Server.h>
-
-#include <Shinobu/ECS/Registry.h>
-
-//#include <glm/gtc/matrix_transform.hpp>
+#include "Sandbox.h"
 #include "Component.h"
 #include "System.h"
 
-//void ToggleClient()
-//{
-//    if (m_client.IsConnected() || m_client.IsConnecting()) m_client.Disconnect();
-//    else m_client.Connect("localhost", 25565);
-//}
-
-class ClientLayer : public sh::Layer
-{
-public:
-    sh::OrthographicCameraController m_camera;
-
-    sh::Registry m_reg;
-
-    sh::Client m_client;
-    
-    ClientLayer() : m_camera(16.f/9.f){}
-
-    virtual void OnAttach() override
-    {
-        m_reg.RegisterSystem(SpawnSystem);
-        m_reg.RegisterSystem(InputSystem);
-        m_reg.RegisterSystem(DrawSystem(m_camera.GetCamera()));
-        m_client.Connect("127.0.0.1", 25565);
-    }
-
-    virtual void OnEvent(sh::Event& event) override
-    { 
-        m_camera.OnEvent(event); 
-    }
-
-    virtual void OnDetach() override
-    {
-        SH_CORE_WARN("We ignore ack because server runs on main thread so this disconnect will never be ack");
-        m_client.Disconnect(0);
-    }
-
-    virtual void OnUpdate(sh::Timestep ts) override 
-    {
-        if (!m_client.IsConnected()) return;
-
-        m_camera.OnUpdate(ts);
-        
-        // Handle packets
-        sh::Packet p;
-        auto& reg = m_reg;
-        while (m_client.Poll(p))
-        {
-            // Get the right entity and check if server entity exists in view
-            // Not sure why it has to be of this type, should just be a uint32_t (at the time of writing this)
-            auto netID = sh::Entity(p.entity.value);
-
-            auto match = sh::netToLocal.find(netID);
-            if (match == sh::netToLocal.end()) { sh::netToLocal[netID] = reg.Create(); }
-
-            sh::Entity local = sh::netToLocal[netID];
-            //SH_TRACE("Client received type ({}) for entity (local: {} net: {})", 
-            //    m_reg.GetComponentData().at(p.id).name,
-            //    local,netID);
-
-            m_reg.HandlePacket(netID, p);
-        }
-
-        // Update user
-        m_reg.UpdateSystems();
-        
-        // TEMP: Send owned player pos
-        auto view = reg.Get().view<Transform, Player>();
-        for (auto e : view)
-        {
-            auto t = reg.Get().get<Transform>(e);
-            m_client.Submit(sh::Serialize(t, (unsigned)sh::LocalIDToNet(e)));
-        }
-        // Flush every second
-        m_client.Flush();
-        //static sh::Timer time;
-        //if (time.Elapsed() > 1.f)
-        //{
-        //    time.Reset();
-        //}
-    }
-};
-
-class ServerLayer : public sh::Layer
-{
-public:
-    sh::Server m_server;
-    
-    sh::OrthographicCameraController m_camera;
-
-    sh::Registry m_reg;
-
-    ServerLayer() : m_camera(16.f / 9.f) {}
-
-    virtual void OnEvent(sh::Event& event) override 
-    { 
-        m_camera.OnEvent(event); 
-    }
-
-    virtual void OnAttach() override 
-    {
-        m_reg.RegisterSystem(SpawnSystem);
-        //m_reg.RegisterSystem(DrawSystem(m_camera.GetCamera()));
-
-        // using ConnectCB = std::function<void(Server&, ENetPeer* connection)>;
-        m_server.SetConnectCB([&](sh::Server& server, ENetPeer* connection)
-            {
-                char ip[64];
-                enet_address_get_host_ip(&connection->address, ip, 64);
-                SH_INFO("Server opened connection with {}", ip);
-
-                // Create the new player
-                auto& reg = m_reg;
-                auto entity = reg.Create();
-                reg.Get().emplace<Transform>(entity, glm::vec2(0.f));
-                auto& sprite = reg.Get().emplace<Sprite>(entity);
-                sprite.image = "res/image.png";
-                sprite.LoadTexture();
-
-                // Submit the new player
-                server.Submit(sh::Serialize(Player(), unsigned(entity)), connection);
-
-                // Send all existing users to that player
-                auto view = reg.Get().view<Transform, Sprite>();
-                for (auto e : view)
-                {
-                    auto& t = reg.Get().get<Transform>(e);
-                    auto& s = reg.Get().get<Sprite>(e);
-
-                    SpawnEntity spawn;
-                    spawn.type = SpawnEntity::Player;
-                    spawn.t = t;
-                    spawn.sprite = s;
-                    server.Submit(sh::Serialize(spawn, unsigned(e)), connection);
-                }
-
-                // Broadcast new player
-                SpawnEntity e;
-                e.type = SpawnEntity::Player;
-                e.t.pos = glm::vec2(0.f);
-                e.sprite.image = "res/image.png";
-                server.Broadcast(sh::Serialize(e, unsigned(entity)));
-            });
-        m_server.SetDisconnectCB([](sh::Server& server, ENetPeer* connection)
-            {
-                char ip[64];
-                enet_address_get_host_ip(&connection->address, ip, 64);
-                SH_INFO("Server closed connection with {}", ip);
-            });
-
-        m_server.Host(25565);
-    }
-    
-    virtual void OnUpdate(sh::Timestep ts) override final
-    {
-        if (!m_server.IsHosting()) return;
-
-        m_camera.OnUpdate(ts);
-
-        auto& reg = m_reg;
-     
-        sh::Packet p;
-        while (m_server.Poll(p))
-        {
-            // TODO: Normally you would handle the input here but for now no verifiction
-            // TODO: If the client is hosting the server as well they will both interact with one
-            // world since the ECS is static. This must be refactored because otherwise
-            // the client will render everything on the server view
-            // which in our game (minecraft clone) should not be the case
-            
-            // Get the right entity and check if server entity exists in view
-            // Not sure why it has to be of this type, should just be a uint32_t (at the time of writing this)
-            // In server case, netID is already the correct ID
-            auto netID = sh::Entity(p.entity.value);
-            
-            //SH_TRACE("Server received type ({}) for entity {}",
-            //    m_reg.GetComponentData().at(p.id).name,
-            //    netID);
-
-            m_reg.HandlePacket(netID, p);
-            //m_reg.GetComponentData().at(p.id).unpack(m_reg, netID, p);
-        }
-
-        m_reg.UpdateSystems();
-
-        // Broadcast all the positions that the server has
-        // TEMP: Send all player pos, this should prob happen in a system
-        auto view = reg.Get().view<Transform>();
-        for (auto e : view)
-        {
-            auto& t = reg.Get().get<Transform>(e);
-            m_server.Broadcast(sh::Serialize(t, (unsigned)e));
-        }
-
-        m_server.Flush();
-    }
-};
-
-class MainMenuLayer : public sh::Layer
-{
-public:
-    sh::Layer* m_client = nullptr;
-    sh::Layer* m_server = nullptr;
-
-    virtual void OnEvent(sh::Event& event) override
-    {
-        sh::EventDispatcher d(event);
-        d.Dispatch<sh::KeyPressedEvent>([&](sh::KeyPressedEvent& e)
-        {
-            if (e.GetKeyCode() == sh::KeyCode::Escape)
-                sh::Application::Get().Exit();
-            return false;
-        });
-    }
-
-    virtual void OnGuiRender() override
-    {
-        if (!ImGui::Begin("Options"))
-            return;
-
-        // TODO: If server or client fails this doesn't get updated
-        // it should be communicated via events
-        static bool client = false;
-        if (ImGui::Checkbox("Client", &client))
-        {
-            if (client)
-            {
-                m_client = new ClientLayer();
-                sh::Application::Get().GetLayerStack().PushLayer(m_client);
-            }
-            else
-            {
-                sh::Application::Get().GetLayerStack().PopLayer(m_client);
-                delete m_client;
-                m_client = nullptr;
-            }
-        }
-
-        static bool server = false;
-        if (ImGui::Checkbox("Server", &server))
-        {
-            if (server)
-            {
-                m_server = new ServerLayer();
-                sh::Application::Get().GetLayerStack().PushLayer(m_server);
-            }
-            else
-            {
-                sh::Application::Get().GetLayerStack().PopLayer(m_server);
-                delete m_server;
-                m_server = nullptr;
-            }
-        }
-
-
-        ImGui::End();
-    }
-
-    /*
-    virtual void OnGuiRender() override final
-    {
-        if (!ImGui::Begin("Network"))
-        {
-            // Early out if the window is collapsed, as an optimization.
-            ImGui::End();
-            return;
-        }
-        {
-            bool hosting = m_server.IsHosting();
-            bool connected = m_client.IsConnected() | m_client.IsConnecting();
-
-            if (ImGui::Checkbox("Server", &hosting)) ToggleServer();
-            if (ImGui::Checkbox("Client", &connected))
-            {
-                ToggleClient();
-            }
-            if (m_client.IsConnected())
-            {
-                static char msg[128] = "";
-
-                ImGui::InputText("message", msg, 128);
-                if (ImGui::Button("send"))
-                {
-                    sh::ExampleData data;
-                    data.message = msg;
-                    auto p = sh::Serialize(data, entt::type_info<sh::ExampleData>::id());
-                    SH_TRACE("Client send ({}): {}", p.id.value, data.message);
-                    m_client.Submit(p);
-                }
-                if (ImGui::Button("Foo"))
-                {
-                    Foo data;
-                    //data.message = msg;
-                    auto id = entt::type_info<Foo>::id();
-                    auto p = sh::Serialize(data, id);
-                    SH_TRACE("Client send (Foo)");
-                    m_client.Submit(p);
-                }
-                if (ImGui::Button("Bar"))
-                {
-                    Bar data;
-                    //data.message = msg;
-                    auto id = entt::type_info<Bar>::id();
-                    auto p = sh::Serialize(data, id);
-                    SH_TRACE("Client send (Bar)");
-                    m_client.Submit(p);
-                }
-
-            }
-        }
-        ImGui::End();
-    }
-    */
-};
-
+std::unordered_map<sh::Entity, sh::Entity> ClientLayer::m_netToLocal;
 
 std::unique_ptr<sh::Application> sh::CreateApplication()
 {
@@ -334,4 +15,191 @@ std::unique_ptr<sh::Application> sh::CreateApplication()
     app->GetLayerStack().PushLayer(new MainMenuLayer());
 
     return app;
+}
+
+void MainMenuLayer::OnEvent(sh::Event& event)
+{
+    sh::EventDispatcher d(event);
+    d.Dispatch<sh::KeyPressedEvent>([&](sh::KeyPressedEvent& e)
+        {
+            if (e.GetKeyCode() == sh::KeyCode::Escape)
+                sh::Application::Get().Exit();
+            return false;
+        });
+}
+
+void MainMenuLayer::OnGuiRender()
+
+{
+    if (!ImGui::Begin("Options"))
+        return;
+
+    // TODO: If server or client fails this doesn't get updated
+    // it should be communicated via events
+    static bool client = false;
+    if (ImGui::Checkbox("Client", &client))
+    {
+        if (client)
+        {
+            m_client = new ClientLayer();
+            sh::Application::Get().GetLayerStack().PushLayer(m_client);
+        }
+        else
+        {
+            sh::Application::Get().GetLayerStack().PopLayer(m_client);
+            delete m_client;
+            m_client = nullptr;
+        }
+    }
+
+    static bool server = false;
+    if (ImGui::Checkbox("Server", &server))
+    {
+        if (server)
+        {
+            m_server = new ServerLayer();
+            sh::Application::Get().GetLayerStack().PushLayer(m_server);
+        }
+        else
+        {
+            sh::Application::Get().GetLayerStack().PopLayer(m_server);
+            delete m_server;
+            m_server = nullptr;
+        }
+    }
+
+    ImGui::End();
+}
+
+sh::Entity ClientLayer::LocalIDToNet(sh::Entity localID) 
+{
+    for (const auto e : m_netToLocal)
+        if (e.second == localID) return e.first;
+    SH_CORE_ERROR("Local ID {} can't be mapped to a network ID", localID);
+}
+
+sh::Entity ClientLayer::NetIDtoLocal(sh::Entity netID)
+{
+    return m_netToLocal.at(netID);
+}
+
+void ClientLayer::OnAttach()
+{
+    m_reg.RegisterSystem(SpawnSystem);
+    m_reg.RegisterSystem(InputSystem);
+    m_reg.RegisterSystem(DrawSystem(m_camera.GetCamera()));
+
+    sh::Application::Get().OnEvent(sh::ClientConnectRequestEvent("127.0.0.1", 25565));
+}
+
+void ClientLayer::OnEvent(sh::Event& event)
+{
+    m_camera.OnEvent(event);
+
+    sh::EventDispatcher d(event);
+
+    if (d.Dispatch<sh::ClientReceivePacketEvent>([&](sh::ClientReceivePacketEvent& e)
+        {
+            // Get the right entity and check if server entity exists in view
+            auto& p = e.GetPacket();
+            auto netID = sh::Entity(p.entity.value);
+
+            auto match = m_netToLocal.find(netID);
+            if (match == m_netToLocal.end()) { m_netToLocal[netID] = m_reg.Create(); }
+
+            sh::Entity local = m_netToLocal[netID];
+            //SH_TRACE("Client received type ({}) for entity (local: {} net: {})", 
+            //    m_reg.GetComponentData().at(p.id).name,
+            //    local,netID);
+
+            m_reg.HandlePacket(netID, p);
+
+            return false;
+        })) return;
+}
+
+void ClientLayer::OnUpdate(sh::Timestep ts)
+{
+    auto& client = sh::NetClient::Get();
+    if (!client.IsConnected()) return;
+
+    m_camera.OnUpdate(ts);
+    m_reg.UpdateSystems();
+}
+
+void ServerLayer::OnEvent(sh::Event& event)
+{
+    m_camera.OnEvent(event);
+
+    sh::EventDispatcher e(event);
+
+    if (e.Dispatch<sh::ServerClientConnectEvent>([&](sh::ServerClientConnectEvent& e)
+        {
+            auto& reg = m_reg;
+            auto& app = sh::Application::Get();
+
+            char ip[64];
+            enet_address_get_host_ip(&e.GetPeer()->address, ip, 64);
+
+            // TODO: Create a join component that is handled by the ECS
+            // Create the new player
+            auto entity = reg.Create();
+            reg.Get().emplace<Transform>(entity, glm::vec2(0.f));
+            auto& sprite = reg.Get().emplace<Sprite>(entity);
+            sprite.image = "res/image.png";
+            sprite.LoadTexture();
+
+            // Submit the new player
+            app.OnEvent(sh::ServerSendPacketEvent(sh::Serialize(Player(), unsigned(entity)), e.GetPeer()));
+
+            // Send all existing users to that player
+            auto view = reg.Get().view<Transform, Sprite>();
+            for (auto ent : view)
+            {
+                auto& t = reg.Get().get<Transform>(ent);
+                auto& s = reg.Get().get<Sprite>(ent);
+
+                SpawnEntity spawn;
+                spawn.type = SpawnEntity::Player;
+                spawn.t = t;
+                spawn.sprite = s;
+                app.OnEvent(sh::ServerSendPacketEvent(sh::Serialize(spawn, unsigned(ent)), e.GetPeer()));
+            }
+
+            // Broadcast new player
+            SpawnEntity ent;
+            ent.type = SpawnEntity::Player;
+            ent.t.pos = glm::vec2(0.f);
+            ent.sprite.image = "res/image.png";
+
+            app.OnEvent(sh::ServerBroadcastPacketEvent(
+                sh::Serialize(ent, unsigned(entity))));
+            
+            return true;
+        })) return;
+
+    if (e.Dispatch<sh::ServerClientConnectEvent>([&](sh::ServerClientConnectEvent& e)
+        {
+            char ip[64];
+            enet_address_get_host_ip(&e.GetPeer()->address, ip, 64);
+            //SH_INFO("Server closed connection with {}", ip);
+            return true;
+        })) return;
+}
+
+void ServerLayer::OnAttach()
+{
+    m_reg.RegisterSystem(SpawnSystem);
+    //m_reg.RegisterSystem(DrawSystem(m_camera.GetCamera()));
+
+    sh::Application::Get().OnEvent(sh::ServerHostRequestEvent(25565));
+}
+
+void ServerLayer::OnUpdate(sh::Timestep ts)
+{
+    auto& server = sh::NetServer::Get();
+    if (!server.IsHosting()) return;
+
+    m_camera.OnUpdate(ts);
+    m_reg.UpdateSystems();
 }

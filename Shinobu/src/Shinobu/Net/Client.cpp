@@ -5,7 +5,7 @@ namespace sh
 {
     static std::atomic_bool cancelConnecting = false;
 
-    Client::Client()
+    NetClient::NetClient()
         : m_isConnecting(false)
         , m_socket(enet_host_create(nullptr, 1, 1, 0, 0))
         , m_server(nullptr)
@@ -17,27 +17,39 @@ namespace sh
         }
     }
 
-    Client::~Client()
+    NetClient::~NetClient()
     {
         // TODO: We don't wait for ack, should publish an event so that main game knows
-        if(IsConnected()) Disconnect(0).wait();
+        if (IsConnected())
+        {
+            SH_CORE_WARN(
+                "Client is force disconnecting. Handle disconnect request event so that client can disconnect "
+                "gracefully. This is an issue if the server is hosting on the same machine");
+            Disconnect(0).wait();
+        }
         cancelConnecting = true;
         if(m_connectFuture.valid()) m_connectFuture.wait();
 
         enet_host_destroy(m_socket);
     }
 
-    bool Client::IsConnected() const
+    NetClient& NetClient::Get()
+    {
+        static NetClient instance;
+        return instance;
+    }
+
+    bool NetClient::IsConnected() const
     {
         return m_socket->connectedPeers == 1;
     }
 
-    bool Client::IsConnecting() const
+    bool NetClient::IsConnecting() const
     {
         return m_isConnecting;
     }
 
-    std::shared_future<bool> Client::Connect(const std::string& host, unsigned port, const Timestep& timeout)
+    std::shared_future<bool> NetClient::Connect(const std::string& host, unsigned port, const Timestep& timeout)
     {
         if (m_isConnecting)
         {
@@ -101,9 +113,9 @@ namespace sh
         return m_connectFuture;
     }
 
-    std::shared_future<void> Client::Disconnect(const Timestep& timeout)
+    std::shared_future<bool> NetClient::Disconnect(const Timestep& timeout)
     {
-        static std::shared_future<void> future;
+        static std::shared_future<bool> future;
 
         if (m_isConnecting)
         {
@@ -132,29 +144,29 @@ namespace sh
                         {
                             SH_CORE_TRACE("Gracefully disconnected from server");
                             enet_peer_reset(m_server);
-                            return;
+                            return true;
                         }
                     }
                 }
 
                 SH_CORE_WARN("Forcefully disconnected form the server");
                 enet_peer_reset(m_server);
-                return;
+                return false;
             });
         return future;
     }
 
-    void Client::Submit(const Packet& packet)
+    void NetClient::Submit(const Packet& packet)
     {
         enet_peer_send(m_server,0,sh::PackENetPacket(packet));
     }
 
-    void Client::Flush()
+    void NetClient::Flush()
     {
         enet_host_flush(m_socket);
     }
 
-    bool Client::Poll(Packet& packet)
+    bool NetClient::Poll(Packet& packet)
     {
         ENetEvent event;
 

@@ -3,7 +3,7 @@
 namespace sh
 {
     std::unordered_map<entt::id_type, Registry::CompData> Registry::m_compData;
-    
+
     Entity Registry::Create()
     {
         return m_reg.create();

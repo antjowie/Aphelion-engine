@@ -29,8 +29,8 @@ namespace sh
 
         inline void Exit() { m_isRunning = false; }
 
-    private:
         void OnEvent(Event& event);
+    private:
         bool OnWindowClose(WindowCloseEvent& event);
 
         std::unique_ptr<Window> m_window;

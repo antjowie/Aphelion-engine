@@ -9,15 +9,14 @@
 
 namespace sh
 {
-    class SHINOBU_API Server : public NonCopyable
+    class SHINOBU_API NetServer : public NonCopyable
     {
     public:
         // TODO: Maybe wrap ENetPeer
-        using ConnectCB = std::function<void(Server&, ENetPeer* connection)>;
+        using ConnectCB = std::function<void(NetServer&, ENetPeer* connection)>;
 
     public:
-        Server();
-        ~Server();
+        static NetServer& Get();
 
         bool IsHosting() const;
 
@@ -37,6 +36,9 @@ namespace sh
         void SetDisconnectCB(ConnectCB cb) { m_disconnectCB = cb; }
 
     private:
+        NetServer();
+        ~NetServer();
+
         ENetHost* m_socket;
     
         ConnectCB m_connectCB;
@@ -45,7 +47,7 @@ namespace sh
 }
 
 //template<typename T>
-//inline void Server::Broadcast(const T& packet)
+//inline void NetServer::Broadcast(const T& packet)
 //{
 //    auto stream = PacketToBinary(packet);
 //    

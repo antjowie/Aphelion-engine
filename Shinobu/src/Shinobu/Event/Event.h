@@ -23,8 +23,9 @@ namespace sh
         ClientDisconnectRequest, ClientDisconnectResponse, 
         ClientSendPacket, ClientReceivePacket,
         ServerHostRequest, ServerHostResponse,
-        ServerDisconnectRequest, ServerDisconnectResponse,
-        ServerSendPacket, ServerReceivePacket,
+        ServerClientConnect, ServerClientDisconnect,
+        ServerShutdownRequest, ServerShutdownResponse,
+        ServerSendPacket, ServerBroadcastPacket, ServerReceivePacket,
     };
 
     enum EventCategory
@@ -36,6 +37,8 @@ namespace sh
         EventCategoryMouse          = Bit(3),
         EventCategoryMouseButton    = Bit(4),
         EventCategoryNet            = Bit(5),
+        EventCategoryNetClient      = Bit(6),
+        EventCategoryNetServer      = Bit(7),
     };
 
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return type; } \

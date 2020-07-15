@@ -33,6 +33,7 @@ add_library(Shinobu
     src/Shinobu/Event/Event.h
     src/Shinobu/Event/KeyEvent.h
     src/Shinobu/Event/MouseEvent.h
+    src/Shinobu/Event/NetEvent.h
     
     src/Shinobu/ECS/Registry.h
     src/Shinobu/ECS/Registry.cpp
@@ -43,10 +44,14 @@ add_library(Shinobu
 
     src/Shinobu/Net/Client.h
     src/Shinobu/Net/Client.cpp
+    src/Shinobu/Net/ClientLayer.h
+    src/Shinobu/Net/ClientLayer.cpp
     src/Shinobu/Net/Packet.h
     src/Shinobu/Net/Packet.cpp
     src/Shinobu/Net/Server.h
     src/Shinobu/Net/Server.cpp
+    src/Shinobu/Net/ServerLayer.h
+    src/Shinobu/Net/ServerLayer.cpp
 
     src/Shinobu/Renderer/GraphicsContext.h
     src/Shinobu/Renderer/GraphicsContext.cpp

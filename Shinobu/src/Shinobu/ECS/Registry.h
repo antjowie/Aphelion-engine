@@ -61,20 +61,6 @@ namespace sh
         r.get<T>(e) = Deserialize<T>(packet);
     }
 
-    // This is needed since the ID on the client does not always match with the server
-    // (spawning predicted entities, not everyone has the same entities)
-    // TODO: Move this into some kind of netcode interface since it couples the ECS for no reason
-    // I also think that the user should not be thinking about which id context they are referring to
-    // it should be handled by a server client layer. 
-    // But how would it know which components contain entity IDs? Since it has to convert them
-    // to server IDs. I don't know yet so for now the client is responsible for converting it themselves.
-    static std::unordered_map<sh::Entity, sh::Entity> netToLocal;
-    inline sh::Entity LocalIDToNet(Entity localID) {
-        for (auto e : netToLocal)
-            if (e.second == localID) return e.first;
-        SH_CORE_ERROR("Local ID {} can't be mapped to a network ID", localID);
-    }
-
     /**
      * The registry stores entities and their components
      *

@@ -5,6 +5,8 @@
 #include "Shinobu/Renderer/Renderer.h"
 #include "Shinobu/Renderer/RenderCommand.h"
 
+#include "Shinobu/Net/ClientLayer.h"
+#include "Shinobu/Net/ServerLayer.h"
 #include <enet/enet.h>
 
 namespace sh
@@ -31,6 +33,14 @@ namespace sh
         
         m_imguiLayer = new ImGuiLayer();
         m_layerStack.PushOverlay(m_imguiLayer);
+
+        auto clientLayer = new NetClientLayer();
+        clientLayer->SetEventCB(SH_BIND_EVENT_FN(Application::OnEvent));
+        m_layerStack.PushLayer(clientLayer);
+
+        auto serverLayer = new NetServerLayer();
+        serverLayer->SetEventCB(SH_BIND_EVENT_FN(Application::OnEvent));
+        m_layerStack.PushLayer(serverLayer);
     }
 
     Application::~Application()
