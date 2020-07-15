@@ -22,7 +22,7 @@ namespace sh
      * A function to clone components from one registry to another
      */
     template<typename T>
-    void Clone(const entt::registry& from, entt::registry& to) {
+    void CloneFn(const entt::registry& from, entt::registry& to) {
         const auto* data = from.data<T>();
         const auto size = from.size<T>();
 
@@ -39,21 +39,18 @@ namespace sh
      * A function to stamp an component value of an entity to another entity
      */
     template<typename T>
-    void Stamp(const entt::registry& from, const entt::entity src, entt::registry& to, const entt::entity dst) 
+    void StampFn(const entt::registry& from, const entt::entity src, entt::registry& to, const entt::entity dst) 
     {
         to.emplace_or_replace<T>(dst, from.get<T>(src));
     }
 
-    // ===============================
-    // Ugly code that couples the ECS to the netcode
-    // ===============================
-
     /**
      * Unpacks a packet
      * TODO: This couples the ECS to our netcode. The ECS should not bother thinking about netcode
+     * Or maybe it should since it needs to store a function to extract the data
      */
     template<typename T>
-    void Unpack(Registry& reg, Entity e, Packet& packet)
+    void UnpackFn(Registry& reg, Entity e, Packet& packet)
     {
         auto& r = reg.Get();
         if (!r.has<T>(e)) r.emplace<T>(e);
@@ -66,7 +63,7 @@ namespace sh
      *
      * TODO: Wrap entt instead of directly accessing it
      */
-    class Registry
+    class SHINOBU_API Registry
     {
     public:
 
@@ -76,8 +73,6 @@ namespace sh
             entt::registry& to, const entt::entity dst)>;
         using UnpackFunc = std::function<void(Registry& reg, Entity e, Packet& packet)>;
 
-        using SystemFunc = std::function<void(Registry& reg)>;
-
         struct CompData
         {
             std::string_view name;
@@ -85,7 +80,6 @@ namespace sh
             StampFunc stamp;
             UnpackFunc unpack;
         };
-
 
     public:
         // Expose underlying registry, these should not be used but I've added
@@ -100,7 +94,8 @@ namespace sh
         Entity Create(Entity hint);
 
         void HandlePacket(Entity entity, Packet& packet);
-        
+        void Stamp(const Registry& from);
+
         /**
          * Be sure to register components.
          * Registering components allows us to serialize the components and
@@ -114,38 +109,19 @@ namespace sh
         {
             auto id = entt::type_info<T>::id();
             SH_CORE_ASSERT(m_compData.count(id) == 0, "Component has already been registered");
-            m_compData[id].clone = Clone<T>;
-            m_compData[id].stamp = Stamp<T>;
-            m_compData[id].unpack = Unpack<T>;
+            m_compData[id].clone = CloneFn<T>;
+            m_compData[id].stamp = StampFn<T>;
+            m_compData[id].unpack = UnpackFn<T>;
             m_compData[id].name = entt::type_info<T>::name();
         }
 
-        /**
-         * You can register systems here so you don't have to update them yourself.
-         * Of course, nothing is stopping you from doing so. But the ECS will in the future
-         * parallize read only systems.
-         *
-         * T should be a callable
-         */
-        template <typename T>
-        void RegisterSystem(T&& t)
-        {
-            static_assert(std::is_invocable_v<T, Registry&>,
-                "T should be callable, make sure operator() is overloaded with argument Registry&");
-            m_systems.push_back(std::forward<T>(t));
-        }
-
-        void ClearSystems();
-        void UpdateSystems();
-
 #ifdef SH_DEBUG
-        // Should be used for debugging purposes
+        // Should be used ONLY for debugging purposes
         const std::unordered_map<entt::id_type, CompData>& GetComponentData() const { return m_compData; }
 #endif
 
     private:
         static std::unordered_map<entt::id_type, CompData> m_compData;
-        std::vector<SystemFunc> m_systems;
         
         entt::registry m_reg;
     };

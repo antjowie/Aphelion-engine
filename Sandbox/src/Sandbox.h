@@ -4,7 +4,7 @@
 #include <Shinobu/Net/Server.h>
 #include <Shinobu/Event/NetEvent.h>
 
-#include <Shinobu/ECS/Registry.h>
+#include <Shinobu/ECS/Scene.h>
 
 class ClientLayer : public sh::Layer
 {
@@ -21,7 +21,7 @@ public:
 
 private:
     sh::OrthographicCameraController m_camera;
-    sh::Registry m_reg;
+    sh::Scene m_scene;
 
     // This is needed since the ID on the client does not always match with the server
     // (spawning predicted entities, not everyone has the same entities)
@@ -45,7 +45,7 @@ public:
 
 private:
     sh::OrthographicCameraController m_camera;
-    sh::Registry m_reg;
+    sh::Scene m_scene;
 };
 
 class MainMenuLayer : public sh::Layer

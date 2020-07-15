@@ -3,13 +3,14 @@
 #include "Component.h"
 #include "Sandbox.h"
 
-#include <Shinobu/ECS/Registry.h>
+#include <Shinobu/ECS/Scene.h>
 #include <Shinobu/Renderer/Renderer2D.h>
 #include <Shinobu/Core/Input/Input.h>
 
 
-void SpawnSystem(sh::Registry& reg)
+void SpawnSystem(sh::Scene& scene)
 {
+    auto& reg = scene.GetRegistry();
     auto view = reg.Get().view<SpawnEntity>();
     for (auto& e : view)
     {
@@ -28,8 +29,9 @@ void SpawnSystem(sh::Registry& reg)
     reg.Get().clear<SpawnEntity>();
 }
 
-void InputSystem(sh::Registry& reg)
+void InputSystem(sh::Scene& scene)
 {
+    auto& reg = scene.GetRegistry();
     auto view = reg.Get().view<Transform, Player>();
     for (auto& e : view)
     {
@@ -53,8 +55,9 @@ class DrawSystem
 public:
     DrawSystem(sh::OrthographicCamera& ortho) : m_ortho(&ortho) {}
 
-    void operator() (sh::Registry& reg)
+    void operator() (sh::Scene& scene)
     {
+        auto& reg = scene.GetRegistry();
         auto view = reg.Get().view<Transform, Sprite>();
 
         // TODO: Maybe make the engine begin and end scene

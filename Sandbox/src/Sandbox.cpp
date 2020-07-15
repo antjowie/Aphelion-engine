@@ -37,12 +37,14 @@ void MainMenuLayer::OnGuiRender()
     // TODO: If server or client fails this doesn't get updated
     // it should be communicated via events
     static bool client = false;
+    static char serverIP[32] = "127.0.0.1";
     if (ImGui::Checkbox("Client", &client))
     {
         if (client)
         {
             m_client = new ClientLayer();
             sh::Application::Get().GetLayerStack().PushLayer(m_client);
+            sh::Application::Get().OnEvent(sh::ClientConnectRequestEvent(serverIP, 25565));
         }
         else
         {
@@ -51,6 +53,9 @@ void MainMenuLayer::OnGuiRender()
             m_client = nullptr;
         }
     }
+
+    ImGui::SameLine(); ImGui::Text("ip ");
+    ImGui::SameLine(); ImGui::InputText("#IP", serverIP, 32);
 
     static bool server = false;
     if (ImGui::Checkbox("Server", &server))
@@ -85,15 +90,14 @@ sh::Entity ClientLayer::NetIDtoLocal(sh::Entity netID)
 
 void ClientLayer::OnAttach()
 {
-    m_reg.RegisterSystem(SpawnSystem);
-    m_reg.RegisterSystem(InputSystem);
-    m_reg.RegisterSystem(DrawSystem(m_camera.GetCamera()));
-
-    sh::Application::Get().OnEvent(sh::ClientConnectRequestEvent("127.0.0.1", 25565));
+    m_scene.RegisterSystem(SpawnSystem);
+    m_scene.RegisterSystem(InputSystem);
+    m_scene.RegisterSystem(DrawSystem(m_camera.GetCamera()));
 }
 
 void ClientLayer::OnDetach()
 {
+    // TODO: add timeout variable to this so that we can just do 0 instead of 5
     sh::Application::Get().OnEvent(sh::ClientDisconnectRequestEvent());
     m_netToLocal.clear();
 }
@@ -111,14 +115,14 @@ void ClientLayer::OnEvent(sh::Event& event)
             auto netID = sh::Entity(p.entity.value);
 
             auto match = m_netToLocal.find(netID);
-            if (match == m_netToLocal.end()) { m_netToLocal[netID] = m_reg.Create(); }
+            if (match == m_netToLocal.end()) { m_netToLocal[netID] = m_scene.GetRegistry().Create(); }
 
             sh::Entity local = m_netToLocal[netID];
             //SH_TRACE("Client received type ({}) for entity (local: {} net: {})", 
             //    m_reg.GetComponentData().at(p.id).name,
             //    local,netID);
 
-            m_reg.HandlePacket(local, p);
+            m_scene.GetRegistry().HandlePacket(local, p);
 
             return false;
         })) return;
@@ -130,7 +134,7 @@ void ClientLayer::OnUpdate(sh::Timestep ts)
     if (!client.IsConnected()) return;
 
     m_camera.OnUpdate(ts);
-    m_reg.UpdateSystems();
+    m_scene.Simulate(ts);
 }
 
 void ServerLayer::OnEvent(sh::Event& event)
@@ -141,7 +145,7 @@ void ServerLayer::OnEvent(sh::Event& event)
 
     if (e.Dispatch<sh::ServerClientConnectEvent>([&](sh::ServerClientConnectEvent& e)
         {
-            auto& reg = m_reg;
+            auto& reg = m_scene.GetRegistry();
             auto& app = sh::Application::Get();
 
             char ip[64];
@@ -191,11 +195,18 @@ void ServerLayer::OnEvent(sh::Event& event)
             //SH_INFO("Server closed connection with {}", ip);
             return true;
         })) return;
+
+    if (e.Dispatch<sh::ServerReceivePacketEvent>([&](sh::ServerReceivePacketEvent& e)
+        {
+            // TODO: Handle the input
+            m_scene.GetRegistry().HandlePacket(sh::Entity(e.GetPacket().entity.value), e.GetPacket());
+            return true;
+        })) return;
 }
 
 void ServerLayer::OnAttach()
 {
-    m_reg.RegisterSystem(SpawnSystem);
+    m_scene.RegisterSystem(SpawnSystem);
     //m_reg.RegisterSystem(DrawSystem(m_camera.GetCamera()));
 
     sh::Application::Get().OnEvent(sh::ServerHostRequestEvent(25565));
@@ -211,6 +222,15 @@ void ServerLayer::OnUpdate(sh::Timestep ts)
     auto& server = sh::NetServer::Get();
     if (!server.IsHosting()) return;
 
+    // TODO: Should or could be handled in systems
+    auto& reg = m_scene.GetRegistry().Get();
+    auto view = reg.view<Transform>();
+    for (auto e : view)
+    {
+        auto p = sh::Serialize(view.get(e), unsigned(e));
+        sh::Application::Get().OnEvent(sh::ServerBroadcastPacketEvent(p));
+    }
+
     m_camera.OnUpdate(ts);
-    m_reg.UpdateSystems();
+    m_scene.Simulate(ts);
 }

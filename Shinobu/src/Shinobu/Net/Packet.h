@@ -17,18 +17,6 @@
 
 namespace sh
 {
-    struct ExampleData
-    {
-        std::string message;
-    };
-
-    //define how object should be serialized/deserialized
-    template <typename S>
-    void serialize(S& s, ExampleData& o)
-    {
-        s.text1b(o.message, 128);
-    }
-
     /**
      * A packet is a piece of data that is transmitted via the network
      * It is what the client and server send to each other

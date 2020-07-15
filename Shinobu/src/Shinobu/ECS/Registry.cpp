@@ -33,15 +33,4 @@ namespace sh
         SH_CORE_ASSERT(m_compData.count(packet.id) == 1, "Component is not registered or is incorrect");
         m_compData.at(packet.id).unpack(*this, entity, packet);
     }
-
-    void Registry::ClearSystems()
-    {
-        m_systems.clear();
-    }
-
-    void Registry::UpdateSystems()
-    {
-        for (auto& system : m_systems)
-            system(*this);
-    }
 }

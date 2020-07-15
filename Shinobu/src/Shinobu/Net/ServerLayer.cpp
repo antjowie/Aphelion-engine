@@ -51,7 +51,7 @@ namespace sh
             {
                 char ip[64];
                 enet_address_get_host_ip(&connection->address, ip, 64);
-                SH_CORE_INFO("Server opened connection with {}", ip);
+                SH_CORE_INFO("Server opened connection with {}:{}", ip, connection->address.port);
 
                 m_cb(ServerClientConnectEvent(connection));
             });
@@ -59,7 +59,7 @@ namespace sh
             {
                 char ip[64];
                 enet_address_get_host_ip(&connection->address, ip, 64);
-                SH_CORE_INFO("Server closed connection with {}", ip);
+                SH_CORE_INFO("Server closed connection with {}:{}", ip, connection->address.port);
 
                 m_cb(ServerClientDisconnectEvent(connection));
             });
