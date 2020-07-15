@@ -69,9 +69,11 @@ namespace sh
         SH_CORE_INFO("Clearing layers...");
         for (auto layer : sh::Reverse(m_layers))
         {
-            SH_CORE_TRACE("Popped layer {}", layer->GetName());
+            const auto& name = layer->GetName();
+            SH_CORE_TRACE("Popping layer {}", name);
             layer->OnDetach();
             delete layer;
+            SH_CORE_TRACE("Popped layer {}", name);
         }
         m_layers.clear();
         m_layerIndex = 0;

@@ -16,7 +16,15 @@ namespace sh
                 return false;
             })) return;
 
-        if (!server.IsHosting())
+        if (d.Dispatch<ServerShutdownRequestEvent>([&](ServerShutdownRequestEvent& e)
+            {
+                server.Shutdown();
+                m_cb(ServerShutdownResponseEvent(true));
+                return false;
+            })) return;
+
+
+        if (!server.IsHosting() && event.GetEventType() != EventType::ServerShutdownResponse)
         {
             SH_CORE_WARN("ServerLayer received {} but server isn't hosting",event.GetName());
             return;

@@ -201,6 +201,11 @@ void ServerLayer::OnAttach()
     sh::Application::Get().OnEvent(sh::ServerHostRequestEvent(25565));
 }
 
+void ServerLayer::OnDetach()
+{
+    sh::Application::Get().OnEvent(sh::ServerShutdownRequestEvent());
+}
+
 void ServerLayer::OnUpdate(sh::Timestep ts)
 {
     auto& server = sh::NetServer::Get();
