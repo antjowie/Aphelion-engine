@@ -35,22 +35,25 @@ namespace sh
         Buffer buffer;
     };
 
-    template <typename T> SHINOBU_API Packet Serialize(const T& data, unsigned id = 0)
+    /**
+     * Defines the header serialization code
+     */
+    template <typename T>
+    SHINOBU_API void SerializeHeader(T& serializer, Packet& packet)
+    {
+        serializer.value4b(packet.id);
+        serializer.value4b(packet.entity);
+    }
+
+    template <typename T> 
+    SHINOBU_API Packet Serialize(const T& data, unsigned id = 0)
     {
         Packet packet;
-        //packet.size = bitsery::quickSerialization<Packet::OutputAdapter>(packet.meta.dataBuffer, data);
-        //size_t quickSerialization(OutputAdapter adapter, const T & value) {
-        //    Serializer<OutputAdapter> ser{ std::move(adapter) };
-
-        //packet.id = 10;
-        // TODO: Uncouple from net code
-        // Coupled to net code
         packet.id = entt::type_info<T>::id();
         packet.entity = id;
 
         bitsery::Serializer<Packet::OutputAdapter> ser{ packet.buffer };
-        ser.value4b(packet.id);
-        ser.value4b(packet.entity);
+        SerializeHeader(ser, packet);
 
         ser.object(data);
         ser.adapter().flush();
@@ -63,13 +66,8 @@ namespace sh
     {
         T data;
 
-        //auto state = bitsery::quickDeserialization<Packet::InputAdapter>({ packet.buffer.begin(),packet.size }, data);
-        //std::pair<ReaderError, bool> quickDeserialization(InputAdapter adapter, T & value) {
-        //    Deserializer<InputAdapter> des{ std::move(adapter) };
-
         bitsery::Deserializer<Packet::InputAdapter> des{ packet.buffer.begin(), packet.size };
-        des.value4b(packet.id);
-        des.value4b(packet.entity);
+        SerializeHeader(des, packet);
 
         des.object(data);
 
@@ -97,8 +95,7 @@ namespace sh
         p.buffer = sh::Packet::Buffer(data, data + p.size);
 
         bitsery::Deserializer<Packet::InputAdapter> des{ p.buffer.begin(), p.size };
-        des.value4b(p.id);
-        des.value4b(p.entity);
+        SerializeHeader(des, p);
 
         enet_packet_destroy(packet);
 
