@@ -68,21 +68,21 @@
  * Set up the asserts
  *
  * It is not crossplatform yet because I don't think __debugbreak() is standard
+ 
+ * Verify is used if you still want to execute the arguments in release but not 
+ * stop execution of the project if failed
  */
 #if defined(SH_DEBUG) || defined(KEEP_ASSERT)
     #define SH_ASSERT(x, msg) { if(!(x)) { SH_ERROR("Assertion Failed: {0}", msg); __debugbreak(); } }
     #define SH_CORE_ASSERT(x, msg) { if(!(x)) { SH_CORE_ERROR("Assertion Failed: {0}", msg); __debugbreak(); } }
+    #define SH_VERIFY(x, msg) { SH_ASSERT(x,msg); }
+    #define SH_CORE_VERIFY(x, msg) { SH_CORE_ASSERT(x,msg); } 
 #else
     #define SH_ASSERT(x, msg)
     #define SH_CORE_ASSERT(x, msg)
+    #define SH_VERIFY(x, msg) { x; }
+    #define SH_CORE_VERIFY(x, msg) { x; } 
 #endif
-
-/**
- * Verify is used if you still want to execute the arguments in release but not 
- * stop execution of the project if failed
- */
-#define SH_VERIFY(x, msg) { x; SH_ASSERT(x,msg); }
-#define SH_CORE_VERIFY(x, msg) { x; SH_CORE_ASSERT(x,msg); } 
 
 #define SH_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
 

@@ -6,6 +6,8 @@
 
 #include <Shinobu/ECS/Scene.h>
 
+#include "PacketQueue.h"
+
 class ClientLayer : public sh::Layer
 {
 public:
@@ -24,6 +26,7 @@ public:
 private:
     sh::OrthographicCameraController m_camera;
     sh::Scene m_scene;
+    PacketQueue m_packets;
 
     // This is needed since the ID on the client does not always match with the server
     // (spawning predicted entities, not everyone has the same entities)
@@ -50,6 +53,7 @@ public:
 private:
     sh::OrthographicCameraController m_camera;
     sh::Scene m_scene;
+    PacketQueue m_packets;
 };
 
 class MainMenuLayer : public sh::Layer

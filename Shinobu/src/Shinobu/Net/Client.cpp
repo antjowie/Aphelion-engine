@@ -148,7 +148,6 @@ namespace sh
                         }
                     }
                 }
-
                 SH_CORE_WARN("Forcefully disconnected form the server");
                 enet_peer_reset(m_server);
                 return false;

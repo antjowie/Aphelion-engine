@@ -44,8 +44,8 @@ void InputSystem(sh::Scene& scene)
         if (sh::Input::IsKeyPressed(sh::KeyCode::Down)) newT.pos.y -= speed * sh::Time::dt;
         if (sh::Input::IsKeyPressed(sh::KeyCode::Right)) newT.pos.x += speed * sh::Time::dt;
 
-        t = newT;
-        auto packet = sh::Serialize(newT, (unsigned)ClientLayer::LocalIDToNet(e));
+        //t = newT;
+        auto packet = sh::Serialize(newT, ClientLayer::LocalIDToNet(e));
         sh::Application::Get().OnEvent(sh::ClientSendPacketEvent(packet));
     }
 }
@@ -78,6 +78,7 @@ public:
             // Tint player light blue
             if (reg.Get().has<Player>(e)) data.color = glm::vec4(0.7f, 0.7f, 1.f, 1.f);
 
+            SH_TRACE("X:{}",t.pos.x);
             sh::Renderer2D::Submit(data);
         }
         sh::Renderer2D::EndScene();

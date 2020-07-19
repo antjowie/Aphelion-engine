@@ -13,12 +13,15 @@ struct Player
     // Components can't be empty. I don't know how to check for it so this
     // is a work around for the time being
     char empty;
+    bool operator==(const Player& rhs) const { return true; }
 };
 template <typename S> void serialize(S& s, Player& o) {}
 
 struct Transform
 {
     glm::vec2 pos;
+
+    bool operator==(const Transform& rhs) const { return pos == rhs.pos; }
 };
 
 template <typename S>
@@ -36,6 +39,8 @@ struct Sprite
 
     // This should be a Texture2D object but not sure if there is a callback after serialize
     sh::TextureRef tex;
+
+    bool operator==(const Sprite& rhs) const { return image == rhs.image; }
 };
 
 template <typename S>
@@ -58,6 +63,8 @@ struct SpawnEntity
     Type type;
     Transform t;
     Sprite sprite;
+
+    bool operator==(const SpawnEntity& rhs) const { return true; }
 };
 
 template <typename S>
@@ -66,29 +73,4 @@ void serialize(S& s, SpawnEntity& o)
     s.value4b(o.type);
     serialize(s, o.t);
     serialize(s, o.sprite);
-}
-
-
-// Test stuff
-// ------------------------------------------
-
-struct Foo
-{
-    int x;
-    int y;
-
-    template <typename S>
-    void serialize(S& s) {
-        s.value4b(x);
-        s.value4b(y);
-    }
-};
-
-struct Bar
-{
-    float val;
-};
-template <typename S>
-void serialize(S& s, Bar& o) {
-    s.value4b(o.val);
 }

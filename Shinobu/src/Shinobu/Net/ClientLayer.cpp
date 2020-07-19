@@ -46,6 +46,7 @@ namespace sh
 
         if (d.Dispatch<ClientSendPacketEvent>([](ClientSendPacketEvent & e)
             {
+                //SH_CORE_TRACE("Submitted packet sim{}", e.GetPacket().simulation);
                 NetClient::Get().Submit(e.GetPacket());
                 return true;
             })) return;

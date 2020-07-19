@@ -16,8 +16,9 @@
 namespace sh
 {
     using Entity = entt::entity;
-    class Registry;
 
+    class Registry;
+    
     /**
      * A function to clone components from one registry to another
      */
@@ -68,14 +69,27 @@ namespace sh
      * Unpacks a packet
      * TODO: This couples the ECS to our netcode. The ECS should not bother thinking about netcode
      * Or maybe it should since it needs to store a function to extract the data
+     *
+     * reg is the registry rolled back to the simulation in which packet was created
+     * returns true if reconciliation took place
      */
     template<typename T>
-    void UnpackFn(Registry& reg, Entity e, Packet& packet)
+    bool UnpackFn(Registry& reg, Entity e, Packet& packet)
     {
         auto& r = reg.Get();
         if (!r.has<T>(e)) r.emplace<T>(e);
 
-        r.get<T>(e) = Deserialize<T>(packet);
+        //r.get<T>(e) = Deserialize<T>(packet);
+        // Check if we have to correct (client side prediction)
+        auto& currentData = r.get<T>(e);
+        auto& newData = Deserialize<T>(packet);
+
+        if (currentData == newData)
+        {
+            return false;
+        }
+        currentData = newData;
+        return true;
     }
 
     /**
@@ -91,7 +105,7 @@ namespace sh
         using StampFunc = std::function<void(
             const entt::registry& from, const entt::entity src,
             entt::registry& to, const entt::entity dst)>;
-        using UnpackFunc = std::function<void(Registry& reg, Entity e, Packet& packet)>;
+        using UnpackFunc = std::function<bool(Registry& reg, Entity e, Packet& packet)>;
 
         struct CompData
         {
@@ -113,7 +127,10 @@ namespace sh
         Entity Create();
         Entity Create(Entity hint);
 
-        void HandlePacket(Entity entity, Packet& packet);
+        /**
+         * Returns true if reconciliation took place
+         */
+        bool HandlePacket(Entity entity, Packet& packet);
         void Clone(Registry& from);
 
         /**
@@ -137,7 +154,7 @@ namespace sh
 
 #ifdef SH_DEBUG
         // Should be used ONLY for debugging purposes
-        const std::unordered_map<entt::id_type, CompData>& GetComponentData() const { return m_compData; }
+        static std::unordered_map<entt::id_type, CompData>& GetComponentData() { return m_compData; }
 #endif
 
     private:
