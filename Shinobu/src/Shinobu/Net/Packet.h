@@ -26,27 +26,14 @@ namespace sh
         using Buffer = std::vector<uint8_t>;
         using OutputAdapter = bitsery::OutputBufferAdapter<Buffer>;
         using InputAdapter = bitsery::InputBufferAdapter<Buffer>;
-        // Bitsery needs a class to serialize
-        struct ID 
-        {
-            ID& operator= (unsigned rhs) { value = rhs; return *this; }
-            operator unsigned int() const { return value; }
-            unsigned value; 
-        }; 
 
-        ID id;
-        ID entity; // TODO: Coupled to ECS, should probably be changed
+        unsigned id; // ID mostly refers to component ID but can also send custom ID
+        unsigned entity; // TODO: Coupled to ECS, should probably be changed
         size_t size; // Set by ENet when received, used in deserializing
         _ENetPeer* sender = nullptr;
 
         Buffer buffer;
     };
-
-    template <typename S>
-    void serialize(S& s, Packet::ID& o)
-    {
-        s.value4b(o.value);
-    }
 
     template <typename T> SHINOBU_API Packet Serialize(const T& data, unsigned id = 0)
     {
@@ -62,8 +49,8 @@ namespace sh
         packet.entity = id;
 
         bitsery::Serializer<Packet::OutputAdapter> ser{ packet.buffer };
-        ser.object(packet.id);
-        ser.object(packet.entity);
+        ser.value4b(packet.id);
+        ser.value4b(packet.entity);
 
         ser.object(data);
         ser.adapter().flush();
@@ -81,8 +68,8 @@ namespace sh
         //    Deserializer<InputAdapter> des{ std::move(adapter) };
 
         bitsery::Deserializer<Packet::InputAdapter> des{ packet.buffer.begin(), packet.size };
-        des.object(packet.id);
-        des.object(packet.entity);
+        des.value4b(packet.id);
+        des.value4b(packet.entity);
 
         des.object(data);
 
@@ -110,8 +97,8 @@ namespace sh
         p.buffer = sh::Packet::Buffer(data, data + p.size);
 
         bitsery::Deserializer<Packet::InputAdapter> des{ p.buffer.begin(), p.size };
-        des.object(p.id);
-        des.object(p.entity);
+        des.value4b(p.id);
+        des.value4b(p.entity);
 
         enet_packet_destroy(packet);
 

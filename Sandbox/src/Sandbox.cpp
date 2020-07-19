@@ -118,7 +118,7 @@ void ClientLayer::OnEvent(sh::Event& event)
         {
             // Get the right entity and check if server entity exists in view
             auto& p = e.GetPacket();
-            auto netID = sh::Entity(p.entity.value);
+            auto netID = sh::Entity(p.entity);
 
             auto match = m_netToLocal.find(netID);
             if (match == m_netToLocal.end()) { m_netToLocal[netID] = m_scene.GetRegistry().Create(); }
@@ -218,7 +218,7 @@ void ServerLayer::OnEvent(sh::Event& event)
     if (e.Dispatch<sh::ServerReceivePacketEvent>([&](sh::ServerReceivePacketEvent& e)
         {
             // TODO: Handle the input
-            m_scene.GetRegistry().HandlePacket(sh::Entity(e.GetPacket().entity.value), e.GetPacket());
+            m_scene.GetRegistry().HandlePacket(sh::Entity(e.GetPacket().entity), e.GetPacket());
             return true;
         })) return;
 }
