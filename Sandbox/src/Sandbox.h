@@ -19,6 +19,8 @@ public:
     virtual void OnEvent(sh::Event& event) override;
     virtual void OnUpdate(sh::Timestep ts) override;
 
+    virtual void OnGuiRender() override;
+
 private:
     sh::OrthographicCameraController m_camera;
     sh::Scene m_scene;
@@ -42,6 +44,8 @@ public:
     virtual void OnAttach() override;
     virtual void OnDetach() override;
     virtual void OnUpdate(sh::Timestep ts) override final;
+
+    virtual void OnGuiRender() override final;
 
 private:
     sh::OrthographicCameraController m_camera;

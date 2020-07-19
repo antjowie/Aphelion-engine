@@ -4,6 +4,13 @@
 
 std::unordered_map<sh::Entity, sh::Entity> ClientLayer::m_netToLocal;
 
+void DrawSceneStats(sh::Scene& scene)
+{
+    auto& reg = scene.GetRegistry().Get();
+    ImGui::Text("Simulation %i (%i/%i)", scene.GetSimulationCount(), scene.GetCurrentSimulationIndex(), scene.maxSimulations);
+    ImGui::Text("Entities %i", reg.size());
+}
+
 std::unique_ptr<sh::Application> sh::CreateApplication()
 {
     sh::Registry::RegisterComponent<Player>();
@@ -29,7 +36,6 @@ void MainMenuLayer::OnEvent(sh::Event& event)
 }
 
 void MainMenuLayer::OnGuiRender()
-
 {
     if (!ImGui::Begin("Options"))
         return;
@@ -134,7 +140,20 @@ void ClientLayer::OnUpdate(sh::Timestep ts)
     if (!client.IsConnected()) return;
 
     m_camera.OnUpdate(ts);
+    
     m_scene.Simulate(ts);
+}
+
+void ClientLayer::OnGuiRender()
+{
+    if (ImGui::Begin("Stats"))
+    {
+        if(ImGui::CollapsingHeader("Client"))
+        {
+            DrawSceneStats(m_scene);
+        }
+        ImGui::End();
+    }
 }
 
 void ServerLayer::OnEvent(sh::Event& event)
@@ -233,4 +252,16 @@ void ServerLayer::OnUpdate(sh::Timestep ts)
 
     m_camera.OnUpdate(ts);
     m_scene.Simulate(ts);
+}
+
+void ServerLayer::OnGuiRender()
+{
+    if (ImGui::Begin("Stats"))
+    {
+        if (ImGui::CollapsingHeader("Server"))
+        {
+            DrawSceneStats(m_scene);
+        }
+        ImGui::End();
+    }
 }

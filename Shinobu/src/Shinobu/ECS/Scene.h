@@ -12,13 +12,14 @@ namespace sh
     class SHINOBU_API Scene
     {
     public:
-        constexpr static unsigned maxRegistries = 256;
+        constexpr static unsigned maxSimulations = 256;
         using SystemFunc = std::function<void(Scene& scene)>;
 
     public:
-        Registry& GetRegistry(unsigned offset = 0);
+        Registry& GetRegistry(unsigned rollback = 0);
 
-        unsigned GetSimulationCount() const;
+        unsigned GetSimulationCount() const { return m_simulationCount; }
+        unsigned GetCurrentSimulationIndex() const { return m_currentSimulation; }
 
         void Simulate(Timestep ts);
 
@@ -40,8 +41,8 @@ namespace sh
         void ClearSystems();
 
     private:
-        Registry m_registries[maxRegistries];
-        unsigned m_currentRegistry = 0;
+        Registry m_registries[maxSimulations];
+        unsigned m_currentSimulation = 0;
         unsigned m_simulationCount = 0;
 
         std::vector<SystemFunc> m_systems;

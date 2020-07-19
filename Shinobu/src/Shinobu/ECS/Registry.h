@@ -23,16 +23,36 @@ namespace sh
      */
     template<typename T>
     void CloneFn(const entt::registry& from, entt::registry& to) {
-        const auto* data = from.data<T>();
-        const auto size = from.size<T>();
+        //const auto* data = from.data<T>();
+        //const auto size = from.size<T>();
 
-        if constexpr (ENTT_IS_EMPTY(T)) {
-            to.insert<T>(data, data + size);
-        }
-        else {
-            const auto* raw = from.raw<T>();
-            to.insert<T>(data, data + size, raw, raw + size);
-        }
+        //if constexpr (ENTT_IS_EMPTY(T)) {
+        //    // This probably crashed but haven't tested it yet
+        //    to.insert<T>(data, data + size);
+        //}
+        //else {
+        //    // Iterate over each entity in from registry
+        //    from.each([&](const entt::entity e)
+        //        {
+        //            if (!to.has(e)) SH_VERIFY(to.create(e) == e, "Could not copy entity from registry");
+
+        //            // Copy each entity into the 
+        //            from.visit([&](const entt::id_type component)
+        //                {
+        //                    to.emplace_or_replace<T>(dst, from.get<T>(src));
+        //                })
+        //        });
+
+        //    to.emplace_or_replace
+        //    const auto* raw = from.raw<T>();
+
+        //    // Clear this reg
+        //    to.
+        //    // Fill with needed entities
+        //    auto* toData = to.data<T>();
+        //    to.create(toData, toData + size);
+        //    to.insert<T>(data, data + size, raw, raw + size);
+        //}
     }
 
     /**
@@ -67,7 +87,7 @@ namespace sh
     {
     public:
 
-        using CloneFunc = std::function<void(entt::registry& from, entt::registry& to)>;
+        using CloneFunc = std::function<void(const entt::registry& from, entt::registry& to)>;
         using StampFunc = std::function<void(
             const entt::registry& from, const entt::entity src,
             entt::registry& to, const entt::entity dst)>;
@@ -94,7 +114,7 @@ namespace sh
         Entity Create(Entity hint);
 
         void HandlePacket(Entity entity, Packet& packet);
-        void Stamp(const Registry& from);
+        void Clone(Registry& from);
 
         /**
          * Be sure to register components.
