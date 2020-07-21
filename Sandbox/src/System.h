@@ -7,6 +7,7 @@
 #include <Shinobu/Renderer/Renderer2D.h>
 #include <Shinobu/Core/Input/Input.h>
 
+float movespeed = 0.5f;
 
 void SpawnSystem(sh::Scene& scene)
 {
@@ -37,14 +38,15 @@ void InputSystem(sh::Scene& scene)
     {
         auto& t = view.get<Transform>(e);
         
-        constexpr float speed = 0.5f;
+        //constexpr float speed = 0.5f;
+        auto speed = movespeed;
         Transform offset;
         if (sh::Input::IsKeyPressed(sh::KeyCode::Up)) offset.pos.y += speed * sh::Time::dt;
         if (sh::Input::IsKeyPressed(sh::KeyCode::Left)) offset.pos.x -= speed * sh::Time::dt;
         if (sh::Input::IsKeyPressed(sh::KeyCode::Down)) offset.pos.y -= speed * sh::Time::dt;
         if (sh::Input::IsKeyPressed(sh::KeyCode::Right)) offset.pos.x += speed * sh::Time::dt;
 
-        //t = newT;
+        t.pos += offset.pos;
         if (offset.pos != glm::vec2(0))
         {
             auto packet = sh::Serialize(Transform{ offset.pos + t.pos }, ClientLayer::LocalIDToNet(e));

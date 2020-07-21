@@ -2,8 +2,6 @@
 #include "Component.h"
 #include "System.h"
 
-
-
 std::unordered_map<sh::Entity, sh::Entity> ClientLayer::m_netToLocal;
 
 void DrawSceneStats(sh::Scene& scene)
@@ -202,6 +200,7 @@ void ClientLayer::OnGuiRender()
         {
             DrawSceneStats(m_scene);
         }
+        ImGui::SliderFloat("Movespeed", &movespeed, 0.f, 5.f);
         ImGui::End();
     }
 }
