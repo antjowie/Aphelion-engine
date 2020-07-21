@@ -1,6 +1,7 @@
 #pragma once
 #include "Shinobu/Core/Core.h"
 #include "Shinobu/Core/Layer.h"
+#include "Shinobu/Net/Protocol.h"
 
 namespace sh
 {
@@ -35,6 +36,8 @@ namespace sh
         virtual void OnDetach() override;
         void SetEventCB(const EventCB& cb);
         
+        static HostConfig m_config;
+
     private:
         EventCB m_cb;
     };

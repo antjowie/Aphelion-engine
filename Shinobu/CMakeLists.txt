@@ -48,6 +48,7 @@ add_library(Shinobu
     src/Shinobu/Net/Client.cpp
     src/Shinobu/Net/ClientLayer.h
     src/Shinobu/Net/ClientLayer.cpp
+    src/Shinobu/Net/Protocol.h
     src/Shinobu/Net/Packet.h
     src/Shinobu/Net/Packet.cpp
     src/Shinobu/Net/Server.h

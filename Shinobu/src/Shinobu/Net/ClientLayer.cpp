@@ -4,8 +4,9 @@
 
 namespace sh
 {
-    static std::shared_future<bool> connectFuture;
-    static std::shared_future<bool> disconnectFuture;
+    std::shared_future<bool> connectFuture;
+    std::shared_future<bool> disconnectFuture;
+    HostConfig NetClientLayer::m_config;
 
     inline bool HasValue(std::shared_future<bool>& future)
     {
@@ -69,13 +70,17 @@ namespace sh
         auto& client = NetClient::Get();
         if (!client.IsConnected()) return;
 
-        // Handle packets
-        Packet p;
-        while (client.Poll(p))
+        // Service
+        static Timer timer;
+        if (timer.Elapsed() > m_config.rate)
         {
-            m_cb(ClientReceivePacketEvent(p));
+            timer.Reset();
+            Packet p;
+            while (client.Poll(p))
+            {
+                m_cb(ClientReceivePacketEvent(p));
+            }
         }
-        client.Flush();
     }
 
     void NetClientLayer::SetEventCB(const EventCB& cb)

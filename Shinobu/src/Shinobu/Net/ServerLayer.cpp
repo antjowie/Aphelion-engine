@@ -4,6 +4,8 @@
 
 namespace sh
 {
+    HostConfig NetServerLayer::m_config;
+
     void NetServerLayer::OnEvent(sh::Event& event)
     {
         if (!event.IsInCategory(EventCategoryNetServer)) return;
@@ -70,14 +72,18 @@ namespace sh
         auto& server = NetServer::Get();
         if (!server.IsHosting()) return;
 
-        sh::Packet p;
-        while (server.Poll(p))
+        static Timer timer;
+        if (timer.Elapsed() > m_config.rate)
         {
-            m_cb(ServerReceivePacketEvent(p));
+            timer.Reset();
+            Packet p;
+            while (server.Poll(p))
+            {
+                m_cb(ServerReceivePacketEvent(p));
+            }
         }
-
-        server.Flush();
     }
+
     void NetServerLayer::SetEventCB(const EventCB& cb)
     {
         m_cb = cb;

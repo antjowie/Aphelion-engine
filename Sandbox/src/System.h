@@ -38,15 +38,18 @@ void InputSystem(sh::Scene& scene)
         auto& t = view.get<Transform>(e);
         
         constexpr float speed = 0.5f;
-        Transform newT = t;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Up)) newT.pos.y += speed * sh::Time::dt;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Left)) newT.pos.x -= speed * sh::Time::dt;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Down)) newT.pos.y -= speed * sh::Time::dt;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Right)) newT.pos.x += speed * sh::Time::dt;
+        Transform offset;
+        if (sh::Input::IsKeyPressed(sh::KeyCode::Up)) offset.pos.y += speed * sh::Time::dt;
+        if (sh::Input::IsKeyPressed(sh::KeyCode::Left)) offset.pos.x -= speed * sh::Time::dt;
+        if (sh::Input::IsKeyPressed(sh::KeyCode::Down)) offset.pos.y -= speed * sh::Time::dt;
+        if (sh::Input::IsKeyPressed(sh::KeyCode::Right)) offset.pos.x += speed * sh::Time::dt;
 
         //t = newT;
-        auto packet = sh::Serialize(newT, ClientLayer::LocalIDToNet(e));
-        sh::Application::Get().OnEvent(sh::ClientSendPacketEvent(packet));
+        if (offset.pos != glm::vec2(0))
+        {
+            auto packet = sh::Serialize(Transform{ offset.pos + t.pos }, ClientLayer::LocalIDToNet(e));
+            sh::Application::Get().OnEvent(sh::ClientSendPacketEvent(packet));
+        }
     }
 }
 

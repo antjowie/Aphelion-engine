@@ -19,7 +19,7 @@ template <typename S> void serialize(S& s, Player& o) {}
 
 struct Transform
 {
-    glm::vec2 pos;
+    glm::vec2 pos = glm::vec2(0);
 
     bool operator==(const Transform& rhs) const { return pos == rhs.pos; }
 };
