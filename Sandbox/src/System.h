@@ -41,10 +41,10 @@ void InputSystem(sh::Scene& scene)
         //constexpr float speed = 0.5f;
         auto speed = movespeed;
         Transform offset;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Up)) offset.pos.y += speed; //*sh::Time::dt;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Left)) offset.pos.x -= speed; //* sh::Time::dt;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Down)) offset.pos.y -= speed; //* sh::Time::dt;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Right)) offset.pos.x += speed; //* sh::Time::dt;
+        if (sh::Input::IsKeyPressed(sh::KeyCode::Up)) offset.pos.y += speed * sh::Time::dt;
+        if (sh::Input::IsKeyPressed(sh::KeyCode::Left)) offset.pos.x -= speed * sh::Time::dt;
+        if (sh::Input::IsKeyPressed(sh::KeyCode::Down)) offset.pos.y -= speed * sh::Time::dt;
+        if (sh::Input::IsKeyPressed(sh::KeyCode::Right)) offset.pos.x += speed * sh::Time::dt;
         t.pos += offset.pos;
         //t.pos += glm::ceil(offset.pos);
         //if (offset.pos != glm::vec2(0))
