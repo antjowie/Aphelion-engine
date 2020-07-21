@@ -3,6 +3,8 @@
 #include "Shinobu/Core/Layer.h"
 #include "Shinobu/Net/Protocol.h"
 
+#include <enet/enet.h>
+
 namespace sh
 {
     class SHINOBU_API NetServerLayer : public Layer
@@ -22,6 +24,13 @@ namespace sh
         static HostConfig m_config;
 
     private:
+        /// Key = componentID Value = simulation
+        using SimulationMap = std::unordered_map<unsigned, int>;
+
+    private:
         EventCB m_cb;
+
+        /// For every peer, we store their last packets and on which frame they were send 
+        std::unordered_map<ENetPeer*, SimulationMap> m_peerData;
     };
 }

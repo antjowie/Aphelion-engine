@@ -49,8 +49,9 @@ namespace sh
         // Header data
         unsigned id = 0; // ID mostly refers to component ID but can also send custom ID
         unsigned entity = 0; // TODO: Coupled to ECS, should probably be changed
-        unsigned clientSimulation = 0;
-        unsigned serverSimulation = 0;
+        int clientSimulation = -1;
+        int serverSimulation = -1;
+        bool isCommand = false;
 
         // ENet data
         size_t size; // Set by ENet when received, used in deserializing
@@ -70,6 +71,7 @@ namespace sh
         serializer.value4b(packet.entity);
         serializer.value4b(packet.clientSimulation);
         serializer.value4b(packet.serverSimulation);
+        serializer.value1b(packet.isCommand);
     }
 
     template<typename T>
@@ -84,11 +86,12 @@ namespace sh
     }
 
     template <typename T> 
-    SHINOBU_API Packet Serialize(const T& data, entt::entity entity)
+    SHINOBU_API Packet Serialize(const T& data, entt::entity entity, bool isCommand = false)
     {
         Packet packet;
         packet.id = entt::type_info<T>::id();
         packet.entity = entt::to_integral(entity);
+        packet.isCommand = isCommand;
 
         packet.serializeFn = SerializeData(data);
         return packet;

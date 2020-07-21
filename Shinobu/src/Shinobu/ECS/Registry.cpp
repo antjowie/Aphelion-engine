@@ -27,11 +27,17 @@ namespace sh
         return id;
     }
     
-    bool Registry::HandlePacket(Entity entity, Packet& packet)
+    void Registry::HandlePacket(Entity entity, Packet& packet)
     {
         //m_compData[compID].unpack(m_reg, entity, packet);
         SH_CORE_ASSERT(m_compData.count(packet.id) == 1, "Component is not registered or is incorrect");
-        return m_compData.at(packet.id).unpack(*this, entity, packet);
+        m_compData.at(packet.id).unpack(*this, entity, packet);
+    }
+
+    bool Registry::HandleAndReconcilePacket(Entity entity, Packet& packet)
+    {
+        SH_CORE_ASSERT(m_compData.count(packet.id) == 1, "Component is not registered or is incorrect");
+        return m_compData.at(packet.id).unpackAndReconcile(*this, entity, packet);
     }
 
     void Registry::Clone(Registry& from)

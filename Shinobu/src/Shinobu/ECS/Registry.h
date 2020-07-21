@@ -18,43 +18,6 @@ namespace sh
     using Entity = entt::entity;
 
     class Registry;
-    
-    /**
-     * A function to clone components from one registry to another
-     */
-    template<typename T>
-    void CloneFn(const entt::registry& from, entt::registry& to) {
-        //const auto* data = from.data<T>();
-        //const auto size = from.size<T>();
-
-        //if constexpr (ENTT_IS_EMPTY(T)) {
-        //    // This probably crashed but haven't tested it yet
-        //    to.insert<T>(data, data + size);
-        //}
-        //else {
-        //    // Iterate over each entity in from registry
-        //    from.each([&](const entt::entity e)
-        //        {
-        //            if (!to.has(e)) SH_VERIFY(to.create(e) == e, "Could not copy entity from registry");
-
-        //            // Copy each entity into the 
-        //            from.visit([&](const entt::id_type component)
-        //                {
-        //                    to.emplace_or_replace<T>(dst, from.get<T>(src));
-        //                })
-        //        });
-
-        //    to.emplace_or_replace
-        //    const auto* raw = from.raw<T>();
-
-        //    // Clear this reg
-        //    to.
-        //    // Fill with needed entities
-        //    auto* toData = to.data<T>();
-        //    to.create(toData, toData + size);
-        //    to.insert<T>(data, data + size, raw, raw + size);
-        //}
-    }
 
     /**
      * A function to stamp an component value of an entity to another entity
@@ -66,7 +29,9 @@ namespace sh
     }
 
     /**
-     * Unpacks a packet
+     * Unpacks a packet and sets the component value to the packet value
+     * If the registry value differs from the packet value, returns false meaning the 
+     * registry should be reconciled
      * TODO: This couples the ECS to our netcode. The ECS should not bother thinking about netcode
      * Or maybe it should since it needs to store a function to extract the data
      *
@@ -74,7 +39,7 @@ namespace sh
      * returns true if reconciliation took place
      */
     template<typename T>
-    bool UnpackFn(Registry& reg, Entity e, Packet& packet)
+    bool UnpackAndReconcileFn(Registry& reg, Entity e, Packet& packet)
     {
         auto& r = reg.Get();
         if (!r.has<T>(e)) r.emplace<T>(e);
@@ -92,6 +57,15 @@ namespace sh
         return true;
     }
 
+    template<typename T>
+    void UnpackFn(Registry& reg, Entity e, Packet& packet)
+    {
+        auto& r = reg.Get();
+        if (!r.has<T>(e)) r.emplace<T>(e);
+
+        r.get<T>(e) = Deserialize<T>(packet);
+    }
+
     /**
      * The registry stores entities and their components
      *
@@ -101,18 +75,18 @@ namespace sh
     {
     public:
 
-        using CloneFunc = std::function<void(const entt::registry& from, entt::registry& to)>;
         using StampFunc = std::function<void(
             const entt::registry& from, const entt::entity src,
             entt::registry& to, const entt::entity dst)>;
-        using UnpackFunc = std::function<bool(Registry& reg, Entity e, Packet& packet)>;
+        using UnpackFunc = std::function<void(Registry& reg, Entity e, Packet& packet)>;
+        using UnpackAndReconcileFunc = std::function<bool(Registry& reg, Entity e, Packet& packet)>;
 
         struct CompData
         {
             std::string_view name;
-            CloneFunc clone;
             StampFunc stamp;
             UnpackFunc unpack;
+            UnpackAndReconcileFunc unpackAndReconcile;
         };
 
     public:
@@ -130,7 +104,8 @@ namespace sh
         /**
          * Returns true if reconciliation took place
          */
-        bool HandlePacket(Entity entity, Packet& packet);
+        void HandlePacket(Entity entity, Packet& packet);
+        bool HandleAndReconcilePacket(Entity entity, Packet& packet);
         void Clone(Registry& from);
 
         /**
@@ -146,9 +121,9 @@ namespace sh
         {
             auto id = entt::type_info<T>::id();
             SH_CORE_ASSERT(m_compData.count(id) == 0, "Component has already been registered");
-            m_compData[id].clone = CloneFn<T>;
             m_compData[id].stamp = StampFn<T>;
             m_compData[id].unpack = UnpackFn<T>;
+            m_compData[id].unpackAndReconcile = UnpackAndReconcileFn<T>;
             m_compData[id].name = entt::type_info<T>::name();
         }
 

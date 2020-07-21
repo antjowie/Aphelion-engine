@@ -3,44 +3,31 @@
 #include <map>
 
 /**
- * The Queue makes sure that we only get the last verison (sequensing) of a packet
+ * The Buffer makes sure that we only get the last version (sequencing) of a packet
+ *
  * It also allows us to poll the queue whenever we want
- * 
  * Why is this needed ? so that we can control the order of things and not 
  * have desyncs where sometimes we use client predicted values and other times
  * we use packet values
  */
-class PacketQueue
+class PacketBuffer
 {
-public:
-    struct PacketKey
-    {
-        unsigned entity;
-        unsigned id;
-
-        bool operator<(const PacketKey& rhs) const
-        {
-            // https://stackoverflow.com/questions/1102392/how-can-i-use-stdmaps-with-user-defined-types-as-key
-            // Apparently a key is equal if a is not smaller then b and likewise
-            return (entity + id) < (rhs.entity + rhs.id);
-        }
-    };
-
 public:
     inline void Push(sh::Packet& packet, bool isClient)
     {
-
         auto& map = GetMap();
-        PacketKey key { packet.entity, packet.id };
-        
+        PacketKey key(packet);
+
         if (map.count(key) == 0)
             map[key] = packet;
         else
         {
             auto& val = map[key];
-            unsigned oldSim = isClient ? val.clientSimulation : val.serverSimulation;
-            unsigned newSim = isClient ? packet.clientSimulation : packet.serverSimulation;
-            if (oldSim < newSim)
+            //unsigned oldSim = isClient ? val.clientSimulation : val.serverSimulation;
+            //unsigned newSim = isClient ? packet.clientSimulation : packet.serverSimulation;
+            int oldSim = val.clientSimulation;
+            int newSim = packet.clientSimulation;
+            if (newSim > oldSim)
                 val = packet;
             else if(oldSim != newSim)
             {
@@ -49,6 +36,7 @@ public:
             }
         }
     }
+
     bool Poll(sh::Packet& packet)
     {
         auto& map = GetBackMap();
@@ -70,10 +58,31 @@ public:
     }
 
 private:
-    std::map<PacketKey, sh::Packet>& GetMap() { return m_packets[m_index]; }
+    struct PacketKey
+    {
+        PacketKey() = default;
+        PacketKey(const sh::Packet& packet)
+            : entity(packet.entity)
+            , id(packet.id)
+        {}
 
-    std::map<PacketKey, sh::Packet>& GetBackMap() { return m_packets[(m_index + 1) % 2]; }
+        unsigned entity;
+        unsigned id;
+
+        bool operator<(const PacketKey& rhs) const
+        {
+            // https://stackoverflow.com/questions/1102392/how-can-i-use-stdmaps-with-user-defined-types-as-key
+            // Apparently a key is equal if a is not smaller then b and likewise
+            return (entity + id) < (rhs.entity + rhs.id);
+        }
+    };
+
+    using Buffer = std::map<PacketKey, sh::Packet>;
+
+private:
+    Buffer& GetMap() { return m_packets[m_index]; }
+    Buffer& GetBackMap() { return m_packets[(m_index + 1) % 2]; }
 
     int m_index;
-    std::map<PacketKey, sh::Packet> m_packets[2];
+    Buffer m_packets[2];
 };

@@ -59,21 +59,27 @@ namespace sh
     std::vector<ENetPeer*> NetServer::GetConnections() const
     {
         std::vector<ENetPeer*> connections;
-        for (int i = 0; i < m_socket->peerCount; i++)
+        for (int i = 0; i < m_socket->connectedPeers; i++)
         {
             connections.push_back(&m_socket->peers[i]);
         }
         return connections;
     }
 
-    void NetServer::Broadcast(const Packet& packet)
+    void NetServer::Broadcast(Packet& packet)
     {
-        enet_host_broadcast(m_socket, 0, sh::PackENetPacket(packet));
+        //PreSendPacket(packet);
+        //enet_host_broadcast(m_socket, 0, PackENetPacket(packet));
+    
+        for(auto* peer : GetConnections())
+        {
+            Submit(packet, peer);
+        }
     }
 
-    void NetServer::Submit(const Packet& packet, ENetPeer* connection)
+    void NetServer::Submit(Packet& packet, ENetPeer* connection)
     {
-        enet_peer_send(connection, 0, sh::PackENetPacket(packet));
+        enet_peer_send(connection, 0, PackENetPacket(packet));
     }
 
     void NetServer::Flush()

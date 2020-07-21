@@ -7,7 +7,7 @@
 #include <Shinobu/Renderer/Renderer2D.h>
 #include <Shinobu/Core/Input/Input.h>
 
-float movespeed = 0.5f;
+float movespeed = 0.01f;
 
 void SpawnSystem(sh::Scene& scene)
 {
@@ -41,15 +41,15 @@ void InputSystem(sh::Scene& scene)
         //constexpr float speed = 0.5f;
         auto speed = movespeed;
         Transform offset;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Up)) offset.pos.y += speed * sh::Time::dt;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Left)) offset.pos.x -= speed * sh::Time::dt;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Down)) offset.pos.y -= speed * sh::Time::dt;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Right)) offset.pos.x += speed * sh::Time::dt;
-
+        if (sh::Input::IsKeyPressed(sh::KeyCode::Up)) offset.pos.y += speed; //*sh::Time::dt;
+        if (sh::Input::IsKeyPressed(sh::KeyCode::Left)) offset.pos.x -= speed; //* sh::Time::dt;
+        if (sh::Input::IsKeyPressed(sh::KeyCode::Down)) offset.pos.y -= speed; //* sh::Time::dt;
+        if (sh::Input::IsKeyPressed(sh::KeyCode::Right)) offset.pos.x += speed; //* sh::Time::dt;
         t.pos += offset.pos;
-        if (offset.pos != glm::vec2(0))
+        //t.pos += glm::ceil(offset.pos);
+        //if (offset.pos != glm::vec2(0))
         {
-            auto packet = sh::Serialize(Transform{ offset.pos + t.pos }, ClientLayer::LocalIDToNet(e));
+            auto packet = sh::Serialize(Transform{ t.pos }, ClientLayer::LocalIDToNet(e));
             sh::Application::Get().OnEvent(sh::ClientSendPacketEvent(packet));
         }
     }
@@ -83,7 +83,7 @@ public:
             // Tint player light blue
             if (reg.Get().has<Player>(e)) data.color = glm::vec4(0.7f, 0.7f, 1.f, 1.f);
 
-            SH_TRACE("X:{}",t.pos.x);
+            //SH_TRACE("X:{}",t.pos.x);
             sh::Renderer2D::Submit(data);
         }
         sh::Renderer2D::EndScene();

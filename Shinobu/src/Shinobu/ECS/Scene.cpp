@@ -9,7 +9,7 @@ namespace sh
     unsigned GetSimulationIndex(unsigned currentSim, unsigned rollback)
     {
         //SH_CORE_ASSERT(rollback < Scene::maxSimulations, "Tried to roll world too far back. Exceeds max simulations that are stored");
-        unsigned targetIndex = currentSim - rollback;
+        int targetIndex = currentSim - rollback;
         targetIndex %= Scene::maxSimulations;
 
         if (targetIndex < 0) targetIndex = Scene::maxSimulations - targetIndex;
@@ -23,15 +23,8 @@ namespace sh
 
     void Scene::Simulate(Timestep ts)
     {
-        // Execute simulation
-        for (auto& system : m_systems)
-            system(*this);
-
-        //SH_CORE_TRACE("Simulation {}", m_currentSimulation);
-
-        // --- Move on to next simulation ---
         // 1. Copy current simulation values into next simulation
-        // 2. Increment simulation count
+        // 2. Run the simulation
         // TODO: m_simulationCount can overflow
         auto nextSim = GetSimulationIndex(m_currentSimulation, -1);
         m_registries[nextSim].Clone(m_registries[m_currentSimulation]);
@@ -40,6 +33,10 @@ namespace sh
         m_currentSimulation++;
         if (m_currentSimulation == maxSimulations)
             m_currentSimulation = 0;
+
+        // Execute simulation
+        for (auto& system : m_systems)
+            system(*this);
     }
     
     void Scene::ClearSystems()

@@ -34,12 +34,20 @@ namespace sh
 
         if (d.Dispatch<ServerSendPacketEvent>([&](ServerSendPacketEvent& e)
             {
-                server.Submit(e.GetPacket(), e.GetPeer());
+                auto& p = e.GetPacket();
+                if (m_peerData[e.GetPeer()].count(p.id) == 0) m_peerData[e.GetPeer()][p.id] = -1;
+                p.clientSimulation = m_peerData[e.GetPeer()][p.id];
+                //SH_WARN(p.clientSimulation);
+                server.Submit(p, e.GetPeer());
                 return true;
             }));
         if (d.Dispatch<ServerBroadcastPacketEvent>([&](ServerBroadcastPacketEvent& e)
             {
-                server.Broadcast(e.GetPacket());
+                for (auto* peer : NetServer::Get().GetConnections())
+                {
+                    m_cb(ServerSendPacketEvent(e.GetPacket(), peer));
+                }
+
                 return true;
             }));
     }
@@ -77,9 +85,21 @@ namespace sh
         {
             timer.Reset();
             Packet p;
+
+            server.Flush();
+
             while (server.Poll(p))
             {
-                m_cb(ServerReceivePacketEvent(p));
+                // NOTE: Right here, we can easily add sequencing, but we do that with PacketBuffers. 
+                // There is some unclearity who is responsible for what, so be sure to keep that in mind
+                // and maybe refactor the system
+                if (m_peerData[p.sender].count(p.id) == 0) m_peerData[p.sender][p.id] = -1;
+                auto& clientSim = m_peerData[p.sender][p.id];
+                if (clientSim < p.clientSimulation) // If we retrieve a newer sequence
+                {
+                    clientSim = p.clientSimulation;
+                    m_cb(ServerReceivePacketEvent(p));
+                }
             }
         }
     }
