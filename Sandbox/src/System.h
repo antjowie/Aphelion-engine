@@ -7,28 +7,7 @@
 #include <Shinobu/Renderer/Renderer2D.h>
 #include <Shinobu/Core/Input/Input.h>
 
-float movespeed = 0.01f;
-
-void SpawnSystem(sh::Scene& scene)
-{
-    auto& reg = scene.GetRegistry();
-    auto view = reg.Get().view<SpawnEntity>();
-    for (auto& e : view)
-    {
-        auto& c = view.get<SpawnEntity>(e);
-
-        switch (c.type)
-        {
-        case SpawnEntity::Type::Player:
-            SH_INFO("Spawned a player");
-            reg.Get().emplace_or_replace<Transform>(e) = c.t;
-            reg.Get().emplace_or_replace<Sprite>(e) = c.sprite;
-            break;
-        }
-
-    }
-    reg.Get().clear<SpawnEntity>();
-}
+float movespeed = 1.f;
 
 void InputSystem(sh::Scene& scene)
 {
@@ -52,6 +31,19 @@ void InputSystem(sh::Scene& scene)
             auto packet = sh::Serialize(Transform{ t.pos }, ClientLayer::LocalIDToNet(e));
             sh::Application::Get().OnEvent(sh::ClientSendPacketEvent(packet));
         }
+    }
+}
+
+void DeathSystem(sh::Scene& scene)
+{
+    auto& reg = scene.GetRegistry();
+    auto view = reg.Get().view<Health>();
+    for (auto& e : view)
+    {
+        auto& h = view.get<Health>(e);
+
+        if(h.health <= 0)
+            reg.Destroy(e);
     }
 }
 

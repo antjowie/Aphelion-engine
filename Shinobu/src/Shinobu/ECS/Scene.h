@@ -4,10 +4,15 @@
 
 namespace sh
 {
+    class Timestep;
+
     /**
-     * A Scene (aka game world) hold our registry and versions of it.
-     * This is used to rollback the simulation for net features such as
-     * server reconcilliation, client prediction and interpolation
+     * @brief A Scene (aka game world) hold our registry and versions of it.
+     * 
+     * @detail This is used to rollback the simulation for net features such as
+     * server reconciliation, client prediction and interpolation
+     *
+     * TODO: Make the simulation multi-threaded
      */
     class SHINOBU_API Scene
     {
@@ -24,21 +29,24 @@ namespace sh
         void Simulate(Timestep ts);
 
         /**
-         * You can register systems here so you don't have to update them yourself.
-         * Of course, nothing is stopping you from doing so. But the ECS will in the future
-         * parallize read only systems.
+         * @brief Register a system that this ECS should use
+         * @detail Registering systems allows us to simulate the world via one call.
+         * This allows us to reconcile the world.
          *
-         * T should be a callable
+         * @param system Must be a callable
          */
         template <typename T>
-        void RegisterSystem(T&& t)
+        void RegisterSystem(T&& system)
         {
             static_assert(std::is_invocable_v<T, Scene&>,
                 "T should be callable, make sure operator() is overloaded with argument Registry&");
-            m_systems.push_back(std::forward<T>(t));
+            m_systems.push_back(std::forward<T>(system));
         }
 
         void ClearSystems();
+
+        void SetOnEntityDestroyCb(Registry::EntityCb cb);
+        void SetOnEntityCreateCb(Registry::EntityCb cb);
 
     private:
         Registry m_registries[maxSimulations];

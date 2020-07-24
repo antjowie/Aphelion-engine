@@ -25,7 +25,7 @@ namespace sh
         else SH_CORE_ERROR("ENet failed to initialize with error code {}", status);
 
         m_window = Window::Create(props);
-        m_window->SetEventCallback(SH_BIND_EVENT_FN(Application::OnEvent));
+        m_window->SetEventCallback(SH_BIND_FN(Application::OnEvent));
         m_window->SetVSync(true);
 
         Renderer::Init();
@@ -35,11 +35,11 @@ namespace sh
         m_layerStack.PushOverlay(m_imguiLayer);
 
         auto clientLayer = new NetClientLayer();
-        clientLayer->SetEventCB(SH_BIND_EVENT_FN(Application::OnEvent));
+        clientLayer->SetEventCB(SH_BIND_FN(Application::OnEvent));
         m_layerStack.PushLayer(clientLayer);
 
         auto serverLayer = new NetServerLayer();
-        serverLayer->SetEventCB(SH_BIND_EVENT_FN(Application::OnEvent));
+        serverLayer->SetEventCB(SH_BIND_FN(Application::OnEvent));
         m_layerStack.PushLayer(serverLayer);
     }
 
@@ -82,7 +82,7 @@ namespace sh
     void Application::OnEvent(Event& event)
     {
         sh::EventDispatcher dispatcher(event);
-        dispatcher.Dispatch<WindowCloseEvent>(SH_BIND_EVENT_FN(Application::OnWindowClose));
+        dispatcher.Dispatch<WindowCloseEvent>(SH_BIND_FN(Application::OnWindowClose));
         dispatcher.Dispatch<WindowResizeEvent>([](WindowResizeEvent& e)
         {
             Renderer::OnWindowResize(e.GetWidth(),e.GetHeight());

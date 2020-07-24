@@ -1,21 +1,43 @@
 #pragma once
 
 #include <Shinobu/Renderer/Texture.h>
-#include <Shinobu/ECS/Registry.h>
+
 #include <glm/vec2.hpp>
+
 #include <string>
 
 
 // This si an invalid component type since it isnt' move constructibel tho I thought it could be used this way
 //using Player = entt::tag<"Player"_hs>();
+
 struct Player 
 {
-    // Components can't be empty. I don't know how to check for it so this
-    // is a work around for the time being
     char empty;
     bool operator==(const Player& rhs) const { return true; }
 };
 template <typename S> void serialize(S& s, Player& o) {}
+
+struct Tag
+{
+    std::string tag;
+    bool operator==(const Tag& rhs) const { return tag == rhs.tag; }
+};
+
+template <typename S> void serialize(S& s, Tag& o)
+{
+    s.text1b(o.tag,32);
+}
+
+struct Health
+{
+    int health;
+    bool operator==(const Health& rhs) const {return health == rhs.health; }
+};
+
+template <typename S> void serialize(S& s, Health& o)
+{
+    s.value4b(o.health);
+}
 
 struct Transform
 {
@@ -51,26 +73,4 @@ void serialize(S& s, Sprite& o)
     s.text1b(o.image, pathSize);
 
     if (!o.tex) { o.LoadTexture(); }
-}
-
-struct SpawnEntity
-{
-    enum Type
-    {
-        Player
-    };
-
-    Type type;
-    Transform t;
-    Sprite sprite;
-
-    bool operator==(const SpawnEntity& rhs) const { return true; }
-};
-
-template <typename S>
-void serialize(S& s, SpawnEntity& o)
-{
-    s.value4b(o.type);
-    serialize(s, o.t);
-    serialize(s, o.sprite);
 }

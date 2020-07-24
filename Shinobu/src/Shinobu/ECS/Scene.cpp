@@ -1,5 +1,5 @@
 #include "Shinobu/ECS/Scene.h"
-#include "Scene.h"
+#include "Shinobu/Core/Time.h"
 
 namespace sh
 {
@@ -42,5 +42,17 @@ namespace sh
     void Scene::ClearSystems()
     {
         m_systems.clear();
+    }
+
+    void Scene::SetOnEntityDestroyCb(Registry::EntityCb cb)
+    {
+        for(size_t i = 0; i < maxSimulations; i++)
+            m_registries[i].SetOnEntityCreateCb(cb);
+    }
+
+    void Scene::SetOnEntityCreateCb(Registry::EntityCb cb)
+    {
+        for(size_t i = 0; i < maxSimulations; i++)
+            m_registries[i].SetOnEntityDestroyCb(cb);
     }
 }

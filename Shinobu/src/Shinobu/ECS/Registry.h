@@ -1,17 +1,10 @@
 #pragma once
-
 #include "Shinobu/Core/Core.h"
-#include "Shinobu/Core/Time.h"
+#include "Shinobu/Net/Packet.h"
 
 #include <entt/entt.hpp>
 
-#include <vector>
 #include <functional>
-
-// Coupled to packet. Gotta do something about this
-// Or should I? Is there any way to get the template argument during
-// runtime?
-#include "Shinobu/Net/Packet.h"
 
 namespace sh
 {
@@ -74,12 +67,13 @@ namespace sh
     class SHINOBU_API Registry
     {
     public:
-
         using StampFunc = std::function<void(
             const entt::registry& from, const entt::entity src,
             entt::registry& to, const entt::entity dst)>;
         using UnpackFunc = std::function<void(Registry& reg, Entity e, Packet& packet)>;
         using UnpackAndReconcileFunc = std::function<bool(Registry& reg, Entity e, Packet& packet)>;
+
+        using EntityCb = std::function<void(Entity)>;
 
         struct CompData
         {
@@ -100,6 +94,8 @@ namespace sh
          */
         Entity Create();
         Entity Create(Entity hint);
+
+        void Destroy(Entity entity);
 
         /**
          * Returns true if reconciliation took place
@@ -127,6 +123,9 @@ namespace sh
             m_compData[id].name = entt::type_info<T>::name();
         }
 
+        void SetOnEntityDestroyCb(EntityCb cb) { m_onCreate = cb; } 
+        void SetOnEntityCreateCb(EntityCb cb) { m_onDestroy = cb; }
+
 #ifdef SH_DEBUG
         // Should be used ONLY for debugging purposes
         static std::unordered_map<entt::id_type, CompData>& GetComponentData() { return m_compData; }
@@ -134,6 +133,9 @@ namespace sh
 
     private:
         static std::unordered_map<entt::id_type, CompData> m_compData;
+
+        EntityCb m_onCreate;
+        EntityCb m_onDestroy;
         
         entt::registry m_reg;
     };

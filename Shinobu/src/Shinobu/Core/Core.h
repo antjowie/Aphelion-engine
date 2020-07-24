@@ -84,7 +84,7 @@
     #define SH_CORE_VERIFY(x, msg) { x; } 
 #endif
 
-#define SH_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+#define SH_BIND_FN(fn) std::bind(&fn, this, std::placeholders::_1)
 
 /**
  * Utilities

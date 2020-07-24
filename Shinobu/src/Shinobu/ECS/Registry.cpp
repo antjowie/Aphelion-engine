@@ -6,7 +6,9 @@ namespace sh
 
     Entity Registry::Create()
     {
-        return m_reg.create();
+        auto id = m_reg.create();
+        if(m_onCreate) m_onCreate(id);
+        return id;
     }
 
     Entity Registry::Create(Entity hint)
@@ -24,9 +26,16 @@ namespace sh
         // Create a network ID component which stores the network ID of the entity.
         // This allows us to always refer to the same object
         SH_CORE_ASSERT(id == hint, "Could not recreate the hint ID");
+        if(m_onCreate) m_onCreate(id);
         return id;
     }
-    
+
+    void Registry::Destroy(Entity entity)
+    {
+        if(m_onDestroy) m_onDestroy(entity);
+        m_reg.destroy(entity);
+    }
+
     void Registry::HandlePacket(Entity entity, Packet& packet)
     {
         //m_compData[compID].unpack(m_reg, entity, packet);

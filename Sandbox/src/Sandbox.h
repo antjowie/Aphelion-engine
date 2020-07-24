@@ -24,6 +24,7 @@ public:
     virtual void OnGuiRender() override;
 
 private:
+
     sh::OrthographicCameraController m_camera;
     sh::Scene m_scene;
     PacketBuffer m_packets;
@@ -54,6 +55,8 @@ private:
     sh::OrthographicCameraController m_camera;
     sh::Scene m_scene;
     PacketBuffer m_packets;
+
+    std::unordered_map<ENetPeer*, sh::Entity> m_players;
 };
 
 class MainMenuLayer : public sh::Layer
