@@ -19,6 +19,7 @@ add_executable(Sandbox
     src/Entry.cpp
     src/PacketBuffer.h
     src/Primitives.h
+    src/Primitives.cpp
 )
 
 target_include_directories(Sandbox PUBLIC src)

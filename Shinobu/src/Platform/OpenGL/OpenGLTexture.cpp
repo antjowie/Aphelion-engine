@@ -61,13 +61,12 @@ namespace sh
 		glTextureParameteri(m_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(m_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, dataFormat, GL_UNSIGNED_BYTE, data);
+        glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, dataFormat, GL_UNSIGNED_BYTE, data);
 
 		stbi_image_free(data);
 	}
 
-
-    OpenGLTexture2D::~OpenGLTexture2D()
+        OpenGLTexture2D::~OpenGLTexture2D()
     {
         glDeleteTextures(1, &m_id);
     }
@@ -79,7 +78,7 @@ namespace sh
 
     void OpenGLTexture2D::Unbind() const
     {
-        glBindTexture(GL_TEXTURE_2D,0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY,0);
     }
 
     uint32_t OpenGLTexture2D::GetWidth() const
@@ -99,6 +98,126 @@ namespace sh
 		glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, m_dataFormat, GL_UNSIGNED_BYTE, data);
     }
 
+    OpenGLArrayTexture2D::OpenGLArrayTexture2D(
+        uint32_t x, uint32_t y, const char* path)
+            : m_layer(0)
+    {
+        int width, height, channels;
+		stbi_set_flip_vertically_on_load(true);
+		stbi_uc* data = nullptr;
+		{
+			data = stbi_load(path, &width, &height, &channels, 0);
+		}
+		SH_CORE_ASSERT(data, "Failed to load image!");
+		m_width = width;
+		m_height = height;
+
+		GLenum internalFormat = 0, dataFormat = 0;
+		if (channels == 4)
+		{
+			internalFormat = GL_RGBA8;
+			dataFormat = GL_RGBA;
+		}
+		else if (channels == 3)
+		{
+			internalFormat = GL_RGB8;
+			dataFormat = GL_RGB;
+		}
+
+		m_internalFormat = internalFormat;
+		m_dataFormat = dataFormat;
+
+		SH_CORE_ASSERT(internalFormat & dataFormat, "Format not supported!");
+
+        // Convert raw texture data to data that we can interpret
+		//glTextureStorage2D(m_id, 1, internalFormat, m_width, m_height);
+		//glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, dataFormat, GL_UNSIGNED_BYTE, data);
+        //stbi_image_free(data);
+
+        const unsigned texSize = width / x;
+        auto image{ std::make_unique<unsigned char[]>(width * height * channels) };
+
+        unsigned offset = 0;
+        for (unsigned yI = 0; yI < height / texSize; yI++)
+        {
+            for (unsigned xI = 0; xI < width / texSize; xI++)
+            {
+                // Read 64 rows
+                for (unsigned row = 0; row < texSize; row++)
+                {
+                    memcpy(
+                        &image[offset],
+                        &data[(yI * width * texSize * channels) +
+                              (xI * texSize * channels) +
+                               row * width * channels],
+                        texSize * channels);
+                    offset += texSize * channels;
+                }
+            }
+        }
+
+        const auto size = x * y;
+        // Create the storage
+		glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &m_id);
+        glTextureStorage3D(m_id, 4, m_internalFormat, texSize, texSize, size);
+
+        glTextureSubImage3D(
+            m_id,
+            0,
+            0, 0, 0,
+            texSize, texSize, size,
+            m_dataFormat,
+            GL_UNSIGNED_BYTE,
+            image.get());
+
+        stbi_image_free(data);
+
+        //glGenerateTextureMipmap(m_id);
+
+        // Set texture parameters
+        glTextureParameteri(m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+        glTextureParameteri(m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glTextureParameteri(m_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(m_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
+
+    OpenGLArrayTexture2D::~OpenGLArrayTexture2D()
+    {
+        glDeleteTextures(1, &m_id);
+    }
+
+    void OpenGLArrayTexture2D::Bind(uint32_t slot) const
+    {
+        glBindTextureUnit(slot, m_id);
+    }
+
+    void OpenGLArrayTexture2D::Unbind() const
+    {
+        glBindTexture(GL_TEXTURE_2D_ARRAY,0);
+    }
+
+    uint32_t OpenGLArrayTexture2D::GetWidth() const
+    {
+        return m_width;
+    }
+    
+    uint32_t OpenGLArrayTexture2D::GetHeight() const
+    {
+        return m_height;
+    }
+
+    void OpenGLArrayTexture2D::SetData(void* data, uint32_t size)
+    {
+		uint32_t bpp = m_dataFormat == GL_RGBA ? 4 : 3;
+		SH_CORE_ASSERT(size == m_width * m_height * bpp, "Data must be entire texture!");
+		glTextureSubImage3D(m_id, 0, 0, 0, 0, m_width, m_height, m_layer, m_dataFormat, GL_UNSIGNED_BYTE, data);
+    }
+
+    void OpenGLArrayTexture2D::SetLayer(unsigned layer)
+    {
+        m_layer = layer;
+    }
 
     //Texture::Texture(const char* path)
     //{

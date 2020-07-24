@@ -11,26 +11,53 @@
 
 static float movespeed = 1.f;
 
-inline void InputSystem(sh::Scene& scene)
-{
-    auto& reg = scene.GetRegistry();
-    auto view = reg.Get().view<sh::Transform, Player>();
-    for (auto& e : view)
-    {
-        auto& t = view.get<sh::Transform>(e);
-        
-        const auto speed = movespeed;
-        glm::vec2 offset(0.f);
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Up)) offset.y += speed * sh::Time::dt;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Left)) offset.x -= speed * sh::Time::dt;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Down)) offset.y -= speed * sh::Time::dt;
-        if (sh::Input::IsKeyPressed(sh::KeyCode::Right)) offset.x += speed * sh::Time::dt;
-        t.Move(glm::vec3(offset.x,offset.y,0.f));
+//inline void InputSystem(sh::Scene& scene)
+//{
+//    auto& reg = scene.GetRegistry();
+//    auto view = reg.Get().view<sh::Transform, Player>();
+//    for (auto& e : view)
+//    {
+//        auto& t = view.get<sh::Transform>(e);
+//        
+//        const auto speed = movespeed;
+//        glm::vec2 offset(0.f);
+//        if (sh::Input::IsKeyPressed(sh::KeyCode::Up)) offset.y += speed * sh::Time::dt;
+//        if (sh::Input::IsKeyPressed(sh::KeyCode::Left)) offset.x -= speed * sh::Time::dt;
+//        if (sh::Input::IsKeyPressed(sh::KeyCode::Down)) offset.y -= speed * sh::Time::dt;
+//        if (sh::Input::IsKeyPressed(sh::KeyCode::Right)) offset.x += speed * sh::Time::dt;
+//        t.Move(glm::vec3(offset.x,offset.y,0.f));
+//
+//        auto packet = sh::Serialize(t, ClientLayer::LocalIDToNet(e));
+//        sh::Application::Get().OnEvent(sh::ClientSendPacketEvent(packet));
+//    }
+//}
 
-        auto packet = sh::Serialize(t, ClientLayer::LocalIDToNet(e));
-        sh::Application::Get().OnEvent(sh::ClientSendPacketEvent(packet));
+class InputSystem
+{
+public:
+    InputSystem(std::reference_wrapper<sh::PerspectiveCamera> camera)
+        : m_cam(std::move(camera))
+    {
     }
-}
+
+    void operator() (sh::Scene& scene)
+    {
+        auto& reg = scene.GetRegistry();
+        auto view = reg.Get().view<sh::Transform, Player>();
+
+        for (auto& e : view)
+        {
+            auto& t = view.get<sh::Transform>(e);
+            t = m_cam.get().transform;
+            auto packet = sh::Serialize(t, ClientLayer::LocalIDToNet(e));
+            sh::Application::Get().OnEvent(sh::ClientSendPacketEvent(packet));
+        }
+        sh::Renderer::EndScene();
+    }
+
+private:
+    std::reference_wrapper<sh::PerspectiveCamera> m_cam;
+};
 
 inline void DeathSystem(sh::Scene& scene)
 {
@@ -51,15 +78,28 @@ public:
     DrawSystem(std::reference_wrapper<sh::PerspectiveCamera> camera)
         : m_cam(std::move(camera))
     {
-        m_shader = sh::Shader::Create("res/shader/Texture3D.glsl");
-        m_texture = sh::Texture2D::Create("res/image.png");
+        m_shader = sh::Shader::Create("res/shader/Voxel.glsl");
+        //m_texture = sh::Texture2D::Create("res/image.png");
+        m_texture = sh::ArrayTexture2D::Create(2,2,"res/texture.png");
 
-        auto vbo = sh::VertexBuffer::Create(cubeVertices,sizeof cubeVertices);
-        vbo->AddElement({sh::ShaderDataType::Float3, "aPos"});
-        vbo->AddElement({sh::ShaderDataType::Float2, "aTex",true});
+        // Create a block
+        float vertices[attributeCount * 4 * 6];
+        unsigned offset = 0;
+        for(int i = 0; i < 6; i++)
+        {
+            auto data = GenerateFaceVertices(FaceDir(i),0,0,0,i % 4);
+            memcpy_s(
+                &vertices[offset],
+                attributeCount * 4 * sizeof(float),
+                data.data(),
+                attributeCount * 4 * sizeof(float));
+            offset += attributeCount * 4;
+        }
+        auto vbo = sh::VertexBuffer::Create(
+            vertices, sizeof(vertices));
+        FillFaceVBOElements(vbo);
 
-        auto ebo = sh::IndexBuffer::Create(
-            cubeIndices, sizeof cubeIndices / sizeof cubeIndices[0]);
+        const auto ebo = GenerateIndices<6>();
 
         m_vao = sh::VertexArray::Create();
         m_vao->AddVertexBuffer(vbo);
@@ -77,7 +117,6 @@ public:
         {
             auto& t = view.get<sh::Transform>(e);
             //auto& sprite = view.get<Sprite>(e);
-            SH_TRACE(t.GetPosition().x);
             sh::Renderer::Submit(m_shader,m_vao,t.GetWorldMatrix());
 
             // Tint player light blue
@@ -87,8 +126,7 @@ public:
     }
 
 private:
-    // To gen implicit constructors
-    // I think references cancel that since we don't know how to copy such thing
+
     std::reference_wrapper<sh::PerspectiveCamera> m_cam;
     sh::ShaderRef m_shader;
     sh::VertexArrayRef m_vao;

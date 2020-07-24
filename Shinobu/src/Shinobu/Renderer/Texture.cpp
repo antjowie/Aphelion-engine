@@ -27,4 +27,13 @@ namespace sh
 
         //return std::shared_ptr<Texture2D>();
     }
+
+    TextureRef ArrayTexture2D::Create(uint32_t x, uint32_t y, const char* path)
+    {
+        switch (RendererAPI::GetAPI())
+        {
+        case RendererAPI::API::None: SH_CORE_CRITICAL("Array Texture 2D None not yet implemented");
+        case RendererAPI::API::OpenGL: return std::make_shared<OpenGLArrayTexture2D>(x,y,path);
+        }
+    }
 }

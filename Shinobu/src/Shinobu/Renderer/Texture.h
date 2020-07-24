@@ -37,4 +37,12 @@ namespace sh
         static TextureRef Create(uint32_t width, uint32_t height);
         static TextureRef Create(const char* path);
     };
+
+    class SHINOBU_API ArrayTexture2D : public Texture
+    {
+    public:
+        static TextureRef Create(uint32_t x, uint32_t y, const char* path);
+
+        virtual void SetLayer(unsigned layer) = 0;
+    };
 }

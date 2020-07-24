@@ -25,7 +25,7 @@ sh::Entity ClientLayer::NetIDtoLocal(sh::Entity netID)
 
 void ClientLayer::OnAttach()
 {
-    m_scene.RegisterSystem(InputSystem);
+    m_scene.RegisterSystem(InputSystem(m_camera.GetCamera()));
     m_scene.RegisterSystem(DeathSystem);
     m_scene.RegisterSystem(DrawSystem(m_camera.GetCamera()));
 
