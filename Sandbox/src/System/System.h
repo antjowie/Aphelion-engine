@@ -54,11 +54,12 @@ public:
         m_shader = sh::Shader::Create("res/shader/Texture3D.glsl");
         m_texture = sh::Texture2D::Create("res/image.png");
 
-        auto vbo = sh::VertexBuffer::Create(planeVertices,sizeof planeVertices);
+        auto vbo = sh::VertexBuffer::Create(cubeVertices,sizeof cubeVertices);
         vbo->AddElement({sh::ShaderDataType::Float3, "aPos"});
         vbo->AddElement({sh::ShaderDataType::Float2, "aTex",true});
 
-        auto ebo = sh::IndexBuffer::Create(planeIndices, sizeof planeIndices / sizeof planeIndices[0]);
+        auto ebo = sh::IndexBuffer::Create(
+            cubeIndices, sizeof cubeIndices / sizeof cubeIndices[0]);
 
         m_vao = sh::VertexArray::Create();
         m_vao->AddVertexBuffer(vbo);
