@@ -5,8 +5,23 @@ project(Sandbox VERSION 1.0
 )
 
 add_executable(Sandbox
-    src/Sandbox.cpp    
+    src/Component/Component.h
+
+    src/Layer/Client.cpp
+    src/Layer/Client.h
+    src/Layer/MainMenu.h
+    src/Layer/SceneStats.h
+    src/Layer/Server.h
+    src/Layer/Server.cpp
+
+    src/System/System.h
+
+    src/Entry.cpp
+    src/PacketBuffer.h
+    src/Primitives.h
 )
+
+target_include_directories(Sandbox PUBLIC src)
 
 # We don't need to copy a static lib to the executable directory
 if(BUILD_SHARED_LIBS)

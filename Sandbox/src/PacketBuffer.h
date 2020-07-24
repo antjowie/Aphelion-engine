@@ -1,5 +1,5 @@
 #pragma once
-#include <Shinobu/Net/Packet.h>
+#include "Shinobu/Net/Packet.h"
 #include <map>
 
 /**

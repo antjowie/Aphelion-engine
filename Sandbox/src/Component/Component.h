@@ -39,20 +39,6 @@ template <typename S> void serialize(S& s, Health& o)
     s.value4b(o.health);
 }
 
-struct Transform
-{
-    glm::vec2 pos = glm::vec2(0);
-
-    bool operator==(const Transform& rhs) const { return pos == rhs.pos; }
-};
-
-template <typename S>
-void serialize(S& s, Transform& o)
-{
-    s.value4b(o.pos.x);
-    s.value4b(o.pos.y);
-}
-
 struct Sprite
 {
     void LoadTexture() { tex = sh::Texture2D::Create(image.c_str()); }

@@ -13,7 +13,9 @@ namespace sh
     class SHINOBU_API Transform
     {
     public:
-        Transform();
+        Transform(
+            const glm::vec3& pos   = glm::vec3(0.f), 
+            const glm::vec3& euler = glm::vec3(0.f));
         
         static constexpr glm::vec3 GetWorldUp() { return glm::vec3(0, 1, 0); }
         static constexpr glm::vec3 GetWorldRight() { return glm::vec3(1, 0, 0); }
@@ -39,6 +41,7 @@ namespace sh
         glm::mat4 GetWorldMatrix() const;
 
         friend bool operator==(const Transform&, const Transform&);
+        template <typename S> friend void serialize(S& s, Transform& t);
 
     private:
         glm::vec3 m_position;
@@ -48,6 +51,21 @@ namespace sh
     inline bool operator==(const Transform& lhs, const Transform& rhs)
     {
         return lhs.m_position == rhs.m_position && lhs.m_euler == rhs.m_euler;
+    }
+
+    template <typename S>
+    void serialize(S& s, glm::vec3& v)
+    {
+        s.value4b(v.x);
+        s.value4b(v.y);
+        s.value4b(v.z);
+    }
+
+    template <typename S>
+    void serialize(S& s, Transform& t)
+    {
+        serialize(s, t.m_position);
+        serialize(s, t.m_euler);
     }
 
     inline glm::vec3& Degrees(glm::vec3& radians) { return radians = radians / glm::pi<float>() * 180.f; }

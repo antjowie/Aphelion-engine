@@ -5,9 +5,9 @@
 
 namespace sh
 {
-    sh::Transform::Transform()
-        : m_position(0)
-        , m_euler(0)
+    sh::Transform::Transform(const glm::vec3& pos, const glm::vec3& euler)
+        : m_position(pos)
+        , m_euler(euler)
     {
     }
 
