@@ -130,10 +130,6 @@ namespace sh
 		SH_CORE_ASSERT(internalFormat & dataFormat, "Format not supported!");
 
         // Convert raw texture data to data that we can interpret
-		//glTextureStorage2D(m_id, 1, internalFormat, m_width, m_height);
-		//glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, dataFormat, GL_UNSIGNED_BYTE, data);
-        //stbi_image_free(data);
-
         const unsigned texSize = width / x;
         auto image{ std::make_unique<unsigned char[]>(width * height * channels) };
 
@@ -172,7 +168,7 @@ namespace sh
 
         stbi_image_free(data);
 
-        //glGenerateTextureMipmap(m_id);
+        glGenerateTextureMipmap(m_id);
 
         // Set texture parameters
         glTextureParameteri(m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);

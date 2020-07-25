@@ -25,7 +25,7 @@ namespace sh
 	void Renderer2D::Init()
     {
         // Set up shader
-        data.shader = Shader::Create("res/shaders/Texture2D.glsl");
+        data.shader = Shader::Create("res/shader/Texture2D.glsl");
         data.whiteTexture = Texture2D::Create(1, 1);
 
         uint32_t white = 0xffffffff;
