@@ -5,22 +5,30 @@ project(Sandbox VERSION 1.0
 )
 
 add_executable(Sandbox
+    src/Block/BlockLibrary.cpp
+    src/Block/BlockLibrary.h
+    src/Block/BlockType.cpp
+    src/Block/BlockType.h
+
+    src/Component/ChunkComponent.h
     src/Component/Component.h
 
     src/Layer/Client.cpp
     src/Layer/Client.h
     src/Layer/MainMenu.h
     src/Layer/SceneStats.h
-    src/Layer/Server.h
     src/Layer/Server.cpp
+    src/Layer/Server.h
 
+    src/System/ChunkSystem.h
     src/System/System.h
 
     src/Entry.cpp
     src/PacketBuffer.h
-    src/Primitives.h
     src/Primitives.cpp
-)
+    src/Primitives.h
+ 
+ )
 
 target_include_directories(Sandbox PUBLIC src)
 

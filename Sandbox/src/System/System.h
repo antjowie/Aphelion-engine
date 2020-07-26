@@ -83,17 +83,17 @@ public:
         m_texture = sh::ArrayTexture2D::Create(2,2,"res/texture.png");
 
         // Create a block
-        float vertices[attributeCount * 4 * 6];
+        float vertices[faceAttributeCount * 4 * 6];
         unsigned offset = 0;
         for(int i = 0; i < 6; i++)
         {
             auto data = GenerateFaceVertices(FaceDir(i),0,0,0,i % 4);
             memcpy_s(
                 &vertices[offset],
-                attributeCount * 4 * sizeof(float),
+                faceAttributeCount * 4 * sizeof(float),
                 data.data(),
-                attributeCount * 4 * sizeof(float));
-            offset += attributeCount * 4;
+                faceAttributeCount * 4 * sizeof(float));
+            offset += faceAttributeCount * 4;
         }
         auto vbo = sh::VertexBuffer::Create(
             vertices, sizeof(vertices));
@@ -112,6 +112,8 @@ public:
         auto view = reg.Get().view<sh::Transform, Sprite>();
 
         m_texture->Bind();
+
+        // TODO: Move BeginScene to Layer
         sh::Renderer::BeginScene(m_cam);
         for (auto& e : view)
         {

@@ -80,6 +80,11 @@ namespace sh
         m_indexBuffer = buffer;
     }
 
+    VertexBufferRef OpenGLVertexArray::GetVertexBuffer(unsigned index)
+    {
+        return m_buffers[index];
+    }
+
     const std::shared_ptr<IndexBuffer>& OpenGLVertexArray::GetIndexBuffer() const
     {
         return m_indexBuffer;

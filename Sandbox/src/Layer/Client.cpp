@@ -1,7 +1,9 @@
 #include "Client.h"
 #include "SceneStats.h"
 #include "Component/Component.h"
+#include "Component/ChunkComponent.h"
 #include "System/System.h"
+#include "System/ChunkSystem.h"
 
 #include "Shinobu/Core/Application.h"
 #include "Shinobu/Event/NetEvent.h"
@@ -28,6 +30,23 @@ void ClientLayer::OnAttach()
     m_scene.RegisterSystem(InputSystem(m_camera.GetCamera()));
     m_scene.RegisterSystem(DeathSystem);
     m_scene.RegisterSystem(DrawSystem(m_camera.GetCamera()));
+
+    m_scene.RegisterSystem(ChunkGenerateSystem);
+    m_scene.RegisterSystem(ChunkRenderSystem(m_camera.GetCamera()));
+
+    // TEMP: Spawn some nice chunks here
+    auto& reg = m_scene.GetRegistry();
+
+    for(int x = -2; x < 2; x++)
+        for(int z = -2; z < 2; z++)
+        {
+            auto entity = reg.Create();
+            auto& data = reg.Get().emplace<ChunkDataComponent>(entity);
+            reg.Get().emplace<ChunkMeshComponent>(entity);
+            reg.Get().emplace<ChunkModifiedComponent>(entity);
+
+            data.pos = glm::vec3(x * chunkDimensions.x, -10.f, z * chunkDimensions.z);
+        }
 
     m_scene.SetOnEntityCreateCb([this](sh::Entity entity)
     {

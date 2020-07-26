@@ -67,10 +67,10 @@ namespace Vertices
 #endif
 
 // pos3 nor3 tex2 texIndex1
-constexpr unsigned attributeCount {3 + 3 + 2 + 1};
-using FaceVertices = std::array<float, 4 * attributeCount>;
+constexpr unsigned faceAttributeCount {3 + 3 + 2 + 1};
+using FaceVertices = std::array<float, 4 * faceAttributeCount>;
 using FaceIndices = std::array<unsigned, 6>;
-using CubeVertices = std::array<float, 8 * attributeCount>;
+using CubeVertices = std::array<float, 8 * faceAttributeCount>;
 using CubeIndices = std::array<unsigned, 3 * 2 * 6>;
 
 /// We assume left handed coordinate system
@@ -81,7 +81,9 @@ enum FaceDir
     Left,
     Right,
     Back,
-    Front
+    Front,
+
+    Count
 };
 
 FaceVertices GenerateFaceVertices(FaceDir dir, float x, float y, float z, float texIndex);
@@ -94,11 +96,37 @@ inline void FillFaceVBOElements(sh::VertexBufferRef& buffer)
 }
 
 template <unsigned faceCount>
-inline sh::IndexBufferRef GenerateIndices()
+sh::IndexBufferRef GenerateIndices()
 {
     constexpr auto elementCount = faceCount * 6u;
 
     std::array<unsigned,elementCount> ebo;
+    unsigned offset = 0;
+    for (unsigned i = 0; i < elementCount; i += 6)
+    {
+        ebo[i + 0] = 3 + offset;
+        ebo[i + 1] = 0 + offset;
+        ebo[i + 2] = 1 + offset;
+        ebo[i + 3] = 3 + offset;
+        ebo[i + 4] = 1 + offset;
+        ebo[i + 5] = 2 + offset;
+
+        //std::vector<unsigned> indices { 3 + offset,0 + offset,1 + offset,3 + offset,1 + offset,2 + offset };
+        //ebo.insert(ebo.end(), indices.begin(), indices.end());
+        //memcpy(&ebo[i], indices, 6 * sizeof(unsigned));
+        offset += 4;
+    }
+
+    return sh::IndexBuffer::Create(ebo.data(),ebo.size());
+}
+
+/// The runtime variant
+inline sh::IndexBufferRef GenerateIndices(unsigned faceCount)
+{
+    auto elementCount = faceCount * 6u;
+
+    std::vector<unsigned> ebo;
+    ebo.resize(elementCount);
     unsigned offset = 0;
     for (unsigned i = 0; i < elementCount; i += 6)
     {

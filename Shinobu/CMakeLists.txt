@@ -39,7 +39,8 @@ add_library(Shinobu
     src/Shinobu/ECS/Registry.cpp
     src/Shinobu/ECS/Scene.h
     src/Shinobu/ECS/Scene.cpp
-
+    src/Shinobu/ECS/Serialize.h
+    
     src/Shinobu/ImGui/ImGuiBuild.cpp
     src/Shinobu/ImGui/ImGuiLayer.h
     src/Shinobu/ImGui/ImGuiLayer.cpp

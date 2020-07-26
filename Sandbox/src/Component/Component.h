@@ -1,11 +1,9 @@
 #pragma once
-
 #include <Shinobu/Renderer/Texture.h>
-
-#include <glm/vec2.hpp>
 
 #include <string>
 
+#include "Shinobu/Core/Transform.h"
 
 // This si an invalid component type since it isnt' move constructibel tho I thought it could be used this way
 //using Player = entt::tag<"Player"_hs>();
@@ -59,4 +57,12 @@ void serialize(S& s, Sprite& o)
     s.text1b(o.image, pathSize);
 
     if (!o.tex) { o.LoadTexture(); }
+}
+
+inline void RegisterComponents()
+{
+    sh::Registry::RegisterComponent<Player>();
+    sh::Registry::RegisterComponent<sh::Transform>();
+    sh::Registry::RegisterComponent<Sprite>();
+    sh::Registry::RegisterComponent<Health>();
 }

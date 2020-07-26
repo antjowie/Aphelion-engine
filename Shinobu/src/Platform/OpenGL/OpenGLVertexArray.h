@@ -20,6 +20,8 @@ namespace sh
         virtual void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& buffer) override final;
         virtual void SetIndexBuffer(const std::shared_ptr<IndexBuffer>& buffer) override final;
 
+        VertexBufferRef GetVertexBuffer(unsigned index) override;
+
         virtual const std::shared_ptr<IndexBuffer>& GetIndexBuffer() const;
 
     private:
