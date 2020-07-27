@@ -27,6 +27,7 @@ class BlockLibrary
 public:
     static void AddBlockData(BlockType id, BlockData&& data)
     {
+        SH_CORE_ASSERT(m_library.count(id) == 0,"Already added this block");
         m_library[id] = data;
     }
     static const BlockData& GetBlockData(BlockType id)

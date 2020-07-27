@@ -45,7 +45,7 @@ void ClientLayer::OnAttach()
             reg.Get().emplace<ChunkMeshComponent>(entity);
             reg.Get().emplace<ChunkModifiedComponent>(entity);
 
-            data.pos = glm::vec3(x * chunkDimensions.x, -10.f, z * chunkDimensions.z);
+            data.pos = glm::vec3(x * chunkDimensions.x, -40.f, z * chunkDimensions.z);
         }
 
     m_scene.SetOnEntityCreateCb([this](sh::Entity entity)

@@ -8,8 +8,7 @@
 #include <Shinobu/Renderer/Renderer.h>
 #include <Shinobu/Renderer/Texture.h>
 
-
-void GenerateChunk(ChunkDataComponent& chunk)
+inline void GenerateChunk(ChunkDataComponent& chunk)
 {
     ForEach(chunk.chunk,[](BlockType& block, int x, int y, int z)
         {
@@ -25,7 +24,7 @@ void GenerateChunk(ChunkDataComponent& chunk)
         });
 }
 
-void GenerateChunkMesh(const ChunkDataComponent& chunk, sh::VertexArrayRef& vao)
+inline void GenerateChunkMesh(const ChunkDataComponent& chunk, sh::VertexArrayRef& vao)
 {
     // Generate face chunk
     constexpr auto faceElemCount = faceAttributeCount * 4u;
@@ -38,6 +37,8 @@ void GenerateChunkMesh(const ChunkDataComponent& chunk, sh::VertexArrayRef& vao)
         {
             for(int i = 0; i < FaceDir::Count; i++)
             {
+                if(block == BlockType::Air) continue;
+
                 auto vertices = GenerateFaceVertices(FaceDir(i),x,y,z,BlockLibrary::GetBlockData(block).texIndices[i]);
                 memcpy_s(
                     &chunkData[elemIndex],
@@ -60,10 +61,10 @@ void GenerateChunkMesh(const ChunkDataComponent& chunk, sh::VertexArrayRef& vao)
         vao->AddVertexBuffer(vbo);
     }
 
-    auto& vbo = vao->GetVertexBuffer(0);
+    auto vbo = vao->GetVertexBuffer(0);
     vbo->SetData(chunkData,elemIndex * sizeof(float));
 
-    vao->SetIndexBuffer(GenerateIndices(chunkCount/6u));
+    vao->SetIndexBuffer(GenerateIndices(chunkCount*6u));
 }
 
 /**
