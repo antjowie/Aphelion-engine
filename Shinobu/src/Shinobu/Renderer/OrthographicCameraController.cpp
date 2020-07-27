@@ -28,6 +28,8 @@ namespace sh
         if (Input::IsKeyPressed(KeyCode::S)) offset += -up;
         if (Input::IsKeyPressed(KeyCode::D)) offset += right;
 
+        if(Input::IsKeyPressed(KeyCode::LeftShift)) offset *= 10.f;
+
         m_camera.SetPosition(m_camera.GetPosition() + glm::vec3(offset,0.f) * ts.Seconds());
 
         float degrees = 0.f;

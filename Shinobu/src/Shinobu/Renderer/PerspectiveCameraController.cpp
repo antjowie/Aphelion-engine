@@ -33,6 +33,8 @@ namespace sh
         if (Input::IsKeyPressed(KeyCode::E)) offset += up;
         if (Input::IsKeyPressed(KeyCode::Q)) offset += -up;
 
+        if(Input::IsKeyPressed(KeyCode::LeftShift)) offset *= 10.f;
+
         m_camera.transform.SetPosition(m_camera.transform.GetPosition() + offset * ts.Seconds() * 5.f);
     }
 

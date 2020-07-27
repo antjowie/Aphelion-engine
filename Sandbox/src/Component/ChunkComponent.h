@@ -7,55 +7,35 @@
 #include <Shinobu/ECS/Serialize.h>
 
 #include <glm/vec3.hpp>
+#include <vector>
 
 #include <bitsery/traits/array.h>
-
 
 /// IVec so that we can use it easily in calculations
 constexpr glm::ivec3 chunkDimensions {32,32,32};
 constexpr unsigned chunkCount = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
 /// TODO: Instead of using default alloc, create a ChunkAlloc
-template <typename T>
-using ChunkSlice = std::vector<T>;
-using ChunkContainer =
+//template <typename T>
+//using ChunkSlice = std::vector<T>;
+using ChunkContainer = std::vector<BlockType>;
     //ChunkSlice<ChunkSlice<ChunkSlice<BlockType,chunkDimensions.z>,chunkDimensions.y>, chunkDimensions.x>;
-    ChunkSlice<ChunkSlice<ChunkSlice<BlockType>>>;
-
-/**
- * Expected parameters
- * block& x y z
- */
-template <typename Callable>
-void ForEach(ChunkContainer& chunk, Callable& callable)
-{
-    for(auto x = 0; x < chunkDimensions.x; x++)
-        for(auto y = 0; y < chunkDimensions.y; y++)
-            for(auto z = 0; z < chunkDimensions.z; z++)
-                callable(chunk[x][y][x],x,y,z);
-}
-
-template <typename Callable>
-void ForEach(const ChunkContainer& chunk, Callable& callable)
-{
-    for(auto x = 0; x < chunkDimensions.x; x++)
-        for(auto y = 0; y < chunkDimensions.y; y++)
-            for(auto z = 0; z < chunkDimensions.z; z++)
-                callable(chunk[x][y][x],x,y,z);
-}
+    //ChunkSlice<ChunkSlice<ChunkSlice<BlockType>>>;
 
 struct ChunkDataComponent
 {
     ChunkDataComponent()
+        : pos(0)
     {
-        chunk.resize(chunkDimensions.x);
-        for(int x = 0; x < chunkDimensions.x; x++)
-        {
-            chunk[x].resize(chunkDimensions.y);
-            for(int y = 0; y < chunkDimensions.y; y++)
-            {
-                chunk[x][y].resize(chunkDimensions.z);
-            }
-        }            
+        chunk.resize(chunkCount);
+        //chunk.resize(chunkDimensions.x);
+        //for(int x = 0; x < chunkDimensions.x; x++)
+        //{
+        //    chunk[x].resize(chunkDimensions.y);
+        //    for(int y = 0; y < chunkDimensions.y; y++)
+        //    {
+        //        chunk[x][y].resize(chunkDimensions.z);
+        //    }
+        //}
     }
 
     glm::vec3 pos;
@@ -103,6 +83,39 @@ struct ChunkModifiedComponent
 template <typename S>
 void serialize(S& s, ChunkModifiedComponent& o)
 {
+}
+
+inline BlockType& GetBlock(ChunkContainer& chunk, unsigned x, unsigned y, unsigned z)
+{
+    return chunk.at((x * chunkDimensions.x * chunkDimensions.y) + (y * chunkDimensions.y) + z);
+}
+
+inline const BlockType& GetBlock(const ChunkContainer& chunk, unsigned x, unsigned y, unsigned z)
+{
+    return chunk.at((x * chunkDimensions.x * chunkDimensions.y) + (y * chunkDimensions.y) + z);
+}
+
+/**
+ * Expected parameters
+ * block& x y z
+ */
+template <typename Callable>
+void ForEach(ChunkContainer& chunk, Callable& callable)
+{
+    for(auto x = 0; x < chunkDimensions.x; x++)
+        for(auto y = 0; y < chunkDimensions.y; y++)
+            for(auto z = 0; z < chunkDimensions.z; z++)
+                callable(GetBlock(chunk,x,y,z),x,y,z);
+                //callable(chunk[x][y][x],x,y,z);
+}
+
+template <typename Callable>
+void ForEach(const ChunkContainer& chunk, Callable& callable)
+{
+    for(auto x = 0; x < chunkDimensions.x; x++)
+        for(auto y = 0; y < chunkDimensions.y; y++)
+            for(auto z = 0; z < chunkDimensions.z; z++)
+                callable(GetBlock(chunk,x,y,z),x,y,z);
 }
 
 inline void RegisterChunkComponents()

@@ -50,9 +50,8 @@ inline void ChunkGenerateSystem(sh::Scene& scene)
         // Generate the chunk vao
         GenerateChunkMesh(chunk,mesh.vao);
 
-        reg.remove<ChunkModifiedComponent>(entity);
-
         // We only do one chunk per frame for now
+        reg.remove<ChunkModifiedComponent>(entity);
         break;
     }
 }

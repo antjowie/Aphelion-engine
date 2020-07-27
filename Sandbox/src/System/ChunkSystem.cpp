@@ -25,6 +25,7 @@ void GenerateChunkMesh(const ChunkDataComponent& chunk, sh::VertexArrayRef& vao)
     // Essentially, this never gets deleted. But the size is always constant so it would be a waste to deallocate it
     // We can't allocate on the stack, it will cause an overflow. I think the limit is 1mb and we reach 6,75 with 32x32x32
     static auto chunkData = std::make_unique<float[]>(chunkElemCount);
+    //static float* chunkData = new float[chunkElemCount];
     //float chunkData[chunkElemCount];
 
     unsigned elemIndex = 0;
