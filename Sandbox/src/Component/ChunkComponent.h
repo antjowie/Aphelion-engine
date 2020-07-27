@@ -12,23 +12,21 @@
 
 
 /// IVec so that we can use it easily in calculations
-constexpr glm::ivec3 chunkDimensions {4,32,4};
+constexpr glm::ivec3 chunkDimensions {32,32,32};
 constexpr unsigned chunkCount = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
-/**
- * TODO: We probably want to create a memory pool for the chunks
- * Unless chunks are not too big.
- */
-template <typename T, unsigned size>
-using ChunkSlice = std::array<T, size>;
-using ChunkArray =
-    ChunkSlice<ChunkSlice<ChunkSlice<BlockType,chunkDimensions.z>,chunkDimensions.y>, chunkDimensions.x>;
+/// TODO: Instead of using default alloc, create a ChunkAlloc
+template <typename T>
+using ChunkSlice = std::vector<T>;
+using ChunkContainer =
+    //ChunkSlice<ChunkSlice<ChunkSlice<BlockType,chunkDimensions.z>,chunkDimensions.y>, chunkDimensions.x>;
+    ChunkSlice<ChunkSlice<ChunkSlice<BlockType>>>;
 
 /**
  * Expected parameters
  * block& x y z
  */
 template <typename Callable>
-void ForEach(ChunkArray& chunk, Callable& callable)
+void ForEach(ChunkContainer& chunk, Callable& callable)
 {
     for(auto x = 0; x < chunkDimensions.x; x++)
         for(auto y = 0; y < chunkDimensions.y; y++)
@@ -37,7 +35,7 @@ void ForEach(ChunkArray& chunk, Callable& callable)
 }
 
 template <typename Callable>
-void ForEach(const ChunkArray& chunk, Callable& callable)
+void ForEach(const ChunkContainer& chunk, Callable& callable)
 {
     for(auto x = 0; x < chunkDimensions.x; x++)
         for(auto y = 0; y < chunkDimensions.y; y++)
@@ -47,9 +45,22 @@ void ForEach(const ChunkArray& chunk, Callable& callable)
 
 struct ChunkDataComponent
 {
+    ChunkDataComponent()
+    {
+        chunk.resize(chunkDimensions.x);
+        for(int x = 0; x < chunkDimensions.x; x++)
+        {
+            chunk[x].resize(chunkDimensions.y);
+            for(int y = 0; y < chunkDimensions.y; y++)
+            {
+                chunk[x][y].resize(chunkDimensions.z);
+            }
+        }            
+    }
+
     glm::vec3 pos;
 
-    ChunkArray chunk;
+    ChunkContainer chunk;
 
     bool operator==(const ChunkDataComponent& rhs) const
     {

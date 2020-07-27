@@ -8,64 +8,8 @@
 #include <Shinobu/Renderer/Renderer.h>
 #include <Shinobu/Renderer/Texture.h>
 
-inline void GenerateChunk(ChunkDataComponent& chunk)
-{
-    ForEach(chunk.chunk,[](BlockType& block, int x, int y, int z)
-        {
-            // TODO: Refactor to chunk strategy
-            if(y > 25)
-                block = BlockType::Air;
-            else if (y == 25)
-                block = BlockType::Grass;
-            else if (y > 21)
-                block = BlockType::Dirt;
-            else
-                block = BlockType::Stone;
-        });
-}
-
-inline void GenerateChunkMesh(const ChunkDataComponent& chunk, sh::VertexArrayRef& vao)
-{
-    // Generate face chunk
-    constexpr auto faceElemCount = faceAttributeCount * 4u;
-    constexpr auto chunkElemCount = chunkCount * faceElemCount * 6u;
-    float chunkData[chunkElemCount];
-
-    unsigned elemIndex = 0;
-    // Just generate every block in the chunk
-    ForEach(chunk.chunk,[&](const BlockType& block, int x, int y, int z)
-        {
-            for(int i = 0; i < FaceDir::Count; i++)
-            {
-                if(block == BlockType::Air) continue;
-
-                auto vertices = GenerateFaceVertices(FaceDir(i),x,y,z,BlockLibrary::GetBlockData(block).texIndices[i]);
-                memcpy_s(
-                    &chunkData[elemIndex],
-                    faceElemCount * sizeof(float),
-                    vertices.data(),
-                    faceElemCount * sizeof(float)
-                    );
-                elemIndex += faceElemCount;
-            }
-        });
-
-    // First time we generate this chunk
-    if(!vao)
-    {
-        vao = sh::VertexArray::Create();
-
-        auto vbo = sh::VertexBuffer::Create(chunkElemCount * sizeof(float));
-        FillFaceVBOElements(vbo);
-
-        vao->AddVertexBuffer(vbo);
-    }
-
-    auto vbo = vao->GetVertexBuffer(0);
-    vbo->SetData(chunkData,elemIndex * sizeof(float));
-
-    vao->SetIndexBuffer(GenerateIndices(chunkCount*6u));
-}
+void GenerateChunk(ChunkDataComponent& chunk);
+void GenerateChunkMesh(const ChunkDataComponent& chunk, sh::VertexArrayRef& vao);
 
 /**
  * A system that decides which chunks to generate (and to remove)
