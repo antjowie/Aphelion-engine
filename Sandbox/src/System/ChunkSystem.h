@@ -42,9 +42,7 @@ inline void ChunkGenerateSystem(sh::Scene& scene)
             view.get<ChunkDataComponent, ChunkMeshComponent,ChunkModifiedComponent>(entity);
 
         // TODO: Note for next time. Chunks cause stack overflow.
-        // They also render incorrectly. Go debug!
-
-        // TEMP: Generate the chunk chunk
+        // TEMP: Generate the chunk block data
         GenerateChunk(chunk);
 
         // Generate the chunk vao

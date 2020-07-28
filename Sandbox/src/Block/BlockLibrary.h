@@ -9,11 +9,6 @@ using TexIndices = std::array<unsigned,FaceDir::Count>;
 
 struct BlockData
 {
-    BlockData() = default;
-    BlockData(const TexIndices& texIndices)
-        : texIndices(texIndices)
-    {}
-
     TexIndices texIndices;
 };
 
