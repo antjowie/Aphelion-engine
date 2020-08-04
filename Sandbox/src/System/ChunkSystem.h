@@ -30,23 +30,45 @@ inline void ChunkStrategySystem(sh::Scene& scene)
 }
 
 /**
- * A system to create chunks and their data and mesh
+ * A server side system to create chunks and their data
  */
 inline void ChunkGenerateSystem(sh::Scene& scene)
 {
     auto& reg = scene.GetRegistry().Get();
-    auto view = reg.view<ChunkDataComponent, ChunkMeshComponent,ChunkModifiedComponent>();
+    auto view = reg.view<ChunkSpawnComponent>();
     for(auto entity : view)
     {
-        auto& [chunk,mesh,flag] = 
-            view.get<ChunkDataComponent, ChunkMeshComponent,ChunkModifiedComponent>(entity);
+        auto& spawnRequest = view.get<ChunkSpawnComponent>(entity);
 
-        // TODO: Note for next time. Chunks cause stack overflow.
-        // TEMP: Generate the chunk block data
-        GenerateChunk(chunk);
+
+        auto& chunkData = reg.get_or_emplace<ChunkDataComponent>(entity);
+
+        if (chunkData.chunk.empty())
+        {
+            chunkData.chunk.resize(chunkCount);
+            chunkData.pos = spawnRequest.pos;
+            GenerateChunk(chunkData);
+
+            // TEMP: add modified component, this should be send
+            reg.emplace<ChunkModifiedComponent>(entity);
+        }
+    }
+}
+
+/**
+ * A client side system to create chunks and their data
+ */
+inline void ChunkMeshBuilderSystem(sh::Scene& scene)
+{
+    auto& reg = scene.GetRegistry().Get();
+    auto view = reg.view<ChunkDataComponent, ChunkModifiedComponent>();
+    for (auto entity : view)
+    {
+        auto& chunk = view.get<ChunkDataComponent>(entity);
 
         // Generate the chunk vao
-        GenerateChunkMesh(chunk,mesh.vao);
+        auto& mesh = reg.get_or_emplace<ChunkMeshComponent>(entity);
+        GenerateChunkMesh(chunk, mesh.vao);
 
         // We only do one chunk per frame for now
         reg.remove<ChunkModifiedComponent>(entity);

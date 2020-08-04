@@ -35,11 +35,12 @@ add_library(Shinobu
     src/Shinobu/Event/MouseEvent.h
     src/Shinobu/Event/NetEvent.h
     
+    
     src/Shinobu/ECS/Registry.h
     src/Shinobu/ECS/Registry.cpp
     src/Shinobu/ECS/Scene.h
     src/Shinobu/ECS/Scene.cpp
-    src/Shinobu/ECS/Serialize.h
+    
     
     src/Shinobu/ImGui/ImGuiBuild.cpp
     src/Shinobu/ImGui/ImGuiLayer.h

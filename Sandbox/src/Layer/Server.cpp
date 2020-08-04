@@ -2,12 +2,14 @@
 #include "System/System.h"
 #include "SceneStats.h"
 #include "Component/Component.h"
+#include "Component/ServerComponent.h"
 
-#include "Shinobu/Core/Application.h"
-#include "Shinobu/Event/NetEvent.h"
-#include "Shinobu/Net/Server.h"
-#include "Shinobu/Net/ServerLayer.h"
+#include <Shinobu/Core/Application.h>
+#include <Shinobu/Event/NetEvent.h>
+#include <Shinobu/Net/Server.h>
+#include <Shinobu/Net/ServerLayer.h>
 
+#include "Component/ChunkComponent.h"
 
 void ServerLayer::OnEvent(sh::Event& event)
 {
@@ -95,6 +97,17 @@ void ServerLayer::OnAttach()
     //m_reg.RegisterSystem(DrawSystem(m_camera.GetCamera()));
     m_scene.RegisterSystem(DeathSystem);
     sh::Application::Get().OnEvent(sh::ServerHostRequestEvent(25565));
+
+    // TEMP: Spawn some nice chunks here
+    auto& reg = m_scene.GetRegistry();
+
+    for (int x = 0; x < 2; x++)
+        {
+            auto entity = reg.Create();
+            auto& data = reg.Get().emplace<ChunkDataComponent>(entity);
+
+            data.pos = glm::vec3(x * chunkDimensions.x, -40.f, x * chunkDimensions.z);
+        }
 }
 
 void ServerLayer::OnDetach()
@@ -111,7 +124,20 @@ void ServerLayer::OnUpdate(sh::Timestep ts)
     m_packets.Swap();
     while (m_packets.Poll(p))
     {
-        m_scene.GetRegistry().HandlePacket(sh::Entity(p.entity), p);
+        auto& reg = m_scene.GetRegistry();
+        // Check if entity exists in our scene (created on server)
+        if (reg.Get().valid(sh::Entity(p.entity)))
+        {
+            reg.HandlePacket(sh::Entity(p.entity), p);
+        }
+        // This means that the client created a request
+        else
+        {
+            auto entity = reg.Create();
+            
+            reg.Get().emplace<SenderComponent>(entity, p.sender, sh::Entity(p.entity));
+            reg.HandlePacket(entity, p);
+        }
     }
     m_scene.Simulate(ts);
 

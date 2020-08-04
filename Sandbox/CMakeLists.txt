@@ -29,7 +29,7 @@ add_executable(Sandbox
     src/Primitives.cpp
     src/Primitives.h
  
- )
+  "src/Component/ServerComponent.h")
 
 target_include_directories(Sandbox PUBLIC src)
 

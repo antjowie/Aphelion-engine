@@ -4,7 +4,6 @@
 #include <Shinobu/Core/Transform.h>
 #include <Shinobu/Renderer/VertexArray.h>
 #include <Shinobu/ECS/Registry.h>
-#include <Shinobu/ECS/Serialize.h>
 
 #include <glm/vec3.hpp>
 #include <vector>
@@ -26,64 +25,41 @@ struct ChunkDataComponent
     ChunkDataComponent()
         : pos(0)
     {
-        chunk.resize(chunkCount);
-        //chunk.resize(chunkDimensions.x);
-        //for(int x = 0; x < chunkDimensions.x; x++)
-        //{
-        //    chunk[x].resize(chunkDimensions.y);
-        //    for(int y = 0; y < chunkDimensions.y; y++)
-        //    {
-        //        chunk[x][y].resize(chunkDimensions.z);
-        //    }
-        //}
     }
 
     glm::vec3 pos;
-
     ChunkContainer chunk;
 
-    bool operator==(const ChunkDataComponent& rhs) const
-    {
-        return true;
-    }
+    bool operator==(const ChunkDataComponent& rhs) const { return true; }
 };
 
 template <typename S>
 void serialize(S& s, ChunkDataComponent& o)
 {
-    //serialize(s,o.pos);
-    //s.container1b(o.chunk);
+    sh::serialize(s,o.pos);
+    s.container1b(o.chunk, chunkCount);
 }
+
+struct ChunkSpawnComponent
+{
+    glm::vec3 pos;
+};
+inline bool operator==(const ChunkSpawnComponent& lhs, const ChunkSpawnComponent& rhs) { return true; }
+template <typename S> void serialize(S& s, ChunkSpawnComponent& o) { serialize(s, pos); }
 
 struct ChunkMeshComponent
 {
     sh::VertexArrayRef vao;
-
-    bool operator==(const ChunkMeshComponent& rhs) const
-    {
-        return true;
-    }
 };
-
-template <typename S>
-void serialize(S& s, ChunkMeshComponent& o)
-{
-}
+inline bool operator==(const ChunkMeshComponent& lhs, const ChunkMeshComponent& rhs) { return true; }
+template <typename S> void serialize(S& s, ChunkMeshComponent& o) {}
 
 struct ChunkModifiedComponent
 {
     char empty;
-
-    bool operator==(const ChunkModifiedComponent& rhs) const
-    {
-        return true;
-    }
 };
-
-template <typename S>
-void serialize(S& s, ChunkModifiedComponent& o)
-{
-}
+inline bool operator==(const ChunkModifiedComponent& lhs, const ChunkModifiedComponent& rhs) { return true; }
+template <typename S> void serialize(S& s, ChunkModifiedComponent& o) {}
 
 inline BlockType& GetBlock(ChunkContainer& chunk, unsigned x, unsigned y, unsigned z)
 {
