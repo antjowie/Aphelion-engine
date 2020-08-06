@@ -3,10 +3,13 @@
 #include "Component/ChunkComponent.h"
 #include "Component/Component.h"
 #include "Primitives.h"
+#include "Component/ServerComponent.h"
 
+#include <Shinobu/Core/Application.h>
 #include <Shinobu/ECS/Scene.h>
 #include <Shinobu/Renderer/Renderer.h>
 #include <Shinobu/Renderer/Texture.h>
+#include <Shinobu/Event/NetEvent.h>
 
 void GenerateChunk(ChunkDataComponent& chunk);
 void GenerateChunkMesh(const ChunkDataComponent& chunk, sh::VertexArrayRef& vao);
@@ -16,42 +19,73 @@ void GenerateChunkMesh(const ChunkDataComponent& chunk, sh::VertexArrayRef& vao)
  */
 inline void ChunkStrategySystem(sh::Scene& scene)
 {
-    // Get player pos
     auto& reg = scene.GetRegistry().Get();
-    //auto& player = reg.view<sh::Transform,Player>().get<sh::Transform>();
-    auto playerView = reg.view<sh::Transform,Player>();
-    if(!playerView.empty())
-    {
-        auto& player = playerView.get<sh::Transform>(playerView.front());
+    auto view = reg.view<ChunkSpawnComponent>();
 
-        // Generate chunks around player
-        // TODO: Write this, for now I just manually spawn some chunks
+    for (auto entity : view)
+    {
+        auto& spawnComp = view.get(entity);
+
+        // TODO: These should not be stored as entities
+        // Client will keep requesting entities
+        sh::Application::Get().OnEvent(sh::ClientSendPacketEvent(sh::Serialize(spawnComp, sh::NullEntity, true)));
+        break;
     }
+
+    //auto& player = reg.view<sh::Transform,Player>().get<sh::Transform>();
+    //auto playerView = reg.view<sh::Transform,Player>();
+    //if(!playerView.empty())
+    //{
+    //    auto& player = playerView.get<sh::Transform>(playerView.front());
+
+    //    // Generate chunks around player
+    //    // TODO: Write this, for now I just manually spawn some chunks
+    //}
 }
 
 /**
- * A server side system to create chunks and their data
+ * A server side system to respond on chunk requests
  */
-inline void ChunkGenerateSystem(sh::Scene& scene)
+inline void ChunkRequestResponseSystem(sh::Scene& scene)
 {
     auto& reg = scene.GetRegistry().Get();
-    auto view = reg.view<ChunkSpawnComponent>();
+    auto view = reg.view<ChunkSpawnComponent, SenderComponent>();
     for(auto entity : view)
     {
-        auto& spawnRequest = view.get<ChunkSpawnComponent>(entity);
-
-
-        auto& chunkData = reg.get_or_emplace<ChunkDataComponent>(entity);
-
-        if (chunkData.chunk.empty())
+        auto& [spawnRequest, sender] = view.get<ChunkSpawnComponent,SenderComponent>(entity);
+        
+        // Check if this chunk is already loaded
+        auto chunkView = reg.view<ChunkDataComponent>();
+        ChunkDataComponent* targetChunkData = nullptr;
+        sh::Entity targetChunkEntity;
+        for (auto chunkEntity : chunkView)
         {
+            auto& chunkData = chunkView.get(chunkEntity);
+            if (chunkData.pos == spawnRequest.pos)
+            {
+                targetChunkData = &chunkData;
+                targetChunkEntity = chunkEntity;
+                break;
+            }
+        }
+
+        // If we can't find the chunk in our system, generate it
+        if (!targetChunkData)
+        {
+            auto chunk = reg.create();
+            auto& chunkData = reg.get_or_emplace<ChunkDataComponent>(chunk);
+
             chunkData.chunk.resize(chunkCount);
             chunkData.pos = spawnRequest.pos;
             GenerateChunk(chunkData);
 
-            // TEMP: add modified component, this should be send
-            reg.emplace<ChunkModifiedComponent>(entity);
+            targetChunkData = &chunkData;
+            targetChunkEntity = chunk;
         }
+
+        sh::Application::Get().OnEvent(sh::ServerSendPacketEvent(sh::Serialize(*targetChunkData, targetChunkEntity),sender.peer));
+        sh::Application::Get().OnEvent(sh::ServerSendPacketEvent(sh::Serialize(ChunkModifiedComponent(), targetChunkEntity), sender.peer));
+        reg.destroy(entity);
     }
 }
 

@@ -45,7 +45,7 @@ struct ChunkSpawnComponent
     glm::vec3 pos;
 };
 inline bool operator==(const ChunkSpawnComponent& lhs, const ChunkSpawnComponent& rhs) { return true; }
-template <typename S> void serialize(S& s, ChunkSpawnComponent& o) { serialize(s, pos); }
+template <typename S> void serialize(S& s, ChunkSpawnComponent& o) { sh::serialize(s, o.pos); }
 
 struct ChunkMeshComponent
 {
@@ -99,4 +99,5 @@ inline void RegisterChunkComponents()
     sh::Registry::RegisterComponent<ChunkDataComponent>();
     sh::Registry::RegisterComponent<ChunkMeshComponent>();
     sh::Registry::RegisterComponent<ChunkModifiedComponent>();
+    sh::Registry::RegisterComponent<ChunkSpawnComponent>();
 }

@@ -1,4 +1,5 @@
 #include "Component/ChunkComponent.h"
+#include "Component/ServerComponent.h"
 #include "Component/Component.h"
 
 #include "Layer/MainMenu.h"
@@ -9,6 +10,7 @@
 
 std::unique_ptr<sh::Application> sh::CreateApplication()
 {
+    RegisterServerComponents();
     RegisterChunkComponents();
     RegisterComponents();
 

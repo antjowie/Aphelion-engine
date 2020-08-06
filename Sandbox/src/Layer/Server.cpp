@@ -10,6 +10,7 @@
 #include <Shinobu/Net/ServerLayer.h>
 
 #include "Component/ChunkComponent.h"
+#include "System/ChunkSystem.h"
 
 void ServerLayer::OnEvent(sh::Event& event)
 {
@@ -98,16 +99,18 @@ void ServerLayer::OnAttach()
     m_scene.RegisterSystem(DeathSystem);
     sh::Application::Get().OnEvent(sh::ServerHostRequestEvent(25565));
 
-    // TEMP: Spawn some nice chunks here
-    auto& reg = m_scene.GetRegistry();
+    m_scene.RegisterSystem(ChunkRequestResponseSystem);
 
-    for (int x = 0; x < 2; x++)
-        {
-            auto entity = reg.Create();
-            auto& data = reg.Get().emplace<ChunkDataComponent>(entity);
+    //// TEMP: Spawn some nice chunks here
+    //auto& reg = m_scene.GetRegistry();
 
-            data.pos = glm::vec3(x * chunkDimensions.x, -40.f, x * chunkDimensions.z);
-        }
+    //for (int x = 0; x < 2; x++)
+    //    {
+    //        auto entity = reg.Create();
+    //        auto& data = reg.Get().emplace<ChunkDataComponent>(entity);
+
+    //        data.pos = glm::vec3(x * chunkDimensions.x, -40.f, x * chunkDimensions.z);
+    //    }
 }
 
 void ServerLayer::OnDetach()

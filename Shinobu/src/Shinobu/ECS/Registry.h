@@ -9,6 +9,7 @@
 namespace sh
 {
     using Entity = entt::entity;
+    constexpr auto& NullEntity = entt::null;
 
     class Registry;
 

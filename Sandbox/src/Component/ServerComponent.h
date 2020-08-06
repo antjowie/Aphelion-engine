@@ -4,7 +4,7 @@
 #include <Shinobu/ECS/Registry.h>
 
 #define EMPTY_COMPONENT(Component) \
-        bool operator==(const Component& lhs, const Component& rhs) { return true; } \
+        inline bool operator==(const Component& lhs, const Component& rhs) { return true; } \
         template <typename S> void serialize(S& s, Component& o) {}
 
 struct SenderComponent
@@ -13,3 +13,8 @@ struct SenderComponent
     sh::Entity entity;
 };
 EMPTY_COMPONENT(SenderComponent);
+
+inline void RegisterServerComponents()
+{
+    sh::Registry::RegisterComponent<SenderComponent>();
+}

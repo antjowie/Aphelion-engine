@@ -31,22 +31,20 @@ void ClientLayer::OnAttach()
     m_scene.RegisterSystem(DeathSystem);
     m_scene.RegisterSystem(DrawSystem(m_camera.GetCamera()));
 
+    m_scene.RegisterSystem(ChunkStrategySystem);
     m_scene.RegisterSystem(ChunkMeshBuilderSystem);
     m_scene.RegisterSystem(ChunkRenderSystem(m_camera.GetCamera()));
 
     // TEMP: Spawn some nice chunks here
     auto& reg = m_scene.GetRegistry();
-    for(int x = -2; x < 2; x++)
+    for(int x = -2; x < 5; x++)
         for(int z = -2; z < 2; z++)
         {
             auto entity = reg.Create();
-            auto& data = reg.Get().emplace<ChunkDataComponent>(entity);
-
-            data.chunk.resize(chunkCount);
+            auto& data = reg.Get().emplace<ChunkSpawnComponent>(entity);
+            
             data.pos = glm::vec3(x * chunkDimensions.x, -40.f, z * chunkDimensions.z);
-            GenerateChunk(data);
-            reg.Get().emplace<ChunkModifiedComponent>(entity);
-        }
+        }    
 
     m_scene.SetOnEntityCreateCb([this](sh::Entity entity)
     {
