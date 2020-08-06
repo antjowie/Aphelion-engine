@@ -36,7 +36,7 @@ namespace ap
         if (string == "vertex") return GL_VERTEX_SHADER;
         else if (string == "fragment") return GL_FRAGMENT_SHADER;
         
-        SH_CORE_WARN("string {0} can't be converted", string);
+        AP_CORE_WARN("string {0} can't be converted", string);
         return 0;
     }
 
@@ -45,7 +45,7 @@ namespace ap
         if (type == GL_VERTEX_SHADER) return "vertex";
         else if (type == GL_FRAGMENT_SHADER) return "fragment";
 
-        SH_CORE_WARN("type {0} can't be converted", type);
+        AP_CORE_WARN("type {0} can't be converted", type);
         return "NO NAME";
     }
 
@@ -109,7 +109,7 @@ namespace ap
         for (const auto& shader : shaders)
         {
             const char* source = shader.second.c_str();
-            SH_CORE_TRACE("Created shader {0}", TypeToString(shader.first));
+            AP_CORE_TRACE("Created shader {0}", TypeToString(shader.first));
             unsigned id = glCreateShader(shader.first);
             glShaderSource(id, 1, &source, NULL);
             glCompileShader(id);

@@ -28,7 +28,7 @@ namespace ap
 
         if (!server.IsHosting() && event.GetEventType() != EventType::ServerShutdownResponse)
         {
-            SH_CORE_WARN("ServerLayer received {} but server isn't hosting",event.GetName());
+            AP_CORE_WARN("ServerLayer received {} but server isn't hosting",event.GetName());
             return;
         }
 
@@ -37,7 +37,7 @@ namespace ap
                 auto& p = e.GetPacket();
                 if (m_peerData[e.GetPeer()].count(p.id) == 0) m_peerData[e.GetPeer()][p.id] = -1;
                 p.clientSimulation = m_peerData[e.GetPeer()][p.id];
-                //SH_WARN(p.clientSimulation);
+                //AP_WARN(p.clientSimulation);
                 server.Submit(p, e.GetPeer());
                 return true;
             }));
@@ -61,7 +61,7 @@ namespace ap
             {
                 char ip[64];
                 enet_address_get_host_ip(&connection->address, ip, 64);
-                SH_CORE_INFO("Server opened connection with {}:{}", ip, connection->address.port);
+                AP_CORE_INFO("Server opened connection with {}:{}", ip, connection->address.port);
 
                 m_cb(ServerClientConnectEvent(connection));
             });
@@ -69,7 +69,7 @@ namespace ap
             {
                 char ip[64];
                 enet_address_get_host_ip(&connection->address, ip, 64);
-                SH_CORE_INFO("Server closed connection with {}:{}", ip, connection->address.port);
+                AP_CORE_INFO("Server closed connection with {}:{}", ip, connection->address.port);
                 m_peerData.erase(connection);
 
                 m_cb(ServerClientDisconnectEvent(connection));

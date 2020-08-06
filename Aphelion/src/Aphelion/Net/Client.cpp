@@ -22,7 +22,7 @@ namespace ap
         // TODO: We don't wait for ack, should publish an event so that main game knows
         if (IsConnected())
         {
-            SH_CORE_WARN(
+            AP_CORE_WARN(
                 "Client is force disconnecting. Handle disconnect request event so that client can disconnect "
                 "gracefully. This is an issue if the server is hosting on the same machine");
             Disconnect(0).wait();
@@ -53,7 +53,7 @@ namespace ap
     {
         if (m_isConnecting)
         {
-            SH_CORE_WARN("The client is already attempting to connect! Cancel this by calling Disconnect");
+            AP_CORE_WARN("The client is already attempting to connect! Cancel this by calling Disconnect");
             return m_connectFuture;
         }
 
@@ -78,7 +78,7 @@ namespace ap
                     return false;
                 }
 
-                SH_CORE_TRACE("Attempting connection with {0}:{1}", serverIP, port);
+                AP_CORE_TRACE("Attempting connection with {0}:{1}", serverIP, port);
                 ap::Timer timer;
                 while (timer.Total().Seconds() < timeout.Seconds() || !cancelConnecting)
                 {
@@ -87,24 +87,24 @@ namespace ap
                         {
                         case ENET_EVENT_TYPE_CONNECT:
                         {
-                            SH_CORE_TRACE("Established connection with {}:{}", serverIP, port);
+                            AP_CORE_TRACE("Established connection with {}:{}", serverIP, port);
                             m_isConnecting = false;
                             return true;
                         }
                         default:
-                            SH_CORE_WARN("Received arbitrary type {} from {}:{}", event.type, serverIP, port);
+                            AP_CORE_WARN("Received arbitrary type {} from {}:{}", event.type, serverIP, port);
                         }
                 }
                 // Timed out or connection cancelled
                 enet_peer_reset(m_server);
                 if (cancelConnecting)
                 {
-                    SH_CORE_TRACE("Aborting connection attempt successful");
+                    AP_CORE_TRACE("Aborting connection attempt successful");
                     cancelConnecting = false;
                 }
                 else
                 {
-                    SH_CORE_WARN("Server did not respond in time out period ({} seconds)", timeout);
+                    AP_CORE_WARN("Server did not respond in time out period ({} seconds)", timeout);
                 }
                 m_isConnecting = false;
                 return false;
@@ -119,7 +119,7 @@ namespace ap
 
         if (m_isConnecting)
         {
-            SH_CORE_TRACE("Aborting connection attempt...");
+            AP_CORE_TRACE("Aborting connection attempt...");
             cancelConnecting = true;
             return future;
         }
@@ -127,7 +127,7 @@ namespace ap
         future = std::async(std::launch::async, [&, timeout]
             {
                 AP_CORE_ASSERT(IsConnected(), "Client can't disconnect if they are not connected!");
-                SH_CORE_TRACE("Attempting disconnect from server...");
+                AP_CORE_TRACE("Attempting disconnect from server...");
 
                 // Attempt graceful disconnect
                 enet_peer_disconnect(m_server, 0);
@@ -142,13 +142,13 @@ namespace ap
                             enet_packet_destroy(event.packet);
                         else if (event.type == ENET_EVENT_TYPE_DISCONNECT)
                         {
-                            SH_CORE_TRACE("Gracefully disconnected from server");
+                            AP_CORE_TRACE("Gracefully disconnected from server");
                             enet_peer_reset(m_server);
                             return true;
                         }
                     }
                 }
-                SH_CORE_WARN("Forcefully disconnected form the server");
+                AP_CORE_WARN("Forcefully disconnected form the server");
                 enet_peer_reset(m_server);
                 return false;
             });
@@ -178,12 +178,12 @@ namespace ap
         switch (event.type)
         {
         case ENET_EVENT_TYPE_CONNECT:
-            SH_CORE_TRACE("Connected to {0}:{1}", event.peer->address.host, event.peer->address.port);
+            AP_CORE_TRACE("Connected to {0}:{1}", event.peer->address.host, event.peer->address.port);
             // We do this since connecting and disconnecting don't actually return a packet
             return Poll(packet); 
             break;
         case ENET_EVENT_TYPE_DISCONNECT:
-            SH_CORE_TRACE("Disconnected from {0}:{1}", event.peer->address.host, event.peer->address.port);
+            AP_CORE_TRACE("Disconnected from {0}:{1}", event.peer->address.host, event.peer->address.port);
             return Poll(packet);
             break;
         case ENET_EVENT_TYPE_RECEIVE:

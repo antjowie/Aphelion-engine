@@ -72,7 +72,7 @@ namespace ap
                 // Copy all components into here
                 from.Get().visit(e, [&](const entt::id_type component)
                     {
-                        //SH_CORE_TRACE(m_compData.at(component).name);
+                        //AP_CORE_TRACE(m_compData.at(component).name);
                         AP_CORE_ASSERT(m_compData.count(component) == 1, "Component is not registered")
                         m_compData.at(component).stamp(from.Get(), e, Get(), newE);
                         //Get().emplace_or_replace<T>(dst, from.get<T>(src));

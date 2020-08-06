@@ -10,7 +10,7 @@ namespace ap
         switch (RendererAPI::GetAPI())
         {
         case RendererAPI::API::None:
-            //SH_CORE_CRITICAL()
+            //AP_CORE_CRITICAL()
             break;
         case RendererAPI::API::OpenGL:
             return std::make_shared<OpenGLShader>(filepath.c_str());
@@ -23,7 +23,7 @@ namespace ap
         switch (RendererAPI::GetAPI())
         {
         case RendererAPI::API::None:
-            //SH_CORE_CRITICAL()
+            //AP_CORE_CRITICAL()
             break;
         case RendererAPI::API::OpenGL:
             return std::make_shared<OpenGLShader>(name.c_str(), vertexSrc.c_str(), fragmentSrc.c_str());

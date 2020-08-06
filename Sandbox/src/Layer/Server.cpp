@@ -61,7 +61,7 @@ void ServerLayer::OnEvent(ap::Event& event)
         {
             char ip[64];
             enet_address_get_host_ip(&e.GetPeer()->address, ip, 64);
-            SH_INFO("Server closed connection with {}", ip);
+            AP_INFO("Server closed connection with {}", ip);
 
             // When player leaves we broadcast that their HP is zero
             auto entity = m_players.at(e.GetPeer());

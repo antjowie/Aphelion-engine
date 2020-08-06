@@ -15,7 +15,7 @@ namespace ap
     ImGuiLayer::ImGuiLayer()
         : Layer("ImGuiLayer") 
     {
-        SH_CORE_INFO("Running ImGui {0}", IMGUI_VERSION);
+        AP_CORE_INFO("Running ImGui {0}", IMGUI_VERSION);
     }
 
     ImGuiContext* ImGuiLayer::GetContext()

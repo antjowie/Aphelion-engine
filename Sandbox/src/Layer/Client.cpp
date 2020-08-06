@@ -125,7 +125,7 @@ void ClientLayer::OnUpdate(ap::Timestep ts)
         {
             auto newT = ap::Deserialize<ap::Transform>(p);
 
-            SH_WARN("Reconciliation!!!");
+            AP_WARN("Reconciliation!!!");
             // TODO: Reconciliate subsequent registries
             m_scene.GetRegistry().HandlePacket(local, p);
         }

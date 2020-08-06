@@ -13,7 +13,7 @@ namespace ap
 //int main(int argc, char** argv)
 //{
 //    ap::Log::Init();
-//    SH_CORE_INFO("Logger initialized");
+//    AP_CORE_INFO("Logger initialized");
 //
 //    auto instance = ap::CreateApplication();
 //    instance->Run();

@@ -42,7 +42,7 @@ namespace ap
     {
         switch (RendererAPI::GetAPI())
         {
-        case RendererAPI::API::None: SH_CORE_CRITICAL("Buffer NONE is not yet implemented");
+        case RendererAPI::API::None: AP_CORE_CRITICAL("Buffer NONE is not yet implemented");
         case RendererAPI::API::OpenGL: return std::make_shared<OpenGLVertexBuffer>(size);
         }
     }
@@ -51,7 +51,7 @@ namespace ap
     {
         switch (RendererAPI::GetAPI())
         {
-        case RendererAPI::API::None: SH_CORE_CRITICAL("Buffer NONE is not yet implemented");
+        case RendererAPI::API::None: AP_CORE_CRITICAL("Buffer NONE is not yet implemented");
         case RendererAPI::API::OpenGL: return std::make_shared<OpenGLVertexBuffer>(vertices, size);
         }
     }
@@ -60,7 +60,7 @@ namespace ap
     {
         switch (RendererAPI::GetAPI())
         {
-        case RendererAPI::API::None: SH_CORE_CRITICAL("Index Buffer NONE is not yet implemented");
+        case RendererAPI::API::None: AP_CORE_CRITICAL("Index Buffer NONE is not yet implemented");
         case RendererAPI::API::OpenGL: return std::make_shared<OpenGLIndexBuffer>(indices, count);
         }
     }

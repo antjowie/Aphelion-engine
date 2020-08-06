@@ -30,18 +30,18 @@ namespace ap
 }
 
 // Core log macros
-#define SH_CORE_TRACE(...)    ::ap::Log::GetCoreLogger()->trace(__VA_ARGS__)
-#define SH_CORE_INFO(...)     ::ap::Log::GetCoreLogger()->info(__VA_ARGS__)
-#define SH_CORE_WARN(...)     ::ap::Log::GetCoreLogger()->warn(__VA_ARGS__)
+#define AP_CORE_TRACE(...)    ::ap::Log::GetCoreLogger()->trace(__VA_ARGS__)
+#define AP_CORE_INFO(...)     ::ap::Log::GetCoreLogger()->info(__VA_ARGS__)
+#define AP_CORE_WARN(...)     ::ap::Log::GetCoreLogger()->warn(__VA_ARGS__)
 #define AP_CORE_ERROR(...)    ::ap::Log::GetCoreLogger()->error(__VA_ARGS__)
-#define SH_CORE_CRITICAL(...) ::ap::Log::GetCoreLogger()->critical(__VA_ARGS__)
+#define AP_CORE_CRITICAL(...) ::ap::Log::GetCoreLogger()->critical(__VA_ARGS__)
 
 // Client log macros
-#define SH_TRACE(...)         ::ap::Log::GetClientLogger()->trace(__VA_ARGS__)
-#define SH_INFO(...)          ::ap::Log::GetClientLogger()->info(__VA_ARGS__)
-#define SH_WARN(...)          ::ap::Log::GetClientLogger()->warn(__VA_ARGS__)
+#define AP_TRACE(...)         ::ap::Log::GetClientLogger()->trace(__VA_ARGS__)
+#define AP_INFO(...)          ::ap::Log::GetClientLogger()->info(__VA_ARGS__)
+#define AP_WARN(...)          ::ap::Log::GetClientLogger()->warn(__VA_ARGS__)
 #define AP_ERROR(...)         ::ap::Log::GetClientLogger()->error(__VA_ARGS__)
-#define SH_CRITICAL(...)      ::ap::Log::GetClientLogger()->critical(__VA_ARGS__)
+#define AP_CRITICAL(...)      ::ap::Log::GetClientLogger()->critical(__VA_ARGS__)
 
 #ifdef _MSC_VER
     #pragma warning(pop)

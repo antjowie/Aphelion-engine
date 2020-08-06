@@ -31,8 +31,8 @@ public:
                 val = packet;
             else if(oldSim != newSim)
             {
-                SH_WARN("Packet came out of sequence. This should never happen since ENet sequences packets");
-                SH_WARN("Packet type {} Old #{} Received #{}", packet.id, oldSim, newSim);
+                AP_WARN("Packet came out of sequence. This should never happen since ENet sequences packets");
+                AP_WARN("Packet type {} Old #{} Received #{}", packet.id, oldSim, newSim);
             }
         }
     }

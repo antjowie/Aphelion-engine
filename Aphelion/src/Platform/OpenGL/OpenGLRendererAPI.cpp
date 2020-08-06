@@ -16,10 +16,10 @@ namespace ap
 	{
 		switch (severity)
 		{
-		case GL_DEBUG_SEVERITY_HIGH:         SH_CORE_CRITICAL(message); return;
+		case GL_DEBUG_SEVERITY_HIGH:         AP_CORE_CRITICAL(message); return;
 		case GL_DEBUG_SEVERITY_MEDIUM:       AP_CORE_ERROR(message); return;
-		case GL_DEBUG_SEVERITY_LOW:          SH_CORE_WARN(message); return;
-		case GL_DEBUG_SEVERITY_NOTIFICATION: SH_CORE_TRACE(message); return;
+		case GL_DEBUG_SEVERITY_LOW:          AP_CORE_WARN(message); return;
+		case GL_DEBUG_SEVERITY_NOTIFICATION: AP_CORE_TRACE(message); return;
 		}
 
 		AP_CORE_ASSERT(false, "Unknown severity level!");

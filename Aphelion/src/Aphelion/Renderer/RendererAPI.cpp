@@ -13,7 +13,7 @@ namespace ap
         switch (m_api)
         {
         case RendererAPI::API::None:
-            SH_CORE_CRITICAL("RenderAPI None is not yet supported");
+            AP_CORE_CRITICAL("RenderAPI None is not yet supported");
         default:
             return std::make_unique<OpenGLRendererAPI>();
             break;

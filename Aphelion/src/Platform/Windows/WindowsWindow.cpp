@@ -112,7 +112,7 @@ namespace ap
             data.eventCallback(event);
         });
 
-        SH_CORE_INFO("Created Windows window");
+        AP_CORE_INFO("Created Windows window");
     }
 
     WindowsWindow::~WindowsWindow()
@@ -129,6 +129,6 @@ namespace ap
     void WindowsWindow::SetVSync(bool enable)
     {
         glfwSwapInterval(enable ? 1 : 0);
-        SH_CORE_TRACE("VSync set to {0}", enable ? "Enabled" : "Disabled");
+        AP_CORE_TRACE("VSync set to {0}", enable ? "Enabled" : "Disabled");
     }
 }

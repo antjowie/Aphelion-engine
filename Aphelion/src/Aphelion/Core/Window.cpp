@@ -9,7 +9,7 @@ namespace ap
 #ifdef AP_PLATFORM_WINDOWS
         return std::make_unique<WindowsWindow>(props);
 #elif
-        SH_CRITICAL("Unknown platform!");
+        AP_CRITICAL("Unknown platform!");
 #endif // AP_PLATFORM_WINDOWS
     }
 }

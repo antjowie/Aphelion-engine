@@ -41,13 +41,13 @@ namespace ap
         // Packet events
         if (!client.IsConnected() && event.GetEventType() != EventType::ClientDisconnectResponse)
         {
-            SH_CORE_WARN("NetClientLayer received {} but client isn't connected", event.GetName());
+            AP_CORE_WARN("NetClientLayer received {} but client isn't connected", event.GetName());
             return;
         }
 
         if (d.Dispatch<ClientSendPacketEvent>([](ClientSendPacketEvent & e)
             {
-                //SH_CORE_TRACE("Submitted packet sim{}", e.GetPacket().simulation);
+                //AP_CORE_TRACE("Submitted packet sim{}", e.GetPacket().simulation);
                 NetClient::Get().Submit(e.GetPacket());
                 return true;
             })) return;

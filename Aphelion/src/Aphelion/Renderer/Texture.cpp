@@ -10,7 +10,7 @@ namespace ap
     {
         switch (RendererAPI::GetAPI())
         {
-        case RendererAPI::API::None: SH_CORE_CRITICAL("Texture 2D not yet implemented");
+        case RendererAPI::API::None: AP_CORE_CRITICAL("Texture 2D not yet implemented");
         case RendererAPI::API::OpenGL: return std::make_shared<OpenGLTexture2D>(width, height);
         }
 
@@ -21,7 +21,7 @@ namespace ap
     {
         switch (RendererAPI::GetAPI())
         {
-        case RendererAPI::API::None: SH_CORE_CRITICAL("Texture 2D not yet implemented");
+        case RendererAPI::API::None: AP_CORE_CRITICAL("Texture 2D not yet implemented");
         case RendererAPI::API::OpenGL: return std::make_shared<OpenGLTexture2D>(path);
         }
 
@@ -32,7 +32,7 @@ namespace ap
     {
         switch (RendererAPI::GetAPI())
         {
-        case RendererAPI::API::None: SH_CORE_CRITICAL("Array Texture 2D None not yet implemented");
+        case RendererAPI::API::None: AP_CORE_CRITICAL("Array Texture 2D None not yet implemented");
         case RendererAPI::API::OpenGL: return std::make_shared<OpenGLArrayTexture2D>(x,y,path);
         }
     }

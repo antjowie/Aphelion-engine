@@ -42,7 +42,7 @@ namespace ap
         char hostIP[128];
         enet_address_get_host_ip(&address, hostIP, 128);
 
-        SH_CORE_INFO("Hosting! Listening on {0}:{1}", hostIP, port);
+        AP_CORE_INFO("Hosting! Listening on {0}:{1}", hostIP, port);
         return true;
     }
 
@@ -51,7 +51,7 @@ namespace ap
         AP_CORE_ASSERT(IsHosting(), "Can't shutdown a server that is not hosting");
 
         // TODO: Gracefully disconnect clients
-        SH_CORE_WARN("Server forcibly shut down!");
+        AP_CORE_WARN("Server forcibly shut down!");
         enet_host_destroy(m_socket);
         m_socket = nullptr;
     }
@@ -114,7 +114,7 @@ namespace ap
             packet = UnpackENetPacket(event.packet);
             packet.sender = event.peer;
 
-            //SH_CORE_TRACE("Server received a packet of size {}", packet.size);
+            //AP_CORE_TRACE("Server received a packet of size {}", packet.size);
             return true;
             break;
         }

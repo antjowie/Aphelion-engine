@@ -21,7 +21,7 @@ namespace ap
         m_instance = this;
 
         int status = enet_initialize();
-        if (status == 0) SH_CORE_TRACE("Enet initialized");
+        if (status == 0) AP_CORE_TRACE("Enet initialized");
         else AP_CORE_ERROR("ENet failed to initialize with error code {}", status);
 
         m_window = Window::Create(props);
@@ -48,7 +48,7 @@ namespace ap
         m_layerStack.Clear();
 
         enet_deinitialize();
-        SH_CORE_TRACE("ENet destroyed");
+        AP_CORE_TRACE("ENet destroyed");
 
         m_instance = nullptr;
     }

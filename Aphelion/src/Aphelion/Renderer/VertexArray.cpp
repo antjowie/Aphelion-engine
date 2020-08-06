@@ -10,7 +10,7 @@ namespace ap
     {
         switch (RendererAPI::GetAPI())
         {
-        case RendererAPI::API::None: SH_CORE_CRITICAL("VertexArray none not yet implemented"); 
+        case RendererAPI::API::None: AP_CORE_CRITICAL("VertexArray none not yet implemented"); 
         case RendererAPI::API::OpenGL: return std::make_shared<OpenGLVertexArray>();
         }
 

@@ -23,10 +23,10 @@ namespace ap
         int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
         AP_CORE_ASSERT(status, "Failed to initialize Glad!");
 
-        SH_CORE_INFO("OpenGL Info:");
-        SH_CORE_INFO("  Vendor: {0}", glGetString(GL_VENDOR));
-        SH_CORE_INFO("  Renderer: {0}", glGetString(GL_RENDERER));
-        SH_CORE_INFO("  Version: {0}", glGetString(GL_VERSION));
+        AP_CORE_INFO("OpenGL Info:");
+        AP_CORE_INFO("  Vendor: {0}", glGetString(GL_VENDOR));
+        AP_CORE_INFO("  Renderer: {0}", glGetString(GL_RENDERER));
+        AP_CORE_INFO("  Version: {0}", glGetString(GL_VERSION));
     }
 
     void OpenGLContext::SwapBuffers()
