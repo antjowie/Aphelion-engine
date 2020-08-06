@@ -1,23 +1,21 @@
-[submodule "Shinobu/thirdParty/spdlog"]
-	path = Shinobu/thirdParty/spdlog
+[submodule "Aphelion/thirdParty/spdlog"]
+	path = Aphelion/thirdParty/spdlog
 	url = https://github.com/gabime/spdlog
-[submodule "Shinobu/thirdParty/glfw"]
-	path = Shinobu/thirdParty/glfw
+[submodule "Aphelion/thirdParty/glfw"]
+	path = Aphelion/thirdParty/glfw
 	url = https://github.com/glfw/glfw
-[submodule "Shinobu/thirdParty/imgui"]
-	path = Shinobu/thirdParty/imgui
+[submodule "Aphelion/thirdParty/imgui"]
+	path = Aphelion/thirdParty/imgui
 	url = https://github.com/antjowie/imgui.git
-[submodule "Shinobu/thirdParty/glm"]
-	path = Shinobu/thirdParty/glm
+[submodule "Aphelion/thirdParty/glm"]
+	path = Aphelion/thirdParty/glm
 	url = https://github.com/g-truc/glm
-[submodule "Shinobu/thirdParty/enet"]
-	path = Shinobu/thirdParty/enet
+[submodule "Aphelion/thirdParty/enet"]
+	path = Aphelion/thirdParty/enet
 	url = https://github.com/antjowie/enet
-[submodule "thirdParty/enet"]
-	url = https://github.com/antjowie/enet
-[submodule "Shinobu/thirdParty/bitsery"]
-	path = Shinobu/thirdParty/bitsery
+[submodule "Aphelion/thirdParty/bitsery"]
+	path = Aphelion/thirdParty/bitsery
 	url = https://github.com/fraillt/bitsery
-[submodule "Shinobu/thirdParty/entt"]
-	path = Shinobu/thirdParty/entt
+[submodule "Aphelion/thirdParty/entt"]
+	path = Aphelion/thirdParty/entt
 	url = https://github.com/skypjack/entt

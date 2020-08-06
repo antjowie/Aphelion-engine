@@ -4,60 +4,60 @@
 #include "Component/Component.h"
 #include "Component/ServerComponent.h"
 
-#include <Shinobu/Core/Application.h>
-#include <Shinobu/Event/NetEvent.h>
-#include <Shinobu/Net/Server.h>
-#include <Shinobu/Net/ServerLayer.h>
+#include <Aphelion/Core/Application.h>
+#include <Aphelion/Event/NetEvent.h>
+#include <Aphelion/Net/Server.h>
+#include <Aphelion/Net/ServerLayer.h>
 
 #include "Component/ChunkComponent.h"
 #include "System/ChunkSystem.h"
 
-void ServerLayer::OnEvent(sh::Event& event)
+void ServerLayer::OnEvent(ap::Event& event)
 {
-    sh::EventDispatcher e(event);
+    ap::EventDispatcher e(event);
 
-    if (e.Dispatch<sh::ServerClientConnectEvent>([&](sh::ServerClientConnectEvent& e)
+    if (e.Dispatch<ap::ServerClientConnectEvent>([&](ap::ServerClientConnectEvent& e)
         {
             auto& reg = m_scene.GetRegistry();
-            auto& app = sh::Application::Get();
+            auto& app = ap::Application::Get();
 
             char ip[64];
             enet_address_get_host_ip(&e.GetPeer()->address, ip, 64);
 
             // Send all existing users to that player
-            auto view = reg.Get().view<sh::Transform, Sprite, Health>();
+            auto view = reg.Get().view<ap::Transform, Sprite, Health>();
             for (auto ent : view)
             {
-                auto& t = reg.Get().get<sh::Transform>(ent);
+                auto& t = reg.Get().get<ap::Transform>(ent);
                 auto& s = reg.Get().get<Sprite>(ent);
                 auto& h = reg.Get().get<Health>(ent);
 
-                app.OnEvent(sh::ServerSendPacketEvent(sh::Serialize(t, ent, true), e.GetPeer()));
-                app.OnEvent(sh::ServerSendPacketEvent(sh::Serialize(s, ent, true), e.GetPeer()));
-                app.OnEvent(sh::ServerSendPacketEvent(sh::Serialize(h, ent, true), e.GetPeer()));
+                app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(t, ent, true), e.GetPeer()));
+                app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(s, ent, true), e.GetPeer()));
+                app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(h, ent, true), e.GetPeer()));
             }
 
             // Create the new player player
             auto entity = reg.Create();
-            auto& t = reg.Get().emplace<sh::Transform>(entity);
+            auto& t = reg.Get().emplace<ap::Transform>(entity);
             auto& s = reg.Get().emplace<Sprite>(entity);
             s.image = "res/image.png";
             s.LoadTexture();
             auto& h = reg.Get().emplace<Health>(entity);
             h.health = 1;
 
-            app.OnEvent(sh::ServerBroadcastPacketEvent(sh::Serialize(t, entity,true)));
-            app.OnEvent(sh::ServerBroadcastPacketEvent(sh::Serialize(s, entity,true)));
-            app.OnEvent(sh::ServerBroadcastPacketEvent(sh::Serialize(h,entity,true)));
+            app.OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(t, entity,true)));
+            app.OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(s, entity,true)));
+            app.OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(h,entity,true)));
             // Tell the new user that they own that player
-            app.OnEvent(sh::ServerSendPacketEvent( 
-                sh::Serialize(Player(), entity, true), e.GetPeer()));
+            app.OnEvent(ap::ServerSendPacketEvent( 
+                ap::Serialize(Player(), entity, true), e.GetPeer()));
 
             m_players[e.GetPeer()] = entity;
             return true;
         })) return;
 
-    if (e.Dispatch<sh::ServerClientDisconnectEvent>([&](sh::ServerClientDisconnectEvent& e)
+    if (e.Dispatch<ap::ServerClientDisconnectEvent>([&](ap::ServerClientDisconnectEvent& e)
         {
             char ip[64];
             enet_address_get_host_ip(&e.GetPeer()->address, ip, 64);
@@ -67,24 +67,24 @@ void ServerLayer::OnEvent(sh::Event& event)
             auto entity = m_players.at(e.GetPeer());
             auto& h = m_scene.GetRegistry().Get().get<Health>(entity);
             h.health = 0;
-            sh::Application::Get().OnEvent(sh::ServerBroadcastPacketEvent(sh::Serialize(h,entity)));
+            ap::Application::Get().OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(h,entity)));
 
             m_players.erase(e.GetPeer());
             return true;
         })) return;
 
-    if (e.Dispatch<sh::ServerSendPacketEvent>([&](sh::ServerSendPacketEvent& e)
+    if (e.Dispatch<ap::ServerSendPacketEvent>([&](ap::ServerSendPacketEvent& e)
         {
             e.GetPacket().serverSimulation = m_scene.GetSimulationCount();
             return false;
         })) return;
-    if (e.Dispatch<sh::ServerBroadcastPacketEvent>([&](sh::ServerBroadcastPacketEvent& e)
+    if (e.Dispatch<ap::ServerBroadcastPacketEvent>([&](ap::ServerBroadcastPacketEvent& e)
         {
             e.GetPacket().serverSimulation = m_scene.GetSimulationCount();
             return false;
         })) return;
 
-    if (e.Dispatch<sh::ServerReceivePacketEvent>([&](sh::ServerReceivePacketEvent& e)
+    if (e.Dispatch<ap::ServerReceivePacketEvent>([&](ap::ServerReceivePacketEvent& e)
         {
             // TODO: Handle the input
             m_packets.Push(e.GetPacket(),false);
@@ -97,7 +97,7 @@ void ServerLayer::OnAttach()
 {
     //m_reg.RegisterSystem(DrawSystem(m_camera.GetCamera()));
     m_scene.RegisterSystem(DeathSystem);
-    sh::Application::Get().OnEvent(sh::ServerHostRequestEvent(25565));
+    ap::Application::Get().OnEvent(ap::ServerHostRequestEvent(25565));
 
     m_scene.RegisterSystem(ChunkRequestResponseSystem);
 
@@ -115,30 +115,30 @@ void ServerLayer::OnAttach()
 
 void ServerLayer::OnDetach()
 {
-    sh::Application::Get().OnEvent(sh::ServerShutdownRequestEvent());
+    ap::Application::Get().OnEvent(ap::ServerShutdownRequestEvent());
 }
 
-void ServerLayer::OnUpdate(sh::Timestep ts)
+void ServerLayer::OnUpdate(ap::Timestep ts)
 {
-    auto& server = sh::NetServer::Get();
+    auto& server = ap::NetServer::Get();
     if (!server.IsHosting()) return;
     
-    sh::Packet p;
+    ap::Packet p;
     m_packets.Swap();
     while (m_packets.Poll(p))
     {
         auto& reg = m_scene.GetRegistry();
         // Check if entity exists in our scene (created on server)
-        if (reg.Get().valid(sh::Entity(p.entity)))
+        if (reg.Get().valid(ap::Entity(p.entity)))
         {
-            reg.HandlePacket(sh::Entity(p.entity), p);
+            reg.HandlePacket(ap::Entity(p.entity), p);
         }
         // This means that the client created a request or send a null entity
         else
         {
             auto entity = reg.Create();
             
-            reg.Get().emplace<SenderComponent>(entity, p.sender, sh::Entity(p.entity));
+            reg.Get().emplace<SenderComponent>(entity, p.sender, ap::Entity(p.entity));
             reg.HandlePacket(entity, p);
         }
     }
@@ -146,11 +146,11 @@ void ServerLayer::OnUpdate(sh::Timestep ts)
 
     // TODO: Should or could be handled in systems
     auto& reg = m_scene.GetRegistry().Get();
-    auto view = reg.view<sh::Transform>();
+    auto view = reg.view<ap::Transform>();
     for (auto e : view)
     {
-        auto p = sh::Serialize(view.get(e), e);
-        sh::Application::Get().OnEvent(sh::ServerBroadcastPacketEvent(p));
+        auto p = ap::Serialize(view.get(e), e);
+        ap::Application::Get().OnEvent(ap::ServerBroadcastPacketEvent(p));
     }
 }
 
@@ -164,7 +164,7 @@ void ServerLayer::OnGuiRender()
 
             static int tick = 60;
             ImGui::SliderInt("Tickrate", &tick, 1, 200);
-            sh::NetServerLayer::m_config.rate = 1.f / (float)tick;
+            ap::NetServerLayer::m_config.rate = 1.f / (float)tick;
         }
         ImGui::End();
     }

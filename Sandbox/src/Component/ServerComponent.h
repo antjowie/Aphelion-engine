@@ -1,7 +1,7 @@
 #pragma once
 // TODO: Should be including the protocol header
-#include <Shinobu/Net/Packet.h>
-#include <Shinobu/ECS/Registry.h>
+#include <Aphelion/Net/Packet.h>
+#include <Aphelion/ECS/Registry.h>
 
 #define EMPTY_COMPONENT(Component) \
         inline bool operator==(const Component& lhs, const Component& rhs) { return true; } \
@@ -10,11 +10,11 @@
 struct SenderComponent
 {
     ENetPeer* peer;
-    sh::Entity entity;
+    ap::Entity entity;
 };
 EMPTY_COMPONENT(SenderComponent);
 
 inline void RegisterServerComponents()
 {
-    sh::Registry::RegisterComponent<SenderComponent>();
+    ap::Registry::RegisterComponent<SenderComponent>();
 }

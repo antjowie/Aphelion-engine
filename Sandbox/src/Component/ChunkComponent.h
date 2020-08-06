@@ -1,9 +1,9 @@
 #pragma once
 #include "Block/BlockType.h"
 
-#include <Shinobu/Core/Transform.h>
-#include <Shinobu/Renderer/VertexArray.h>
-#include <Shinobu/ECS/Registry.h>
+#include <Aphelion/Core/Transform.h>
+#include <Aphelion/Renderer/VertexArray.h>
+#include <Aphelion/ECS/Registry.h>
 
 #include <glm/vec3.hpp>
 #include <vector>
@@ -36,7 +36,7 @@ struct ChunkDataComponent
 template <typename S>
 void serialize(S& s, ChunkDataComponent& o)
 {
-    sh::serialize(s,o.pos);
+    ap::serialize(s,o.pos);
     s.container1b(o.chunk, chunkCount);
 }
 
@@ -45,11 +45,11 @@ struct ChunkSpawnComponent
     glm::vec3 pos;
 };
 inline bool operator==(const ChunkSpawnComponent& lhs, const ChunkSpawnComponent& rhs) { return true; }
-template <typename S> void serialize(S& s, ChunkSpawnComponent& o) { sh::serialize(s, o.pos); }
+template <typename S> void serialize(S& s, ChunkSpawnComponent& o) { ap::serialize(s, o.pos); }
 
 struct ChunkMeshComponent
 {
-    sh::VertexArrayRef vao;
+    ap::VertexArrayRef vao;
 };
 inline bool operator==(const ChunkMeshComponent& lhs, const ChunkMeshComponent& rhs) { return true; }
 template <typename S> void serialize(S& s, ChunkMeshComponent& o) {}
@@ -96,8 +96,8 @@ void ForEach(const ChunkContainer& chunk, Callable& callable)
 
 inline void RegisterChunkComponents()
 {
-    sh::Registry::RegisterComponent<ChunkDataComponent>();
-    sh::Registry::RegisterComponent<ChunkMeshComponent>();
-    sh::Registry::RegisterComponent<ChunkModifiedComponent>();
-    sh::Registry::RegisterComponent<ChunkSpawnComponent>();
+    ap::Registry::RegisterComponent<ChunkDataComponent>();
+    ap::Registry::RegisterComponent<ChunkMeshComponent>();
+    ap::Registry::RegisterComponent<ChunkModifiedComponent>();
+    ap::Registry::RegisterComponent<ChunkSpawnComponent>();
 }

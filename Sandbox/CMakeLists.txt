@@ -37,27 +37,27 @@ target_include_directories(Sandbox PUBLIC src)
 if(BUILD_SHARED_LIBS)
     add_custom_target(CopyDLL 
                         ALL COMMAND ${CMAKE_COMMAND} -E copy
-                        $<TARGET_FILE:Shinobu>
+                        $<TARGET_FILE:Aphelion>
                         $<TARGET_FILE_DIR:Sandbox>
-                        COMMENT "Copying Shinobu.dll to output dir"
+                        COMMENT "Copying Aphelion.dll to output dir"
     )
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_custom_target(CopyPDB
                     ALL COMMAND ${CMAKE_COMMAND} -E copy
-                    $<TARGET_FILE_DIR:Shinobu>/Shinobu.pdb 
+                    $<TARGET_FILE_DIR:Aphelion>/Aphelion.pdb 
                     $<TARGET_FILE_DIR:Sandbox>
-                    COMMENT "Copying Shinobu.pdb to output dir"
+                    COMMENT "Copying Aphelion.pdb to output dir"
     )
 endif ()
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/Shinobu/res)
+if (EXISTS ${CMAKE_SOURCE_DIR}/Aphelion/res)
     add_custom_target(CopyGameAssets
                     ALL COMMAND ${CMAKE_COMMAND} -E copy_directory
-                    ${CMAKE_SOURCE_DIR}/Shinobu/res 
+                    ${CMAKE_SOURCE_DIR}/Aphelion/res 
                     $<TARGET_FILE_DIR:Sandbox>/res
-                    COMMENT "Copying Shinobu resources to output dir"
+                    COMMENT "Copying Aphelion resources to output dir"
     )
 endif()
 
@@ -70,4 +70,4 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/Sandbox/res)
     )
 endif()
 
-target_link_libraries(Sandbox PUBLIC Shinobu)
+target_link_libraries(Sandbox PUBLIC Aphelion)

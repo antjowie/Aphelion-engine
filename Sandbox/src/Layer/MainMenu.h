@@ -2,26 +2,26 @@
 #include "Client.h"
 #include "Server.h"
 
-#include "Shinobu/Core/Application.h"
-#include "Shinobu/Core/Layer.h"
-#include "Shinobu/Core/Input/KeyCodes.h"
-#include "Shinobu/Event/KeyEvent.h"
-#include "Shinobu/Event/NetEvent.h"
+#include "Aphelion/Core/Application.h"
+#include "Aphelion/Core/Layer.h"
+#include "Aphelion/Core/Input/KeyCodes.h"
+#include "Aphelion/Event/KeyEvent.h"
+#include "Aphelion/Event/NetEvent.h"
 
-class MainMenuLayer : public sh::Layer
+class MainMenuLayer : public ap::Layer
 {
 public:
     MainMenuLayer() : Layer("MainMenuLayer") {}
-    sh::Layer* m_client = nullptr;
-    sh::Layer* m_server = nullptr;
+    ap::Layer* m_client = nullptr;
+    ap::Layer* m_server = nullptr;
 
-    void OnEvent(sh::Event& event) override
+    void OnEvent(ap::Event& event) override
     {
-        sh::EventDispatcher d(event);
-        d.Dispatch<sh::KeyPressedEvent>([&](sh::KeyPressedEvent& e)
+        ap::EventDispatcher d(event);
+        d.Dispatch<ap::KeyPressedEvent>([&](ap::KeyPressedEvent& e)
             {
-            if (e.GetKeyCode() == sh::KeyCode::Escape)
-                sh::Application::Get().Exit();
+            if (e.GetKeyCode() == ap::KeyCode::Escape)
+                ap::Application::Get().Exit();
             return false;
             });
     }
@@ -41,12 +41,12 @@ public:
             if (client)
             {
                 m_client = new ClientLayer();
-                sh::Application::Get().GetLayerStack().PushLayer(m_client);
-                sh::Application::Get().OnEvent(sh::ClientConnectRequestEvent(serverIP, 25565));
+                ap::Application::Get().GetLayerStack().PushLayer(m_client);
+                ap::Application::Get().OnEvent(ap::ClientConnectRequestEvent(serverIP, 25565));
             }
             else
             {
-                sh::Application::Get().GetLayerStack().PopLayer(m_client);
+                ap::Application::Get().GetLayerStack().PopLayer(m_client);
                 delete m_client;
                 m_client = nullptr;
             }
@@ -61,11 +61,11 @@ public:
             if (server)
             {
                 m_server = new ServerLayer();
-                sh::Application::Get().GetLayerStack().PushLayer(m_server);
+                ap::Application::Get().GetLayerStack().PushLayer(m_server);
             }
             else
             {
-                sh::Application::Get().GetLayerStack().PopLayer(m_server);
+                ap::Application::Get().GetLayerStack().PopLayer(m_server);
                 delete m_server;
                 m_server = nullptr;
             }

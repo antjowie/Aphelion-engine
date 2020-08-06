@@ -1,30 +1,30 @@
 #pragma once
-#include "Shinobu/Core/Layer.h"
-#include "Shinobu/ECS/Scene.h"
-#include "Shinobu/Renderer/PerspectiveCameraController.h"
+#include "Aphelion/Core/Layer.h"
+#include "Aphelion/ECS/Scene.h"
+#include "Aphelion/Renderer/PerspectiveCameraController.h"
 
 #include "PacketBuffer.h"
 
-class ClientLayer : public sh::Layer
+class ClientLayer : public ap::Layer
 {
 public:
     ClientLayer() : Layer("ClientLayer"), m_camera(glm::radians(45.f),16.f/9.f) {}
 
-    static sh::Entity LocalIDToNet(sh::Entity localID);
-    static sh::Entity NetIDtoLocal(sh::Entity netID);
+    static ap::Entity LocalIDToNet(ap::Entity localID);
+    static ap::Entity NetIDtoLocal(ap::Entity netID);
 
     virtual void OnAttach() override;
     virtual void OnDetach() override;
-    virtual void OnEvent(sh::Event& event) override;
-    virtual void OnUpdate(sh::Timestep ts) override;
+    virtual void OnEvent(ap::Event& event) override;
+    virtual void OnUpdate(ap::Timestep ts) override;
 
     virtual void OnGuiRender() override;
 
 private:
 
-    sh::PerspectiveCameraController m_camera;
-    sh::Scene m_scene;
+    ap::PerspectiveCameraController m_camera;
+    ap::Scene m_scene;
     PacketBuffer m_packets;
 
-    static std::unordered_map<sh::Entity, sh::Entity> m_netToLocal;
+    static std::unordered_map<ap::Entity, ap::Entity> m_netToLocal;
 };

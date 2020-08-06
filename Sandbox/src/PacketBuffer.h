@@ -1,5 +1,5 @@
 #pragma once
-#include "Shinobu/Net/Packet.h"
+#include "Aphelion/Net/Packet.h"
 #include <map>
 
 /**
@@ -13,7 +13,7 @@
 class PacketBuffer
 {
 public:
-    inline void Push(sh::Packet& packet, bool isClient)
+    inline void Push(ap::Packet& packet, bool isClient)
     {
         auto& map = GetMap();
         PacketKey key(packet);
@@ -37,7 +37,7 @@ public:
         }
     }
 
-    bool Poll(sh::Packet& packet)
+    bool Poll(ap::Packet& packet)
     {
         auto& map = GetBackMap();
         auto begin = map.begin();
@@ -53,7 +53,7 @@ public:
         m_index++;
         m_index %= 2;
 
-        SH_ASSERT(GetMap().size() == 0, "Map should have been cleared by poll");
+        AP_ASSERT(GetMap().size() == 0, "Map should have been cleared by poll");
         //GetMap().clear();
     }
 
@@ -61,7 +61,7 @@ private:
     struct PacketKey
     {
         PacketKey() = default;
-        PacketKey(const sh::Packet& packet)
+        PacketKey(const ap::Packet& packet)
             : entity(packet.entity)
             , id(packet.id)
         {}
@@ -77,7 +77,7 @@ private:
         }
     };
 
-    using Buffer = std::map<PacketKey, sh::Packet>;
+    using Buffer = std::map<PacketKey, ap::Packet>;
 
 private:
     Buffer& GetMap() { return m_packets[m_index]; }

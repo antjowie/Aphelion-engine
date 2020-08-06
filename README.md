@@ -1,4 +1,4 @@
-# Shinobu-engine
+# Aphelion Engine
 A cross platform game engine written, made as an educational passion project.  
 You can follow the development of this project on the [Trello page](https://trello.com/b/XO0iYUhz/voxelcraft)
 
@@ -14,8 +14,8 @@ The project makes use of CMake so building should be straightforward. Simply do 
 > NOTE: As of right now, the project can't be build as a DLL. The engine defines the entry point (this is because last I remembered it was necessary for DirectX to retrieve some parameters in the entry function). It contains a function declaration that the user defines in their project file. Because of this, the engine library can't compile 
 
 ```
-git clone https://github.com/antjowie/Shinobu-engine.git shinobu-engine
-cd shinobu-engine
+git clone https://github.com/antjowie/Aphelion-engine.git aphelion-engine
+cd aphelion-engine
 
 cmake -S . -B build
 cmake --build build

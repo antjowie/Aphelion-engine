@@ -5,19 +5,19 @@
 #include "Primitives.h"
 #include "Component/ServerComponent.h"
 
-#include <Shinobu/Core/Application.h>
-#include <Shinobu/ECS/Scene.h>
-#include <Shinobu/Renderer/Renderer.h>
-#include <Shinobu/Renderer/Texture.h>
-#include <Shinobu/Event/NetEvent.h>
+#include <Aphelion/Core/Application.h>
+#include <Aphelion/ECS/Scene.h>
+#include <Aphelion/Renderer/Renderer.h>
+#include <Aphelion/Renderer/Texture.h>
+#include <Aphelion/Event/NetEvent.h>
 
 void GenerateChunk(ChunkDataComponent& chunk);
-void GenerateChunkMesh(const ChunkDataComponent& chunk, sh::VertexArrayRef& vao);
+void GenerateChunkMesh(const ChunkDataComponent& chunk, ap::VertexArrayRef& vao);
 
 /**
  * A system that decides which chunks to generate (and to remove)
  */
-inline void ChunkStrategySystem(sh::Scene& scene)
+inline void ChunkStrategySystem(ap::Scene& scene)
 {
     auto& reg = scene.GetRegistry().Get();
     auto view = reg.view<ChunkSpawnComponent>();
@@ -28,14 +28,14 @@ inline void ChunkStrategySystem(sh::Scene& scene)
 
         // TODO: These should not be stored as entities
         // Client will keep requesting entities
-        sh::Application::Get().OnEvent(sh::ClientSendPacketEvent(sh::Serialize(spawnComp, sh::NullEntity, true)));
+        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(spawnComp, ap::NullEntity, true)));
     }
 
-    //auto& player = reg.view<sh::Transform,Player>().get<sh::Transform>();
-    //auto playerView = reg.view<sh::Transform,Player>();
+    //auto& player = reg.view<ap::Transform,Player>().get<ap::Transform>();
+    //auto playerView = reg.view<ap::Transform,Player>();
     //if(!playerView.empty())
     //{
-    //    auto& player = playerView.get<sh::Transform>(playerView.front());
+    //    auto& player = playerView.get<ap::Transform>(playerView.front());
 
     //    // Generate chunks around player
     //    // TODO: Write this, for now I just manually spawn some chunks
@@ -45,7 +45,7 @@ inline void ChunkStrategySystem(sh::Scene& scene)
 /**
  * A server side system to respond on chunk requests
  */
-inline void ChunkRequestResponseSystem(sh::Scene& scene)
+inline void ChunkRequestResponseSystem(ap::Scene& scene)
 {
     auto& reg = scene.GetRegistry().Get();
     auto view = reg.view<ChunkSpawnComponent, SenderComponent>();
@@ -56,7 +56,7 @@ inline void ChunkRequestResponseSystem(sh::Scene& scene)
         // Check if this chunk is already loaded
         auto chunkView = reg.view<ChunkDataComponent>();
         ChunkDataComponent* targetChunkData = nullptr;
-        sh::Entity targetChunkEntity;
+        ap::Entity targetChunkEntity;
         for (auto chunkEntity : chunkView)
         {
             auto& chunkData = chunkView.get(chunkEntity);
@@ -82,8 +82,8 @@ inline void ChunkRequestResponseSystem(sh::Scene& scene)
             targetChunkEntity = chunk;
         }
 
-        sh::Application::Get().OnEvent(sh::ServerSendPacketEvent(sh::Serialize(*targetChunkData, targetChunkEntity),sender.peer));
-        sh::Application::Get().OnEvent(sh::ServerSendPacketEvent(sh::Serialize(ChunkModifiedComponent(), targetChunkEntity), sender.peer));
+        ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(*targetChunkData, targetChunkEntity),sender.peer));
+        ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(ChunkModifiedComponent(), targetChunkEntity), sender.peer));
         reg.destroy(entity);
     }
 }
@@ -91,7 +91,7 @@ inline void ChunkRequestResponseSystem(sh::Scene& scene)
 /**
  * A client side system to create chunks and their data
  */
-inline void ChunkMeshBuilderSystem(sh::Scene& scene)
+inline void ChunkMeshBuilderSystem(ap::Scene& scene)
 {
     auto& reg = scene.GetRegistry().Get();
     auto view = reg.view<ChunkDataComponent, ChunkModifiedComponent>();
@@ -125,32 +125,32 @@ inline void ChunkMeshBuilderSystem(sh::Scene& scene)
 class ChunkRenderSystem
 {
 public:
-    ChunkRenderSystem(std::reference_wrapper<sh::PerspectiveCamera> camera)
+    ChunkRenderSystem(std::reference_wrapper<ap::PerspectiveCamera> camera)
         : m_cam(std::move(camera))
-        , m_shader(sh::Shader::Create("res/shader/Voxel.glsl"))
-        , m_texture(sh::ArrayTexture2D::Create(2,2,"res/texture.png"))
+        , m_shader(ap::Shader::Create("res/shader/Voxel.glsl"))
+        , m_texture(ap::ArrayTexture2D::Create(2,2,"res/texture.png"))
     {
 
     }
 
-    void operator() (sh::Scene& scene)
+    void operator() (ap::Scene& scene)
     {
         auto& reg = scene.GetRegistry().Get();
         auto view = reg.view<ChunkDataComponent, ChunkMeshComponent>(entt::exclude<ChunkModifiedComponent>);
 
-        sh::Renderer::BeginScene(m_cam);
+        ap::Renderer::BeginScene(m_cam);
         for(auto entity : view)
         {
             auto& [chunk,mesh] = 
                 view.get<ChunkDataComponent, ChunkMeshComponent>(entity);
 
-            sh::Renderer::Submit(m_shader,mesh.vao,glm::translate(glm::identity<glm::mat4>(),chunk.pos));
+            ap::Renderer::Submit(m_shader,mesh.vao,glm::translate(glm::identity<glm::mat4>(),chunk.pos));
         }
-        sh::Renderer::EndScene();
+        ap::Renderer::EndScene();
     }
 
 private:
-    std::reference_wrapper<sh::PerspectiveCamera> m_cam;
-    sh::ShaderRef m_shader;
-    sh::TextureRef m_texture;
+    std::reference_wrapper<ap::PerspectiveCamera> m_cam;
+    ap::ShaderRef m_shader;
+    ap::TextureRef m_texture;
 };

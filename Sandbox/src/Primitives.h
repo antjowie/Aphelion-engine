@@ -1,6 +1,6 @@
 #pragma once
 #include <array>
-#include <Shinobu/Renderer/VertexBuffer.h>
+#include <Aphelion/Renderer/VertexBuffer.h>
 
 #if 0
 namespace Vertices
@@ -87,16 +87,16 @@ enum FaceDir
 };
 
 FaceVertices GenerateFaceVertices(FaceDir dir, float x, float y, float z, float texIndex);
-inline void FillFaceVBOElements(sh::VertexBufferRef& buffer)
+inline void FillFaceVBOElements(ap::VertexBufferRef& buffer)
 {
-    buffer->AddElement({sh::ShaderDataType::Float3, "aPos"});
-    buffer->AddElement({sh::ShaderDataType::Float3, "aNormal",true});
-    buffer->AddElement({sh::ShaderDataType::Float2, "aTex",true});
-    buffer->AddElement({sh::ShaderDataType::Float, "aIndex"});
+    buffer->AddElement({ap::ShaderDataType::Float3, "aPos"});
+    buffer->AddElement({ap::ShaderDataType::Float3, "aNormal",true});
+    buffer->AddElement({ap::ShaderDataType::Float2, "aTex",true});
+    buffer->AddElement({ap::ShaderDataType::Float, "aIndex"});
 }
 
 template <unsigned faceCount>
-sh::IndexBufferRef GenerateIndices()
+ap::IndexBufferRef GenerateIndices()
 {
     constexpr auto elementCount = faceCount * 6u;
 
@@ -117,11 +117,11 @@ sh::IndexBufferRef GenerateIndices()
         offset += 4;
     }
 
-    return sh::IndexBuffer::Create(ebo.data(),ebo.size());
+    return ap::IndexBuffer::Create(ebo.data(),ebo.size());
 }
 
 /// The runtime variant
-inline sh::IndexBufferRef GenerateIndices(unsigned faceCount)
+inline ap::IndexBufferRef GenerateIndices(unsigned faceCount)
 {
     auto elementCount = faceCount * 6u;
 
@@ -143,5 +143,5 @@ inline sh::IndexBufferRef GenerateIndices(unsigned faceCount)
         offset += 4;
     }
 
-    return sh::IndexBuffer::Create(ebo.data(),ebo.size());
+    return ap::IndexBuffer::Create(ebo.data(),ebo.size());
 }

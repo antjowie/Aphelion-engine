@@ -7,5 +7,5 @@ set(CMAKE_BUILD_TYPE "DEBUG" CACHE STRING "")
 
 project(Application)
 
-add_subdirectory(Shinobu)
+add_subdirectory(Aphelion)
 add_subdirectory(Sandbox)

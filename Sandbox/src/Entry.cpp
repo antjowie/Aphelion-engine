@@ -6,9 +6,9 @@
 
 #include "Block/BlockType.h"
 
-#include <Shinobu/Core/EntryPoint.h>
+#include <Aphelion/Core/EntryPoint.h>
 
-std::unique_ptr<sh::Application> sh::CreateApplication()
+std::unique_ptr<ap::Application> ap::CreateApplication()
 {
     RegisterServerComponents();
     RegisterChunkComponents();
@@ -16,7 +16,7 @@ std::unique_ptr<sh::Application> sh::CreateApplication()
 
     RegisterBlocks();
 
-    auto app = std::make_unique<sh::Application>();
+    auto app = std::make_unique<ap::Application>();
     app->GetLayerStack().PushLayer(new MainMenuLayer());
 
     return app;

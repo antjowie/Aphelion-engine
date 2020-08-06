@@ -1,8 +1,8 @@
 #pragma once
-#include "Shinobu/Core/Application.h"
-#include "Shinobu/ECS/Scene.h"
+#include "Aphelion/Core/Application.h"
+#include "Aphelion/ECS/Scene.h"
 
-inline void DrawSceneStats(sh::Scene& scene)
+inline void DrawSceneStats(ap::Scene& scene)
 {
     auto& reg = scene.GetRegistry().Get();
     ImGui::Text("Simulation %i (%i/%i)", 

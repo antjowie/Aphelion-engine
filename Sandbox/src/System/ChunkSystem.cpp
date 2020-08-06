@@ -16,7 +16,7 @@ void GenerateChunk(ChunkDataComponent& chunk)
         });
 }
 
-void GenerateChunkMesh(const ChunkDataComponent& chunk, sh::VertexArrayRef& vao)
+void GenerateChunkMesh(const ChunkDataComponent& chunk, ap::VertexArrayRef& vao)
 {
     // Generate face chunk
     constexpr auto faceElemCount = faceAttributeCount * 4u;
@@ -50,9 +50,9 @@ void GenerateChunkMesh(const ChunkDataComponent& chunk, sh::VertexArrayRef& vao)
     // First time we generate this chunk
     if(!vao)
     {
-        vao = sh::VertexArray::Create();
+        vao = ap::VertexArray::Create();
 
-        auto vbo = sh::VertexBuffer::Create(chunkElemCount * sizeof(float));
+        auto vbo = ap::VertexBuffer::Create(chunkElemCount * sizeof(float));
         FillFaceVBOElements(vbo);
 
         vao->AddVertexBuffer(vbo);
