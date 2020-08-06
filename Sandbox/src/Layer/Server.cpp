@@ -133,7 +133,7 @@ void ServerLayer::OnUpdate(sh::Timestep ts)
         {
             reg.HandlePacket(sh::Entity(p.entity), p);
         }
-        // This means that the client created a request
+        // This means that the client created a request or send a null entity
         else
         {
             auto entity = reg.Create();

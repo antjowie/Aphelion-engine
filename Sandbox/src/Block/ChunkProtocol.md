@@ -1,19 +1,24 @@
 ## Client side
 > I make the client responsible for chunk requests since it knows which chunks it already has, instead of having to communicate this with the server. Running verification is very easy since we can just do it based on the position and server render distance
 
+> Note: a packet can be a command. This means that it is a request. These don't have an entity ID and aren't reconciled. (for example, ChunkSpawnComponent). An example of a non-command would be the player transform.
 
-Generating a chunk
+Requesting a chunk
 ```
-Client spawn entity with ChunkSpawnComponent
-For all ChunkSpawnComponent request server for the chunk
-Server sends back ChunkServerAckComponent
-For all ChunkSpawnComponent and ChunkServerAckComponent. Build ChunkMesh and delete first 2 components
+Client sends SpawnChunkComponent command
+Server sends back ChunkDataComponent and ChunkModifiedComponent
 ```
- Required systems and components
+
+When a chunk is modified
+```
+Client runs ChunkMeshBuilderSystem on the entity
+```
+
+Required systems and components
 ```
 ChunkSpawnComponent: pos
-ChunkServerAckComponent
 ChunkDataComponent: pos, chunk
+ChunkMeshComponent: vao
 
 ChunkSpawnRequestSystem
 ChunkMeshBuilderSystem
@@ -22,7 +27,7 @@ ChunkMeshBuilderSystem
 ## Server side
 When receiving ChunkSpawnComponent
 ```
-If data at chunk pos is empty
-    Generate chunk
-Send Chunk Data to player
+if there is NOT an entity with the same pos
+    Create the chunk and generate it
+return the ChunkDataComponent and ChunkModifiedComponent
 ```

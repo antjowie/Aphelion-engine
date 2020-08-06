@@ -29,7 +29,6 @@ inline void ChunkStrategySystem(sh::Scene& scene)
         // TODO: These should not be stored as entities
         // Client will keep requesting entities
         sh::Application::Get().OnEvent(sh::ClientSendPacketEvent(sh::Serialize(spawnComp, sh::NullEntity, true)));
-        break;
     }
 
     //auto& player = reg.view<sh::Transform,Player>().get<sh::Transform>();
@@ -106,6 +105,19 @@ inline void ChunkMeshBuilderSystem(sh::Scene& scene)
 
         // We only do one chunk per frame for now
         reg.remove<ChunkModifiedComponent>(entity);
+
+        // TODO: This is a temp fix but once we build the chunk we remove any 
+        // spawn request component. We probably want to add receive callbacks
+        auto spawnView = reg.view<ChunkSpawnComponent>();
+        for (auto spawnRequest : spawnView)
+        {
+            auto& spawnComp = spawnView.get(spawnRequest);
+            if (spawnComp.pos == chunk.pos) 
+            {
+                reg.destroy(spawnRequest);
+                break;
+            }
+        }
         break;
     }
 }
