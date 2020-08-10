@@ -178,28 +178,30 @@ endif()
 # I'm not sure if there is a better way of doing it
 set(BUILD_SHARED_LIBS_OLD ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS "OFF" CACHE BOOL "" FORCE)
-set(GLFW_BUILD_DOCS "OFF" CACHE BOOL "" FORCE)
 set(BUILD_TESTING "OFF" CACHE BOOL "" FORCE)
 
 add_subdirectory(thirdParty/bitsery)
 add_subdirectory(thirdParty/enet)
 add_subdirectory(thirdParty/entt)
 add_subdirectory(thirdParty/Glad)
+option(GLFW_BUILD_DOCS OFF)
+option(GLFW_INSTALL OFF)
 add_subdirectory(thirdParty/glfw)
 add_subdirectory(thirdParty/glm)
 add_subdirectory(thirdParty/imgui)
+option(SPDLOG_ENABLE_PCH ON)
 add_subdirectory(thirdParty/spdlog)
 add_subdirectory(thirdParty/stb_image)
 
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD} CACHE BOOL "" FORCE)
   
 target_link_libraries(Aphelion PUBLIC 
-    bitsery
-    enet
-    EnTT
-    Glad
+    Bitsery::bitsery
+    Enet::enet
+    EnTT::EnTT
+    Glad::glad
     glfw
-    glm
-    imgui
-    spdlog
-    stb_image)
+    glm::glm
+    ImGui::imgui
+    spdlog::spdlog
+    stb_image::stb_image)

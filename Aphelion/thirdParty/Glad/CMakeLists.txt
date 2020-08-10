@@ -9,4 +9,6 @@ add_library(Glad
     src/glad.c
 )
 
+add_library(Glad::glad ALIAS Glad)
+
 target_include_directories(Glad PUBLIC include)
