@@ -2,6 +2,10 @@
 A cross platform game engine written, made as an educational passion project.  
 You can follow the development of this project on the [Trello page](https://trello.com/b/XO0iYUhz/voxelcraft)
 
+## Features
+
+![Current high level design of the engine](./HighLevelDesign.png)
+
 ## Purpose
 One of the first things that I wanted to do when I started learning programming was to create a game engine. With my experiences right now, I feel confident to pick up this task.
 
