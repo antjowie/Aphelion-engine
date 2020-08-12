@@ -5,6 +5,10 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+/// Terrible dependency that should not exist
+/// Serialization should be moved to its own system
+#include <bitsery/bitsery.h>
+
 namespace ap
 {
     /**
@@ -40,34 +44,34 @@ namespace ap
 
         glm::mat4 GetWorldMatrix() const;
 
-        friend bool operator==(const Transform&, const Transform&);
-        template <typename S> friend void serialize(S& s, Transform& t);
+        bool operator==(const Transform& rhs) const { return m_position == rhs.m_position && m_euler == rhs.m_euler; }
 
-    private:
+        /// TODO: Find a way to access these for serialize purposes
         glm::vec3 m_position;
         glm::vec3 m_euler;
+    private:
     };
-
-    inline bool operator==(const Transform& lhs, const Transform& rhs)
-    {
-        return lhs.m_position == rhs.m_position && lhs.m_euler == rhs.m_euler;
-    }
-
-    template <typename S>
-    void serialize(S& s, glm::vec3& v)
-    {
-        s.value4b(v.x);
-        s.value4b(v.y);
-        s.value4b(v.z);
-    }
-
-    template <typename S>
-    void serialize(S& s, Transform& t)
-    {
-        serialize(s, t.m_position);
-        serialize(s, t.m_euler);
-    }
 
     inline glm::vec3& Degrees(glm::vec3& radians) { return radians = radians / glm::pi<float>() * 180.f; }
     inline glm::vec3& Radians(glm::vec3& degrees) { return degrees = degrees / 180.f * glm::pi<float>(); }
+}
+
+namespace bitsery
+{
+
+/// TODO: Move these to a serialize system and figure out if we can wrap it
+template <typename S>
+void serialize(S& s, glm::vec3& v)
+{
+    s.value4b(v.x);
+    s.value4b(v.y);
+    s.value4b(v.z);
+}
+
+template <typename S>
+void serialize(S& s, ap::Transform& t)
+{
+    serialize(s, t.m_position);
+    serialize(s, t.m_euler);
+}
 }

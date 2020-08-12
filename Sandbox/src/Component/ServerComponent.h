@@ -10,7 +10,6 @@
 struct SenderComponent
 {
     ENetPeer* peer;
-    ap::Entity entity;
 };
 EMPTY_COMPONENT(SenderComponent);
 

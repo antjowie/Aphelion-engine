@@ -3,57 +3,91 @@
 namespace ap
 {
     std::unordered_map<entt::id_type, Registry::CompData> Registry::m_compData;
+    PRNG Registry::m_prng = PRNG(std::chrono::system_clock::now().time_since_epoch().count());
 
-    Entity Registry::Create()
+    Entity Registry::Create(const std::string& tag)
     {
-        auto id = m_reg.create();
-        if(m_onCreate) m_onCreate(id);
-        return id;
+        auto guid = m_prng.Get();
+        if (m_idToHandle.count(guid) == 1)
+        {
+            AP_CORE_WARN("Duplicate GUID generated. Attemting again...");            
+            return Create(tag);
+        }
+        else if (guid == 0)
+        {
+            AP_CORE_WARN("Null GUID generated. Attemting again...");
+            return Create(tag);
+        }
+
+        // Create the entity 
+
+        auto handle = m_reg.create();
+        Entity entity = { handle, m_reg };
+
+        entity.AddComponent<TransformComponent>();
+        entity.AddComponent<TagComponent>(tag);
+        entity.AddComponent<GUIDComponent>(guid);
+        
+        m_idToHandle[guid] = handle;
+
+        if (m_onCreate) m_onCreate(entity);
+        return entity;
     }
 
-    Entity Registry::Create(Entity hint)
+    Entity Registry::Create(unsigned guid)
     {
-        auto id = m_reg.create(hint);
-        // I've added this assert since there may be an issue when we predict new entities
-        // locally but the server creates a new one. In this case, the ID's may not match. To solve this,
-        // we either disallow the client from ever making entities themselves or we 
-        // use a different ID system
-        //
-        // For example, a system that the Source engine uses is if the entity does not yet exist, 
-        // create it. And only then. (I think)
-        //
-        // I HAVE A WAY BETTER SOLUTION!
-        // Create a network ID component which stores the network ID of the entity.
-        // This allows us to always refer to the same object
-        AP_CORE_ASSERT(id == hint, "Could not recreate the hint ID");
-        if(m_onCreate) m_onCreate(id);
-        return id;
+        if (m_idToHandle.count(guid) == 1)
+        {
+            // In this case, a GUID has been received by a remote computer
+            // What should we do in this case???
+            // For now we crash
+            AP_CORE_CRITICAL("Network duplicate GUID generated. Attemting again...");
+        }
+
+        auto handle = m_reg.create();
+        Entity entity = { handle, m_reg };
+
+        entity.AddComponent<TransformComponent>();
+        entity.AddComponent<TagComponent>("network entity");
+        entity.AddComponent<GUIDComponent>(guid);
+
+        m_idToHandle[guid] = handle;
+
+        if (m_onCreate) m_onCreate(entity);
+        return entity;
     }
 
     void Registry::Destroy(Entity entity)
     {
-        if(m_onDestroy) m_onDestroy(entity);
-        m_reg.destroy(entity);
+        if (m_onDestroy) m_onDestroy(entity);
+
+        auto handle = m_idToHandle.at(entity.GetComponent<GUIDComponent>().guid);
+        m_idToHandle.erase(entity.GetComponent<GUIDComponent>().guid);
+
+        m_reg.destroy(handle);
     }
 
-    void Registry::HandlePacket(Entity entity, Packet& packet)
+    void Registry::HandlePacket(unsigned guid, Packet& packet)
     {
         //m_compData[compID].unpack(m_reg, entity, packet);
         AP_CORE_ASSERT(m_compData.count(packet.id) == 1, "Component is not registered or is incorrect");
-        m_compData.at(packet.id).unpack(*this, entity, packet);
+        m_compData.at(packet.id).unpack(*this, m_idToHandle.at(guid), packet);
     }
 
-    bool Registry::HandleAndReconcilePacket(Entity entity, Packet& packet)
+    bool Registry::HandleAndReconcilePacket(unsigned id, Packet& packet)
     {
         AP_CORE_ASSERT(m_compData.count(packet.id) == 1, "Component is not registered or is incorrect");
-        return m_compData.at(packet.id).unpackAndReconcile(*this, entity, packet);
+        return m_compData.at(packet.id).unpackAndReconcile(*this, m_idToHandle.at(id), packet);
     }
 
     void Registry::Clone(Registry& from)
     {
-        Get().clear();
+        m_reg.clear();
+        // Copy current GUID register (we may want to move this to scene)
+        m_idToHandle = from.m_idToHandle;
+
         // Iterate over each entity in from registry
-        from.Get().each([&](const entt::entity e)
+        from.m_reg.each([&](const entt::entity e)
             {
                 // If entity does not exist create it
                 // NOTE: This will pretty much always throw an exception since ENTT does not expect you to check for an entity
@@ -64,17 +98,17 @@ namespace ap
                 // NOTE: For some reason I can't really copy a entity with all their values (such as version and id etc) so I 
                 // ignore these details since I don't think we'll need them
 
-                auto newE = Get().create(e);
+                auto newE = m_reg.create(e);
                 AP_CORE_VERIFY(e == newE, "Could not copy entity from registry");
                 //AP_CORE_VERIFY(entt::to_integral(Get().create(e)) == entt::to_integral(e), "Could not copy entity from registry");
                 //entt::to_integral(Get().create(e)) == entt::to_integral(e);
 
                 // Copy all components into here
-                from.Get().visit(e, [&](const entt::id_type component)
+                from.m_reg.visit(e, [&](const entt::id_type component)
                     {
                         //AP_CORE_TRACE(m_compData.at(component).name);
                         AP_CORE_ASSERT(m_compData.count(component) == 1, "Component is not registered")
-                        m_compData.at(component).stamp(from.Get(), e, Get(), newE);
+                        m_compData.at(component).stamp(from.m_reg, e, m_reg, newE);
                         //Get().emplace_or_replace<T>(dst, from.get<T>(src));
                     });
             });

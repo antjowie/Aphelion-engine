@@ -36,7 +36,7 @@ struct ChunkDataComponent
 template <typename S>
 void serialize(S& s, ChunkDataComponent& o)
 {
-    ap::serialize(s,o.pos);
+    serialize(s,o.pos);
     s.container1b(o.chunk, chunkCount);
 }
 
@@ -45,7 +45,7 @@ struct ChunkSpawnComponent
     glm::vec3 pos;
 };
 inline bool operator==(const ChunkSpawnComponent& lhs, const ChunkSpawnComponent& rhs) { return true; }
-template <typename S> void serialize(S& s, ChunkSpawnComponent& o) { ap::serialize(s, o.pos); }
+template <typename S> void serialize(S& s, ChunkSpawnComponent& o) { serialize(s, o.pos); }
 
 struct ChunkMeshComponent
 {

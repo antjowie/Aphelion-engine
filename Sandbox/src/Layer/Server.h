@@ -20,5 +20,6 @@ private:
     ap::Scene m_scene;
     PacketBuffer m_packets;
 
-    std::unordered_map<ENetPeer*, ap::Entity> m_players;
+    // Map of player guid
+    std::unordered_map<ENetPeer*, unsigned> m_players;
 };

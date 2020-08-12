@@ -62,18 +62,18 @@ private:
     {
         PacketKey() = default;
         PacketKey(const ap::Packet& packet)
-            : entity(packet.entity)
+            : guid(packet.guid)
             , id(packet.id)
         {}
 
-        unsigned entity;
+        unsigned guid;
         unsigned id;
 
         bool operator<(const PacketKey& rhs) const
         {
             // https://stackoverflow.com/questions/1102392/how-can-i-use-stdmaps-with-user-defined-types-as-key
             // Apparently a key is equal if a is not smaller then b and likewise
-            return (entity + id) < (rhs.entity + rhs.id);
+            return (guid + id) < (rhs.guid + rhs.id);
         }
     };
 

@@ -27,7 +27,7 @@ static float movespeed = 1.f;
 //        if (ap::Input::IsKeyPressed(ap::KeyCode::Right)) offset.x += speed * ap::Time::dt;
 //        t.Move(glm::vec3(offset.x,offset.y,0.f));
 //
-//        auto packet = ap::Serialize(t, ClientLayer::LocalIDToNet(e));
+//        auto packet = serialize(t, ClientLayer::LocalIDToNet(e));
 //        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(packet));
 //    }
 //}
@@ -49,7 +49,7 @@ public:
         {
             auto& t = view.get<ap::Transform>(e);
             t = m_cam.get().transform;
-            auto packet = ap::Serialize(t, ClientLayer::LocalIDToNet(e));
+            auto packet = ap::Serialize(t, ap::Entity(e,reg.Get()).GetComponent<ap::GUIDComponent>().guid);
             ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(packet));
         }
         ap::Renderer::EndScene();
@@ -68,7 +68,7 @@ inline void DeathSystem(ap::Scene& scene)
         auto& h = view.get<Health>(e);
 
         if(h.health <= 0)
-            reg.Destroy(e);
+            reg.Destroy(ap::Entity(e,reg.Get()));
     }
 }
 

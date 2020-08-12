@@ -28,32 +28,35 @@ void ServerLayer::OnEvent(ap::Event& event)
             auto view = reg.Get().view<ap::Transform, Sprite, Health>();
             for (auto ent : view)
             {
-                auto& t = reg.Get().get<ap::Transform>(ent);
-                auto& s = reg.Get().get<Sprite>(ent);
-                auto& h = reg.Get().get<Health>(ent);
+                ap::Entity entity = { ent,reg.Get() };
+                auto& t = entity.GetComponent<ap::Transform>();
+                auto& s = entity.GetComponent<Sprite>();
+                auto& h = entity.GetComponent<Health>();
+                auto& guid = entity.GetComponent<ap::GUIDComponent>().guid;
 
-                app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(t, ent, true), e.GetPeer()));
-                app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(s, ent, true), e.GetPeer()));
-                app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(h, ent, true), e.GetPeer()));
+                app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(t, guid), e.GetPeer()));
+                app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(s, guid), e.GetPeer()));
+                app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(h, guid), e.GetPeer()));
             }
 
-            // Create the new player player
+            // Create the new entity for the client that just joined
             auto entity = reg.Create();
-            auto& t = reg.Get().emplace<ap::Transform>(entity);
-            auto& s = reg.Get().emplace<Sprite>(entity);
+
+            auto& guid = entity.GetComponent<ap::GUIDComponent>().guid;
+            auto& t = entity.GetComponent<ap::TransformComponent>();
+            auto& s = entity.AddComponent<Sprite>();
             s.image = "res/image.png";
             s.LoadTexture();
-            auto& h = reg.Get().emplace<Health>(entity);
-            h.health = 1;
+            auto& h = entity.AddComponent<Health>(1);
+            //h.health = 1;
 
-            app.OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(t, entity,true)));
-            app.OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(s, entity,true)));
-            app.OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(h,entity,true)));
+            app.OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(t, guid)));
+            app.OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(s, guid)));
+            app.OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(h, guid)));
             // Tell the new user that they own that player
-            app.OnEvent(ap::ServerSendPacketEvent( 
-                ap::Serialize(Player(), entity, true), e.GetPeer()));
+            app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(Player(), guid), e.GetPeer()));
 
-            m_players[e.GetPeer()] = entity;
+            m_players[e.GetPeer()] = guid;
             return true;
         })) return;
 
@@ -64,10 +67,11 @@ void ServerLayer::OnEvent(ap::Event& event)
             AP_INFO("Server closed connection with {}", ip);
 
             // When player leaves we broadcast that their HP is zero
-            auto entity = m_players.at(e.GetPeer());
-            auto& h = m_scene.GetRegistry().Get().get<Health>(entity);
+            auto guid = m_players.at(e.GetPeer());
+            auto entity = m_scene.GetRegistry().Get(guid);
+            auto& h = entity.GetComponent<Health>();
             h.health = 0;
-            ap::Application::Get().OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(h,entity)));
+            ap::Application::Get().OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(h,guid)));
 
             m_players.erase(e.GetPeer());
             return true;
@@ -128,18 +132,17 @@ void ServerLayer::OnUpdate(ap::Timestep ts)
     while (m_packets.Poll(p))
     {
         auto& reg = m_scene.GetRegistry();
-        // Check if entity exists in our scene (created on server)
-        if (reg.Get().valid(ap::Entity(p.entity)))
-        {
-            reg.HandlePacket(ap::Entity(p.entity), p);
-        }
-        // This means that the client created a request or send a null entity
-        else
+        // Received a command
+        if (p.guid == 0)
         {
             auto entity = reg.Create();
-            
-            reg.Get().emplace<SenderComponent>(entity, p.sender, ap::Entity(p.entity));
-            reg.HandlePacket(entity, p);
+
+            entity.AddComponent<SenderComponent>(p.sender);
+            reg.HandlePacket(entity.GetComponent<ap::GUIDComponent>().guid, p);
+        }
+        else 
+        {
+            reg.HandlePacket(p.guid, p);
         }
     }
     m_scene.Simulate(ts);
@@ -149,7 +152,8 @@ void ServerLayer::OnUpdate(ap::Timestep ts)
     auto view = reg.view<ap::Transform>();
     for (auto e : view)
     {
-        auto p = ap::Serialize(view.get(e), e);
+        ap::Entity entity{ e,reg };
+        auto p = ap::Serialize(view.get(e), entity.GetComponent<ap::GUIDComponent>().guid);
         ap::Application::Get().OnEvent(ap::ServerBroadcastPacketEvent(p));
     }
 }

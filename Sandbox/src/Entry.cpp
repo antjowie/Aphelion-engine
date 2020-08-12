@@ -10,6 +10,11 @@
 
 std::unique_ptr<ap::Application> ap::CreateApplication()
 {
+    /// TODO: Move component registry or use a macro
+    ap::Registry::RegisterComponent<ap::TransformComponent>();
+    ap::Registry::RegisterComponent<ap::TagComponent>();
+    ap::Registry::RegisterComponent<ap::GUIDComponent>();
+
     RegisterServerComponents();
     RegisterChunkComponents();
     RegisterComponents();

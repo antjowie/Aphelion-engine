@@ -10,8 +10,8 @@ class ClientLayer : public ap::Layer
 public:
     ClientLayer() : Layer("ClientLayer"), m_camera(glm::radians(45.f),16.f/9.f) {}
 
-    static ap::Entity LocalIDToNet(ap::Entity localID);
-    static ap::Entity NetIDtoLocal(ap::Entity netID);
+    //static ap::EntityID LocalIDToNet(ap::EntityID localID);
+    //static ap::EntityID NetIDtoLocal(ap::EntityID netID);
 
     virtual void OnAttach() override;
     virtual void OnDetach() override;
@@ -26,5 +26,5 @@ private:
     ap::Scene m_scene;
     PacketBuffer m_packets;
 
-    static std::unordered_map<ap::Entity, ap::Entity> m_netToLocal;
+    //static std::unordered_map<ap::EntityID, ap::EntityID> m_netToLocal;
 };

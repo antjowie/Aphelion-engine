@@ -48,10 +48,9 @@ namespace ap
 
         // Header data
         unsigned id = 0; // ID mostly refers to component ID but can also send custom ID
-        unsigned entity = 0; // TODO: Coupled to ECS, should probably be changed
+        unsigned guid = 0; // TODO: Coupled to ECS, should probably be changed
         int clientSimulation = -1;
         int serverSimulation = -1;
-        bool isCommand = false;
 
         // ENet data
         size_t size; // Set by ENet when received, used in deserializing
@@ -68,10 +67,9 @@ namespace ap
     APHELION_API void SerializeHeader(T& serializer, Packet& packet)
     {
         serializer.value4b(packet.id);
-        serializer.value4b(packet.entity);
+        serializer.value4b(packet.guid);
         serializer.value4b(packet.clientSimulation);
         serializer.value4b(packet.serverSimulation);
-        serializer.value1b(packet.isCommand);
     }
 
     template<typename T>
@@ -86,12 +84,11 @@ namespace ap
     }
 
     template <typename T> 
-    APHELION_API Packet Serialize(const T& data, entt::entity entity, bool isCommand = false)
+    APHELION_API Packet Serialize(const T& data, unsigned guid)
     {
         Packet packet;
         packet.id = entt::type_info<T>::id();
-        packet.entity = entt::to_integral(entity);
-        packet.isCommand = isCommand;
+        packet.guid = guid;
 
         packet.serializeFn = SerializeData(data);
         return packet;

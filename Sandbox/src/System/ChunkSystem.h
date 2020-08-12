@@ -28,7 +28,7 @@ inline void ChunkStrategySystem(ap::Scene& scene)
 
         // TODO: These should not be stored as entities
         // Client will keep requesting entities
-        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(spawnComp, ap::NullEntity, true)));
+        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(spawnComp, 0)));
     }
 
     //auto& player = reg.view<ap::Transform,Player>().get<ap::Transform>();
@@ -63,7 +63,7 @@ inline void ChunkRequestResponseSystem(ap::Scene& scene)
             if (chunkData.pos == spawnRequest.pos)
             {
                 targetChunkData = &chunkData;
-                targetChunkEntity = chunkEntity;
+                targetChunkEntity = { chunkEntity,reg };
                 break;
             }
         }
@@ -79,11 +79,13 @@ inline void ChunkRequestResponseSystem(ap::Scene& scene)
             GenerateChunk(chunkData);
 
             targetChunkData = &chunkData;
-            targetChunkEntity = chunk;
+            targetChunkEntity = { chunk,reg };
         }
 
-        ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(*targetChunkData, targetChunkEntity),sender.peer));
-        ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(ChunkModifiedComponent(), targetChunkEntity), sender.peer));
+        ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(
+            *targetChunkData, targetChunkEntity.GetComponent<ap::GUIDComponent>().guid),sender.peer));
+        ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(
+            ChunkModifiedComponent(), targetChunkEntity.GetComponent<ap::GUIDComponent>().guid), sender.peer));
         reg.destroy(entity);
     }
 }

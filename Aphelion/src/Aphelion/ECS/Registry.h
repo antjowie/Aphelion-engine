@@ -1,16 +1,18 @@
 #pragma once
 #include "Aphelion/Core/Core.h"
+#include "Aphelion/Core/PRNG.h"
 #include "Aphelion/Net/Packet.h"
+#include "Aphelion/ECS/Entity.h"
+#include "Aphelion/ECS/Component.h"
 
 #include <entt/entt.hpp>
 
 #include <functional>
+#include <vector>
+#include <unordered_map>
 
 namespace ap
 {
-    using Entity = entt::entity;
-    constexpr auto& NullEntity = entt::null;
-
     class Registry;
 
     /**
@@ -33,31 +35,31 @@ namespace ap
      * returns true if reconciliation took place
      */
     template<typename T>
-    bool UnpackAndReconcileFn(Registry& reg, Entity e, Packet& packet)
+    bool UnpackAndReconcileFn(Registry& reg, entt::entity handle, Packet& packet)
     {
         auto& r = reg.Get();
-        if (!r.has<T>(e)) r.emplace<T>(e);
+        if (!r.has<T>(handle)) r.emplace<T>(handle);
 
         //r.get<T>(e) = Deserialize<T>(packet);
         // Check if we have to correct (client side prediction)
-        auto& currentData = r.get<T>(e);
+        auto& currentData = r.get<T>(handle);
         auto& newData = Deserialize<T>(packet);
 
         if (currentData == newData)
         {
-            return false;
+            return true;
         }
         currentData = newData;
-        return true;
+        return false;
     }
 
     template<typename T>
-    void UnpackFn(Registry& reg, Entity e, Packet& packet)
+    void UnpackFn(Registry& reg, entt::entity handle, Packet& packet)
     {
         auto& r = reg.Get();
-        if (!r.has<T>(e)) r.emplace<T>(e);
+        if (!r.has<T>(handle)) r.emplace<T>(handle);
 
-        r.get<T>(e) = Deserialize<T>(packet);
+        r.get<T>(handle) = Deserialize<T>(packet);
     }
 
     /**
@@ -71,8 +73,8 @@ namespace ap
         using StampFunc = std::function<void(
             const entt::registry& from, const entt::entity src,
             entt::registry& to, const entt::entity dst)>;
-        using UnpackFunc = std::function<void(Registry& reg, Entity e, Packet& packet)>;
-        using UnpackAndReconcileFunc = std::function<bool(Registry& reg, Entity e, Packet& packet)>;
+        using UnpackFunc = std::function<void(Registry& reg, entt::entity handle, Packet& packet)>;
+        using UnpackAndReconcileFunc = std::function<bool(Registry& reg, entt::entity handle, Packet& packet)>;
 
         using EntityCb = std::function<void(Entity)>;
 
@@ -85,24 +87,32 @@ namespace ap
         };
 
     public:
-        // Expose underlying registry, these should not be used but I've added
-        // them for the time being so that I can abstract them later
-        inline entt::registry& Get() { return m_reg; }
-        inline const entt::registry& Get() const { return m_reg; }
+        [[deprecated]] entt::registry& Get() { return m_reg; }
+        [[deprecated]] const entt::registry& Get() const { return m_reg; }
 
-        /**
-         * Asserts if the hint entity can't be created
-         */
-        Entity Create();
-        Entity Create(Entity hint);
-
+        Entity Create(const std::string& tag = "entity");
+        /// Used when recreating an existing entity (from another source such as network for example)
+        Entity Create(unsigned guid);
         void Destroy(Entity entity);
+        Entity Get(unsigned guid) { return { m_idToHandle.at(guid),m_reg }; }
+        bool Has(unsigned guid) const { return m_idToHandle.count(guid) == 1; }
+
+        template<typename... Component, typename... Exclude, typename CB>
+        void View(CB& callback, entt::exclude_t<Exclude...> = {}) {
+            auto view = m_reg.view<Component..., Exclude...>();
+            auto cbWrap = [&m_reg, &callback](auto entity, auto... param) { callback(Entity(entity, m_reg), param...); };
+            view.each(cbWrap);
+
+            //static_assert(sizeof...(Component) > 0, "Exclusion-only views are not supported");
+            //return { assure<std::decay_t<Component>>()..., assure<Exclude>()... };
+        }
 
         /**
          * Returns true if reconciliation took place
+         * TODO: Refactor this so that registry no longer depends on Net system
          */
-        void HandlePacket(Entity entity, Packet& packet);
-        bool HandleAndReconcilePacket(Entity entity, Packet& packet);
+        void HandlePacket(unsigned guid, Packet& packet);
+        bool HandleAndReconcilePacket(unsigned guid, Packet& packet);
         void Clone(Registry& from);
 
         /**
@@ -124,7 +134,7 @@ namespace ap
             m_compData[id].name = entt::type_info<T>::name();
         }
 
-        void SetOnEntityDestroyCb(EntityCb cb) { m_onCreate = cb; } 
+        void SetOnEntityDestroyCb(EntityCb cb)  { m_onCreate = cb; }
         void SetOnEntityCreateCb(EntityCb cb) { m_onDestroy = cb; }
 
 #ifdef AP_DEBUG
@@ -134,6 +144,9 @@ namespace ap
 
     private:
         static std::unordered_map<entt::id_type, CompData> m_compData;
+        static PRNG m_prng;
+
+        std::unordered_map<unsigned, entt::entity> m_idToHandle;
 
         EntityCb m_onCreate;
         EntityCb m_onDestroy;

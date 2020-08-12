@@ -10,21 +10,6 @@
 #include "Aphelion/Net/Client.h"
 #include "Aphelion/Net/ClientLayer.h"
 
-
-std::unordered_map<ap::Entity, ap::Entity> ClientLayer::m_netToLocal;
-
-ap::Entity ClientLayer::LocalIDToNet(ap::Entity localID) 
-{
-    for (const auto e : m_netToLocal)
-        if (e.second == localID) return e.first;
-    AP_CORE_ERROR("Local ID {} can't be mapped to a network ID", localID);
-}
-
-ap::Entity ClientLayer::NetIDtoLocal(ap::Entity netID)
-{
-    return m_netToLocal.at(netID);
-}
-
 void ClientLayer::OnAttach()
 {
     m_scene.RegisterSystem(InputSystem(m_camera.GetCamera()));
@@ -41,18 +26,17 @@ void ClientLayer::OnAttach()
         for(int z = -2; z < 2; z++)
         {
             auto entity = reg.Create();
-            auto& data = reg.Get().emplace<ChunkSpawnComponent>(entity);
+            auto& data = entity.AddComponent<ChunkSpawnComponent>();
             
             data.pos = glm::vec3(x * chunkDimensions.x, -40.f, z * chunkDimensions.z);
         }    
 
-    m_scene.SetOnEntityCreateCb([this](ap::Entity entity)
-    {
-    });
-    m_scene.SetOnEntityDestroyCb([this](ap::Entity entity)
-    {
-        m_netToLocal.erase(LocalIDToNet(entity));
-    });
+    //m_scene.SetOnEntityCreateCb([this](ap::Entity entity)
+    //{
+    //});
+    //m_scene.SetOnEntityDestroyCb([this](ap::Entity entity)
+    //{
+    //});
 
     m_camera.GetCamera().transform.Move(ap::Transform::GetWorldForward() * 5.f);
 }
@@ -61,7 +45,6 @@ void ClientLayer::OnDetach()
 {
     // TODO: add timeout variable to this so that we can just do 0 instead of 5
     ap::Application::Get().OnEvent(ap::ClientDisconnectRequestEvent());
-    m_netToLocal.clear();
 }
 
 /**
@@ -105,29 +88,38 @@ void ClientLayer::OnUpdate(ap::Timestep ts)
     ap::Packet p;
     m_packets.Swap();
     clientIsReconciling = true;
+    auto& reg = m_scene.GetRegistry();
     while(m_packets.Poll(p))
     {
-        auto netID = ap::Entity(p.entity);
-        auto match = m_netToLocal.find(netID);
-        if (match == m_netToLocal.end()) { m_netToLocal[netID] = m_scene.GetRegistry().Create(); }
-        auto local = m_netToLocal[netID];
+        //auto netID = ap::Entity(p.entity);
+        //auto match = m_netToLocal.find(netID);
+        //if (match == m_netToLocal.end()) { m_netToLocal[netID] = m_scene.GetRegistry().Create(); }
+        //auto local = m_netToLocal[netID];
+
+        auto guid = p.guid;
+        if (!reg.Has(guid))
+        {
+            auto entity = guid == 0 ? reg.Create("command") : reg.Create(guid);
+        }
 
         unsigned delta = m_scene.GetSimulationCount() - p.clientSimulation;
 
         // We only want to reconcile player input
-        if (p.isCommand || !m_scene.GetRegistry().Get().has<Player>(local))
+        if (guid == 0 || !reg.Get(guid).HasComponent<Player>())
         {
-            m_scene.GetRegistry().HandlePacket(local, p);
+            m_scene.GetRegistry().HandlePacket(guid, p);
         }
-        else if (m_scene.GetRegistry().Get().has<Player>(local) && 
+        else if (
+            reg.Get(guid).HasComponent<Player>() && 
             p.clientSimulation != -1 && 
-            m_scene.GetRegistry(delta).HandleAndReconcilePacket(local, p))
+            !m_scene.GetRegistry(delta).HandleAndReconcilePacket(guid, p))
         {
             auto newT = ap::Deserialize<ap::Transform>(p);
 
             AP_WARN("Reconciliation!!!");
             // TODO: Reconciliate subsequent registries
-            m_scene.GetRegistry().HandlePacket(local, p);
+            auto player = reg.Get(guid).GetComponent<ap::Transform>() = newT;
+            //m_scene.GetRegistry().HandlePacket(local, p);
         }
     }
     clientIsReconciling = false;
