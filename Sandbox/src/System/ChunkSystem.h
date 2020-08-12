@@ -71,15 +71,14 @@ inline void ChunkRequestResponseSystem(ap::Scene& scene)
         // If we can't find the chunk in our system, generate it
         if (!targetChunkData)
         {
-            auto chunk = reg.create();
-            auto& chunkData = reg.get_or_emplace<ChunkDataComponent>(chunk);
+            targetChunkEntity = scene.GetRegistry().Create("chunk");
+            auto& chunkData = targetChunkEntity.AddComponent<ChunkDataComponent>();
 
             chunkData.chunk.resize(chunkCount);
             chunkData.pos = spawnRequest.pos;
             GenerateChunk(chunkData);
 
             targetChunkData = &chunkData;
-            targetChunkEntity = { chunk,reg };
         }
 
         ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(
