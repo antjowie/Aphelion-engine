@@ -25,6 +25,7 @@ namespace ap
     struct APHELION_API GUIDComponent
     {
         unsigned guid;
+        operator unsigned() const {return guid;}
     };
     template<typename S> void serialize(S& s, GUIDComponent& v) { s.value4b(v.guid); }
     inline bool operator==(const GUIDComponent& lhs, const GUIDComponent& rhs) { return lhs.guid == rhs.guid; }

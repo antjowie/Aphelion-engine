@@ -13,8 +13,6 @@
 
 namespace ap
 {
-    class Registry;
-
     /**
      * A function to stamp an component value of an entity to another entity
      */
@@ -35,9 +33,9 @@ namespace ap
      * returns true if reconciliation took place
      */
     template<typename T>
-    bool UnpackAndReconcileFn(Registry& reg, entt::entity handle, Packet& packet)
+    bool UnpackAndReconcileFn(entt::registry& reg, entt::entity handle, Packet& packet)
     {
-        auto& r = reg.Get();
+        auto& r = reg;
         if (!r.has<T>(handle)) r.emplace<T>(handle);
 
         //r.get<T>(e) = Deserialize<T>(packet);
@@ -54,9 +52,9 @@ namespace ap
     }
 
     template<typename T>
-    void UnpackFn(Registry& reg, entt::entity handle, Packet& packet)
+    void UnpackFn(entt::registry& reg, entt::entity handle, Packet& packet)
     {
-        auto& r = reg.Get();
+        auto& r = reg;
         if (!r.has<T>(handle)) r.emplace<T>(handle);
 
         r.get<T>(handle) = Deserialize<T>(packet);
@@ -64,8 +62,6 @@ namespace ap
 
     /**
      * The registry stores entities and their components
-     *
-     * TODO: Wrap entt instead of directly accessing it
      */
     class APHELION_API Registry
     {
@@ -73,8 +69,8 @@ namespace ap
         using StampFunc = std::function<void(
             const entt::registry& from, const entt::entity src,
             entt::registry& to, const entt::entity dst)>;
-        using UnpackFunc = std::function<void(Registry& reg, entt::entity handle, Packet& packet)>;
-        using UnpackAndReconcileFunc = std::function<bool(Registry& reg, entt::entity handle, Packet& packet)>;
+        using UnpackFunc = std::function<void(entt::registry& reg, entt::entity handle, Packet& packet)>;
+        using UnpackAndReconcileFunc = std::function<bool(entt::registry& reg, entt::entity handle, Packet& packet)>;
 
         using EntityCb = std::function<void(Entity)>;
 
@@ -87,20 +83,21 @@ namespace ap
         };
 
     public:
-        [[deprecated]] entt::registry& Get() { return m_reg; }
-        [[deprecated]] const entt::registry& Get() const { return m_reg; }
-
-        Entity Create(const std::string& tag = "entity");
+        Entity Create(const std::string& tag = {});
         /// Used when recreating an existing entity (from another source such as network for example)
         Entity Create(unsigned guid);
         void Destroy(Entity entity);
         Entity Get(unsigned guid) { return { m_idToHandle.at(guid),m_reg }; }
         bool Has(unsigned guid) const { return m_idToHandle.count(guid) == 1; }
 
+        size_t Count() const { return m_reg.size(); }
+
         template<typename... Component, typename... Exclude, typename CB>
-        void View(CB& callback, entt::exclude_t<Exclude...> = {}) {
-            auto view = m_reg.view<Component..., Exclude...>();
-            auto cbWrap = [&m_reg, &callback](auto entity, auto... param) { callback(Entity(entity, m_reg), param...); };
+        void View(CB& callback, entt::exclude_t<Exclude...> exclude = {}) {
+            auto view = m_reg.view<Component...>(exclude);
+            auto cbWrap = [&](entt::entity entity, auto&... param) 
+            { callback(Entity(entity, m_reg), param...); };
+
             view.each(cbWrap);
 
             //static_assert(sizeof...(Component) > 0, "Exclusion-only views are not supported");
