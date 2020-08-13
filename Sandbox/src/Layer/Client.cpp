@@ -31,12 +31,16 @@ void ClientLayer::OnAttach()
             data.pos = glm::vec3(x * chunkDimensions.x, -40.f, z * chunkDimensions.z);
         }    
 
-    //m_scene.SetOnEntityCreateCb([this](ap::Entity entity)
-    //{
-    //});
-    //m_scene.SetOnEntityDestroyCb([this](ap::Entity entity)
-    //{
-    //});
+#ifdef AP_DEBUG
+    m_scene.SetOnEntityCreateCb([](ap::Entity entity)
+    {
+        AP_INFO("Created {}", entity.GetComponent<ap::GUIDComponent>());
+    });
+    m_scene.SetOnEntityDestroyCb([](ap::Entity entity)
+    {
+        AP_WARN("Destroyed {}", entity.GetComponent<ap::GUIDComponent>());    
+    });
+#endif
 
     m_camera.GetCamera().transform.Move(ap::Transform::GetWorldForward() * 5.f);
 }

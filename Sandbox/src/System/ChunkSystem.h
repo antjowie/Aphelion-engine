@@ -51,7 +51,7 @@ inline void ChunkRequestCooldownSysten(ap::Scene& scene)
         [](ap::Entity e, ChunkSpawnCooldownComponent& cooldown)
     {
         cooldown.time += ap::Time::dt;
-        
+
         // TODO: Should make this based on framerate or rtt I think
         if(cooldown.time > 0.1f)
             e.RemoveComponent<ChunkSpawnCooldownComponent>();
@@ -98,7 +98,7 @@ inline void ChunkRequestResponseSystem(ap::Scene& scene)
         }
 
         auto& guid = targetChunkEntity.GetComponent<ap::GUIDComponent>().guid;
-        AP_INFO("Server send chunk {}", guid);
+        //AP_INFO("Server send chunk {}", guid);
         ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(
             *targetChunkData, guid),sender.peer));
         ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(
@@ -132,11 +132,11 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
         // TODO: This is a temp fix but once we build the chunk we remove any 
         // spawn request component. We probably want to add receive callbacks
         reg.View<ChunkSpawnComponent>(
-            [&](ap::Entity e, ChunkSpawnComponent& spawnComp)
+            [&](ap::Entity spawnEntity, ChunkSpawnComponent& spawnComp)
         {
             if (spawnComp.pos == chunk.pos) 
             {
-                reg.Destroy(e);
+                reg.Destroy(spawnEntity);
                 return;
             }
         });
@@ -161,9 +161,12 @@ public:
         ap::Renderer::BeginScene(m_cam);
         reg.View<ChunkDataComponent, ChunkMeshComponent>(
             [&](ap::Entity e, ChunkDataComponent& chunk, ChunkMeshComponent& mesh)
-            {
-                ap::Renderer::Submit(m_shader,mesh.vao,glm::translate(glm::identity<glm::mat4>(),chunk.pos));
-            },ap::typeList<ChunkModifiedComponent>);
+        {
+            if(mesh.vao)
+            ap::Renderer::Submit(m_shader,mesh.vao,glm::translate(glm::identity<glm::mat4>(),chunk.pos));
+        }
+        //,ap::typeList<ChunkModifiedComponent>
+        );
         ap::Renderer::EndScene();
     }
 
