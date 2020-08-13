@@ -54,11 +54,27 @@ namespace ap
     template<typename T>
     void UnpackFn(entt::registry& reg, entt::entity handle, Packet& packet)
     {
-        auto& r = reg;
-        if (!r.has<T>(handle)) r.emplace<T>(handle);
+        reg.get_or_emplace<T>(handle) = Deserialize<T>(packet);
 
-        r.get<T>(handle) = Deserialize<T>(packet);
+        //if (!r.has<T>(handle)) r.emplace<T>(handle);
+        //r.get<T>(handle) = Deserialize<T>(packet);
     }
+
+    /**
+     * Taken from EnTT
+     * Reg View takes 2 variadic arguments
+     * Since variadic arguments are gready, we pass the second set via a pack of 
+     * types, hence typelist. 
+     */
+    template <typename... T>
+    struct TypeList {};
+
+    /**
+     * Allows us to nicely make a list using the following syntax
+     * typeList<SomeComponent>
+     */
+    template <typename... T>
+    inline constexpr TypeList<T...> typeList{};
 
     /**
      * The registry stores entities and their components
@@ -93,8 +109,8 @@ namespace ap
         size_t Count() const { return m_reg.size(); }
 
         template<typename... Component, typename... Exclude, typename CB>
-        void View(CB& callback, entt::exclude_t<Exclude...> exclude = {}) {
-            auto view = m_reg.view<Component...>(exclude);
+        void View(CB& callback, TypeList<Exclude...> = {}) {
+            auto view = m_reg.view<Component...>(entt::exclude<Exclude...>);
             auto cbWrap = [&](entt::entity entity, auto&... param) 
             { callback(Entity(entity, m_reg), param...); };
 

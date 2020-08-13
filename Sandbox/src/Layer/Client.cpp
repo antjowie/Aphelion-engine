@@ -97,28 +97,33 @@ void ClientLayer::OnUpdate(ap::Timestep ts)
         //auto local = m_netToLocal[netID];
 
         auto guid = p.guid;
+        ap::Entity entity;
         if (!reg.Has(guid))
         {
-            auto entity = guid == 0 ? reg.Create("command") : reg.Create(guid);
+            entity = (guid == 0 ? reg.Create() : reg.Create(guid));
+        }
+        else
+        {
+            entity = reg.Get(guid);
         }
 
         unsigned delta = m_scene.GetSimulationCount() - p.clientSimulation;
 
+        //AP_TRACE("Received guid {}",entity.GetComponent<ap::GUIDComponent>());
         // We only want to reconcile player input
-        if (guid == 0 || !reg.Get(guid).HasComponent<Player>())
+        if (guid == 0 || !entity.HasComponent<Player>())
         {
             m_scene.GetRegistry().HandlePacket(guid, p);
         }
         else if (
-            reg.Get(guid).HasComponent<Player>() && 
-            p.clientSimulation != -1 && 
+            entity.HasComponent<Player>() && p.clientSimulation != -1 && 
             !m_scene.GetRegistry(delta).HandleAndReconcilePacket(guid, p))
         {
             auto newT = ap::Deserialize<ap::Transform>(p);
 
             AP_WARN("Reconciliation!!!");
             // TODO: Reconciliate subsequent registries
-            auto player = reg.Get(guid).GetComponent<ap::Transform>() = newT;
+            auto player = entity.GetComponent<ap::Transform>() = newT;
             //m_scene.GetRegistry().HandlePacket(local, p);
         }
     }
