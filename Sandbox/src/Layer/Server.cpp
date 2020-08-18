@@ -25,19 +25,15 @@ void ServerLayer::OnEvent(ap::Event& event)
             enet_address_get_host_ip(&e.GetPeer()->address, ip, 64);
 
             // Send all existing users to that player
-            auto view = reg.Get().view<ap::Transform, Sprite, Health>();
-            for (auto ent : view)
+            //auto view = reg.Get().view<ap::Transform, Sprite, Health>();
+            reg.View<ap::Transform,Sprite,Health, ap::GUIDComponent>(
+                [&](ap::Entity entity, ap::Transform& t, Sprite& s, Health& h, ap::GUIDComponent& guid)
             {
-                ap::Entity entity = { ent,reg.Get() };
-                auto& t = entity.GetComponent<ap::Transform>();
-                auto& s = entity.GetComponent<Sprite>();
-                auto& h = entity.GetComponent<Health>();
-                auto& guid = entity.GetComponent<ap::GUIDComponent>().guid;
-
                 app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(t, guid), e.GetPeer()));
                 app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(s, guid), e.GetPeer()));
                 app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(h, guid), e.GetPeer()));
-            }
+            });
+            //for (auto ent : view)
 
             // Create the new entity for the client that just joined
             auto entity = reg.Create();
@@ -148,14 +144,14 @@ void ServerLayer::OnUpdate(ap::Timestep ts)
     m_scene.Simulate(ts);
 
     // TODO: Should or could be handled in systems
-    auto& reg = m_scene.GetRegistry().Get();
-    auto view = reg.view<ap::Transform>();
-    for (auto e : view)
+    auto& reg = m_scene.GetRegistry();
+    //auto view = reg.view<ap::Transform>();
+    reg.View<ap::Transform, ap::GUIDComponent>(
+        [](ap::Entity e, ap::Transform& t, ap::GUIDComponent& guid)
     {
-        ap::Entity entity{ e,reg };
-        auto p = ap::Serialize(view.get(e), entity.GetComponent<ap::GUIDComponent>().guid);
+        auto p = ap::Serialize(t, guid);
         ap::Application::Get().OnEvent(ap::ServerBroadcastPacketEvent(p));
-    }
+    });
 }
 
 void ServerLayer::OnGuiRender()

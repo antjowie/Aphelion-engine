@@ -48,7 +48,7 @@ namespace ap
         Entity entity = { handle, m_reg };
 
         entity.AddComponent<TransformComponent>();
-        entity.AddComponent<TagComponent>("network entity");
+        entity.AddComponent<TagComponent>();
         entity.AddComponent<GUIDComponent>(guid);
 
         m_idToHandle[guid] = handle;
@@ -71,13 +71,13 @@ namespace ap
     {
         //m_compData[compID].unpack(m_reg, entity, packet);
         AP_CORE_ASSERT(m_compData.count(packet.id) == 1, "Component is not registered or is incorrect");
-        m_compData.at(packet.id).unpack(*this, m_idToHandle.at(guid), packet);
+        m_compData.at(packet.id).unpack(m_reg, m_idToHandle.at(guid), packet);
     }
 
-    bool Registry::HandleAndReconcilePacket(unsigned id, Packet& packet)
+    bool Registry::HandleAndReconcilePacket(unsigned guid, Packet& packet)
     {
         AP_CORE_ASSERT(m_compData.count(packet.id) == 1, "Component is not registered or is incorrect");
-        return m_compData.at(packet.id).unpackAndReconcile(*this, m_idToHandle.at(id), packet);
+        return m_compData.at(packet.id).unpackAndReconcile(m_reg, m_idToHandle.at(guid), packet);
     }
 
     void Registry::Clone(Registry& from)

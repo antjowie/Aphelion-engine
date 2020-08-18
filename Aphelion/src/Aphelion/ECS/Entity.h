@@ -44,6 +44,7 @@ namespace ap
         Component& GetComponent()
         {
             AP_CORE_ASSERT(*this, "Entity is not valid");
+            AP_CORE_ASSERT(HasComponent<Component>(), "Entity does not have the component");
             return m_reg->get<Component>(m_handle);
         }
 
@@ -62,6 +63,16 @@ namespace ap
         }
 
         explicit operator bool() const { return m_handle != entt::null && m_reg; }
+
+#ifdef AP_DEBUG
+        /**
+         * Do not use this handle for any logical purposes
+         *
+         * It only server for debug purposes. It represent the entt handle. This
+         * handle is unique on each machine and used to communicate with the EnTT API
+         */
+        entt::entity GetHandle() const {return m_handle;}
+#endif
 
     private:
         entt::entity m_handle = entt::null;

@@ -4,10 +4,10 @@
 
 inline void DrawSceneStats(ap::Scene& scene)
 {
-    auto& reg = scene.GetRegistry().Get();
+    auto& reg = scene.GetRegistry();
     ImGui::Text("Simulation %i (%i/%i)", 
         scene.GetSimulationCount(), 
         scene.GetCurrentSimulationIndex(), 
         scene.maxSimulations);
-    ImGui::Text("Entities %i", reg.size());
+    ImGui::Text("Entities %i", reg.Count());
 }

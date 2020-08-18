@@ -36,23 +36,19 @@ class InputSystem
 {
 public:
     InputSystem(std::reference_wrapper<ap::PerspectiveCamera> camera)
-        : m_cam(std::move(camera))
-    {
-    }
+        : m_cam(std::move(camera)) {}
 
     void operator() (ap::Scene& scene)
     {
         auto& reg = scene.GetRegistry();
-        auto view = reg.Get().view<ap::Transform, Player>();
 
-        for (auto& e : view)
+        reg.View<ap::Transform, Player, ap::GUIDComponent>(
+            [&](ap::Entity e, ap::Transform& t, Player&, ap::GUIDComponent& guid)
         {
-            auto& t = view.get<ap::Transform>(e);
             t = m_cam.get().transform;
-            auto packet = ap::Serialize(t, ap::Entity(e,reg.Get()).GetComponent<ap::GUIDComponent>().guid);
+            auto packet = ap::Serialize(t, guid);
             ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(packet));
-        }
-        ap::Renderer::EndScene();
+        });
     }
 
 private:
@@ -62,14 +58,12 @@ private:
 inline void DeathSystem(ap::Scene& scene)
 {
     auto& reg = scene.GetRegistry();
-    auto view = reg.Get().view<Health>();
-    for (auto& e : view)
-    {
-        auto& h = view.get<Health>(e);
 
+    reg.View<Health>([&](ap::Entity e, Health& h)
+    {
         if(h.health <= 0)
-            reg.Destroy(ap::Entity(e,reg.Get()));
-    }
+            reg.Destroy(e);
+    });
 }
 
 class DrawSystem
@@ -109,29 +103,27 @@ public:
     void operator() (ap::Scene& scene)
     {
         auto& reg = scene.GetRegistry();
-        auto view = reg.Get().view<ap::Transform, Sprite>();
+        //auto view = reg.Get().view<ap::Transform, Sprite>();
 
         m_texture->Bind();
 
         // TODO: Move BeginScene to Layer
         ap::Renderer::BeginScene(m_cam);
-        for (auto& e : view)
+               
+        reg.View<ap::Transform, Sprite>(
+            [&](ap::Entity e, ap::Transform& t, Sprite& s)
         {
-            auto& t = view.get<ap::Transform>(e);
-            //auto& sprite = view.get<Sprite>(e);
             ap::Renderer::Submit(m_shader,m_vao,t.GetWorldMatrix());
 
             // Tint player light blue
             //if (reg.Get().has<Player>(e)) data.color = glm::vec4(0.7f, 0.7f, 1.f, 1.f);
-        }
+        });
         ap::Renderer::EndScene();
     }
 
 private:
-
     std::reference_wrapper<ap::PerspectiveCamera> m_cam;
     ap::ShaderRef m_shader;
     ap::VertexArrayRef m_vao;
     ap::TextureRef m_texture;
-
 };

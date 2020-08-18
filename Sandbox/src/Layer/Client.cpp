@@ -31,12 +31,16 @@ void ClientLayer::OnAttach()
             data.pos = glm::vec3(x * chunkDimensions.x, -40.f, z * chunkDimensions.z);
         }    
 
-    //m_scene.SetOnEntityCreateCb([this](ap::Entity entity)
-    //{
-    //});
-    //m_scene.SetOnEntityDestroyCb([this](ap::Entity entity)
-    //{
-    //});
+#ifdef AP_DEBUG
+    m_scene.SetOnEntityCreateCb([](ap::Entity entity)
+    {
+        AP_INFO("Created {}", entity.GetComponent<ap::GUIDComponent>());
+    });
+    m_scene.SetOnEntityDestroyCb([](ap::Entity entity)
+    {
+        AP_WARN("Destroyed {}", entity.GetComponent<ap::GUIDComponent>());    
+    });
+#endif
 
     m_camera.GetCamera().transform.Move(ap::Transform::GetWorldForward() * 5.f);
 }
@@ -97,28 +101,33 @@ void ClientLayer::OnUpdate(ap::Timestep ts)
         //auto local = m_netToLocal[netID];
 
         auto guid = p.guid;
+        ap::Entity entity;
         if (!reg.Has(guid))
         {
-            auto entity = guid == 0 ? reg.Create("command") : reg.Create(guid);
+            entity = (guid == 0 ? reg.Create() : reg.Create(guid));
+        }
+        else
+        {
+            entity = reg.Get(guid);
         }
 
         unsigned delta = m_scene.GetSimulationCount() - p.clientSimulation;
 
+        //AP_TRACE("Received guid {}",entity.GetComponent<ap::GUIDComponent>());
         // We only want to reconcile player input
-        if (guid == 0 || !reg.Get(guid).HasComponent<Player>())
+        if (guid == 0 || !entity.HasComponent<Player>())
         {
             m_scene.GetRegistry().HandlePacket(guid, p);
         }
         else if (
-            reg.Get(guid).HasComponent<Player>() && 
-            p.clientSimulation != -1 && 
+            entity.HasComponent<Player>() && p.clientSimulation != -1 && 
             !m_scene.GetRegistry(delta).HandleAndReconcilePacket(guid, p))
         {
             auto newT = ap::Deserialize<ap::Transform>(p);
 
             AP_WARN("Reconciliation!!!");
             // TODO: Reconciliate subsequent registries
-            auto player = reg.Get(guid).GetComponent<ap::Transform>() = newT;
+            auto player = entity.GetComponent<ap::Transform>() = newT;
             //m_scene.GetRegistry().HandlePacket(local, p);
         }
     }

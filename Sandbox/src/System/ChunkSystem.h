@@ -19,17 +19,16 @@ void GenerateChunkMesh(const ChunkDataComponent& chunk, ap::VertexArrayRef& vao)
  */
 inline void ChunkStrategySystem(ap::Scene& scene)
 {
-    auto& reg = scene.GetRegistry().Get();
-    auto view = reg.view<ChunkSpawnComponent>();
+    auto& reg = scene.GetRegistry();
+    //auto view = reg.view<ChunkSpawnComponent>();
 
-    for (auto entity : view)
+    reg.View<ChunkSpawnComponent>(
+        [](ap::Entity e, ChunkSpawnComponent& spawnComp)
     {
-        auto& spawnComp = view.get(entity);
-
         // TODO: These should not be stored as entities
         // Client will keep requesting entities
         ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(spawnComp, 0)));
-    }
+    });
 
     //auto& player = reg.view<ap::Transform,Player>().get<ap::Transform>();
     //auto playerView = reg.view<ap::Transform,Player>();
@@ -42,52 +41,71 @@ inline void ChunkStrategySystem(ap::Scene& scene)
     //}
 }
 
+/// A client system that makes sure that we don't request the same chunk every frame
+/// Maybe we want to refactor the chunk system to not rely on the ECS or be one object
+inline void ChunkRequestCooldownSysten(ap::Scene& scene)
+{
+    auto& reg = scene.GetRegistry();
+
+    reg.View<ChunkSpawnCooldownComponent>(
+        [](ap::Entity e, ChunkSpawnCooldownComponent& cooldown)
+    {
+        cooldown.time += ap::Time::dt;
+
+        // TODO: Should make this based on framerate or rtt I think
+        if(cooldown.time > 0.1f)
+            e.RemoveComponent<ChunkSpawnCooldownComponent>();
+    });
+}
+
 /**
  * A server side system to respond on chunk requests
  */
 inline void ChunkRequestResponseSystem(ap::Scene& scene)
 {
-    auto& reg = scene.GetRegistry().Get();
-    auto view = reg.view<ChunkSpawnComponent, SenderComponent>();
-    for(auto entity : view)
-    {
-        auto& [spawnRequest, sender] = view.get<ChunkSpawnComponent,SenderComponent>(entity);
-        
+    auto& reg = scene.GetRegistry();
+    
+    reg.View<ChunkSpawnComponent, SenderComponent>(
+        [&](ap::Entity e, ChunkSpawnComponent& spawnRequest, SenderComponent& sender)
+    {   
         // Check if this chunk is already loaded
-        auto chunkView = reg.view<ChunkDataComponent>();
         ChunkDataComponent* targetChunkData = nullptr;
         ap::Entity targetChunkEntity;
-        for (auto chunkEntity : chunkView)
+        //auto chunkView = reg.view<ChunkDataComponent>();
+
+        reg.View<ChunkDataComponent>(
+            [&](ap::Entity chunk, ChunkDataComponent& chunkData)
         {
-            auto& chunkData = chunkView.get(chunkEntity);
             if (chunkData.pos == spawnRequest.pos)
             {
                 targetChunkData = &chunkData;
-                targetChunkEntity = { chunkEntity,reg };
-                break;
+                targetChunkEntity = chunk;
+                return;
             }
-        }
+        });
 
         // If we can't find the chunk in our system, generate it
         if (!targetChunkData)
         {
-            auto chunk = reg.create();
-            auto& chunkData = reg.get_or_emplace<ChunkDataComponent>(chunk);
+            targetChunkEntity = scene.GetRegistry().Create();
+            auto& chunkData = targetChunkEntity.AddComponent<ChunkDataComponent>();
 
             chunkData.chunk.resize(chunkCount);
             chunkData.pos = spawnRequest.pos;
             GenerateChunk(chunkData);
 
             targetChunkData = &chunkData;
-            targetChunkEntity = { chunk,reg };
         }
 
+        auto& guid = targetChunkEntity.GetComponent<ap::GUIDComponent>().guid;
+        //AP_INFO("Server send chunk {}", guid);
         ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(
-            *targetChunkData, targetChunkEntity.GetComponent<ap::GUIDComponent>().guid),sender.peer));
+            *targetChunkData, guid),sender.peer));
         ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(
-            ChunkModifiedComponent(), targetChunkEntity.GetComponent<ap::GUIDComponent>().guid), sender.peer));
-        reg.destroy(entity);
-    }
+            ChunkModifiedComponent(), guid), sender.peer));
+
+        reg.Destroy(e);
+    });
 }
 
 /**
@@ -95,33 +113,36 @@ inline void ChunkRequestResponseSystem(ap::Scene& scene)
  */
 inline void ChunkMeshBuilderSystem(ap::Scene& scene)
 {
-    auto& reg = scene.GetRegistry().Get();
-    auto view = reg.view<ChunkDataComponent, ChunkModifiedComponent>();
-    for (auto entity : view)
+    auto& reg = scene.GetRegistry();
+    
+    reg.View<ChunkDataComponent, ChunkModifiedComponent>(
+        [&](ap::Entity e, ChunkDataComponent& chunk, ChunkModifiedComponent& modified)
     {
-        auto& chunk = view.get<ChunkDataComponent>(entity);
+        AP_TRACE("Building chunk {}", e.GetComponent<ap::GUIDComponent>());
 
         // Generate the chunk vao
-        auto& mesh = reg.get_or_emplace<ChunkMeshComponent>(entity);
+        if(!e.HasComponent<ChunkMeshComponent>()) e.AddComponent<ChunkMeshComponent>();
+        auto& mesh = e.GetComponent<ChunkMeshComponent>();
         GenerateChunkMesh(chunk, mesh.vao);
 
         // We only do one chunk per frame for now
-        reg.remove<ChunkModifiedComponent>(entity);
+        e.RemoveComponent<ChunkModifiedComponent>();
+        //e.AddComponent<ChunkSpawnCooldownComponent>();
 
         // TODO: This is a temp fix but once we build the chunk we remove any 
         // spawn request component. We probably want to add receive callbacks
-        auto spawnView = reg.view<ChunkSpawnComponent>();
-        for (auto spawnRequest : spawnView)
+        reg.View<ChunkSpawnComponent>(
+            [&](ap::Entity spawnEntity, ChunkSpawnComponent& spawnComp)
         {
-            auto& spawnComp = spawnView.get(spawnRequest);
             if (spawnComp.pos == chunk.pos) 
             {
-                reg.destroy(spawnRequest);
-                break;
+                reg.Destroy(spawnEntity);
+                return;
             }
-        }
-        break;
-    }
+        });
+
+        return;
+    }, ap::typeList<ChunkSpawnCooldownComponent>);
 }
 
 class ChunkRenderSystem
@@ -131,23 +152,21 @@ public:
         : m_cam(std::move(camera))
         , m_shader(ap::Shader::Create("res/shader/Voxel.glsl"))
         , m_texture(ap::ArrayTexture2D::Create(2,2,"res/texture.png"))
-    {
-
-    }
+    {}
 
     void operator() (ap::Scene& scene)
     {
-        auto& reg = scene.GetRegistry().Get();
-        auto view = reg.view<ChunkDataComponent, ChunkMeshComponent>(entt::exclude<ChunkModifiedComponent>);
+        auto& reg = scene.GetRegistry();
 
         ap::Renderer::BeginScene(m_cam);
-        for(auto entity : view)
+        reg.View<ChunkDataComponent, ChunkMeshComponent>(
+            [&](ap::Entity e, ChunkDataComponent& chunk, ChunkMeshComponent& mesh)
         {
-            auto& [chunk,mesh] = 
-                view.get<ChunkDataComponent, ChunkMeshComponent>(entity);
-
+            if(mesh.vao)
             ap::Renderer::Submit(m_shader,mesh.vao,glm::translate(glm::identity<glm::mat4>(),chunk.pos));
         }
+        //,ap::typeList<ChunkModifiedComponent>
+        );
         ap::Renderer::EndScene();
     }
 

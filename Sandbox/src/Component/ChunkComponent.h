@@ -40,6 +40,13 @@ void serialize(S& s, ChunkDataComponent& o)
     s.container1b(o.chunk, chunkCount);
 }
 
+struct ChunkSpawnCooldownComponent
+{
+    float time = 0.f;
+};
+inline bool operator==(const ChunkSpawnCooldownComponent& lhs, const ChunkSpawnCooldownComponent& rhs) { return true; }
+template <typename S> void serialize(S& s, ChunkSpawnCooldownComponent& o) { s.value4b(o.time); }
+
 struct ChunkSpawnComponent
 {
     glm::vec3 pos;
@@ -99,5 +106,6 @@ inline void RegisterChunkComponents()
     ap::Registry::RegisterComponent<ChunkDataComponent>();
     ap::Registry::RegisterComponent<ChunkMeshComponent>();
     ap::Registry::RegisterComponent<ChunkModifiedComponent>();
+    ap::Registry::RegisterComponent<ChunkSpawnCooldownComponent>();
     ap::Registry::RegisterComponent<ChunkSpawnComponent>();
 }
