@@ -26,6 +26,13 @@ add_library(
     Window.cpp
     Window.h
 
+    # TODO: These bottom dependencies will need to be refactored
+    ../Event/ApplicationEvent.h
+    ../Event/Event.h
+    ../Event/KeyEvent.h
+    ../Event/MouseEvent.h
+    ../Event/NetEvent.h
+
     # These depend on current platform so we should move them in the future
     ../../Platform/Windows/WindowsWindow.cpp
     ../../Platform/Windows/WindowsWindow.h

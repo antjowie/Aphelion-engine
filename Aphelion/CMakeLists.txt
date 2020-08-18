@@ -76,12 +76,6 @@ add_library(
     src/Aphelion/ECS/Registry.h
     src/Aphelion/ECS/Scene.cpp
     src/Aphelion/ECS/Scene.h
-
-    src/Aphelion/Event/ApplicationEvent.h
-    src/Aphelion/Event/Event.h
-    src/Aphelion/Event/KeyEvent.h
-    src/Aphelion/Event/MouseEvent.h
-    src/Aphelion/Event/NetEvent.h
     
     src/Aphelion/ImGui/ImGuiBuild.cpp
     src/Aphelion/ImGui/ImGuiLayer.cpp
