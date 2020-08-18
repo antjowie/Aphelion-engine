@@ -34,23 +34,23 @@ add_executable(Sandbox
 target_include_directories(Sandbox PUBLIC src)
 
 # We don't need to copy a static lib to the executable directory
-if(BUILD_SHARED_LIBS)
-    add_custom_target(CopyDLL 
-                        ALL COMMAND ${CMAKE_COMMAND} -E copy
-                        $<TARGET_FILE:Aphelion>
-                        $<TARGET_FILE_DIR:Sandbox>
-                        COMMENT "Copying Aphelion.dll to output dir"
-    )
-endif()
-
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_custom_target(CopyPDB
-                    ALL COMMAND ${CMAKE_COMMAND} -E copy
-                    $<TARGET_FILE_DIR:Aphelion>/Aphelion.pdb 
-                    $<TARGET_FILE_DIR:Sandbox>
-                    COMMENT "Copying Aphelion.pdb to output dir"
-    )
-endif ()
+# if(BUILD_SHARED_LIBS)
+#     add_custom_target(CopyDLL 
+#                         ALL COMMAND ${CMAKE_COMMAND} -E copy
+#                         $<TARGET_FILE:Aphelion::Runtime>
+#                         $<TARGET_FILE_DIR:Sandbox>
+#                         COMMENT "Copying Aphelion.dll to output dir"
+#     )
+# endif()
+# 
+# if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#     add_custom_target(CopyPDB
+#                     ALL COMMAND ${CMAKE_COMMAND} -E copy
+#                     $<TARGET_FILE_DIR:Aphelion::Runtime>/Runtime.pdb 
+#                     $<TARGET_FILE_DIR:Sandbox>
+#                     COMMENT "Copying Aphelion.pdb to output dir"
+#     )
+# endif ()
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/Aphelion/res)
     add_custom_target(CopyGameAssets
@@ -70,4 +70,4 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/Sandbox/res)
     )
 endif()
 
-target_link_libraries(Sandbox PUBLIC Aphelion)
+target_link_libraries(Sandbox PUBLIC Aphelion::Runtime)
