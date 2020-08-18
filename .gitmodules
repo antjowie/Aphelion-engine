@@ -22,3 +22,4 @@
 [submodule "Aphelion/thirdParty/PhysX"]
 	path = Aphelion/thirdParty/PhysX
 	url = https://github.com/phcerdan/PhysX
+	ignore = dirty

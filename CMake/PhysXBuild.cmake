@@ -1,4 +1,4 @@
-function(BuildPhysX PX_ROOT_DIR PX_SAMPLES)
+function(BuildPhysX PX_ROOT_DIR BUILD_PX_SAMPLES)
 
 
 # set(PX_ROOT_DIR ${CMAKE_SOURCE_DIR}/lib)
