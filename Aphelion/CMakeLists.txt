@@ -194,6 +194,8 @@ add_subdirectory(thirdParty/glfw)
 add_subdirectory(thirdParty/glm)
 add_subdirectory(thirdParty/imgui)
 set(SPDLOG_ENABLE_PCH ON)
+include(../../CMake/PhysXBuild.cmake ON)
+find_package(PhysX REQUIRED)
 add_subdirectory(thirdParty/spdlog)
 add_subdirectory(thirdParty/stb_image)
 
@@ -207,6 +209,7 @@ target_link_libraries(Aphelion PUBLIC
     glfw
     glm::glm
     ImGui::imgui
+    PhysX::PhysXCommon
     spdlog::spdlog
     stb_image::stb_image
 )

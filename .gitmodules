@@ -19,3 +19,6 @@
 [submodule "Aphelion/thirdParty/entt"]
 	path = Aphelion/thirdParty/entt
 	url = https://github.com/skypjack/entt
+[submodule "Aphelion/thirdParty/PhysX"]
+	path = Aphelion/thirdParty/PhysX
+	url = https://github.com/phcerdan/PhysX
