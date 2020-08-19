@@ -20,6 +20,10 @@ function(BuildPhysX PX_ROOT_DIR BUILD_PX_SAMPLES)
     # message(STATUS "  Configuring PhysX...")
     set(TARGET_BUILD_PLATFORM ${CMAKE_SYSTEM_NAME} CACHE INTERNAL "The target platform that we are building for")
     set(PHYSX_CONFIG_TYPE ${CMAKE_BUILD_TYPE} CACHE INTERNAL "Config/build type for PhysX")
+    
+    # set(NV_USE_DEBUG_WINCRT $<STREQUAL:${PHYSX_CONFIG_TYPE},"Debug")
+    # message(WARNING "Value of debug wincrt:${NV_USE_DEBUG_WINCRT}")
+    # set(NV_USE_STATIC_WINCRT ON)
     if(PHYSX_CONFIG_TYPE STREQUAL "")
         message("PHYSX_CONFIG_TYPE is empty, assuming release build type")
         set(PHYSX_CONFIG_TYPE "release" CACHE INTERNAL "Config/build type for PhysX")
@@ -32,6 +36,8 @@ function(BuildPhysX PX_ROOT_DIR BUILD_PX_SAMPLES)
             -B ${CMAKE_BINARY_DIR}/physx
             -DCMAKE_GENERATOR=${CMAKE_GENERATOR}
             -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+            -DCMAKE_MSVC_RUNTIME_LIBRARY=${CMAKE_MSVC_RUNTIME_LIBRARY}
+            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/physx
         COMMAND_ECHO STDOUT
