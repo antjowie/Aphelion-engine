@@ -18,26 +18,27 @@ function(BuildPhysX PX_ROOT_DIR BUILD_PX_SAMPLES)
     # message(STATUS "  Populating PhysX...")
     # FetchContent_Populate(physx)
     # message(STATUS "  Configuring PhysX...")
-    set(TARGET_BUILD_PLATFORM ${CMAKE_SYSTEM_NAME} CACHE INTERNAL "The target platform that we are building for")
-    set(PHYSX_CONFIG_TYPE ${CMAKE_BUILD_TYPE} CACHE INTERNAL "Config/build type for PhysX")
-    
-    # set(NV_USE_DEBUG_WINCRT $<STREQUAL:${PHYSX_CONFIG_TYPE},"Debug")
-    # message(WARNING "Value of debug wincrt:${NV_USE_DEBUG_WINCRT}")
-    # set(NV_USE_STATIC_WINCRT ON)
-    if(PHYSX_CONFIG_TYPE STREQUAL "")
-        message("PHYSX_CONFIG_TYPE is empty, assuming release build type")
-        set(PHYSX_CONFIG_TYPE "release" CACHE INTERNAL "Config/build type for PhysX")
+   string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_CONFIG) 
+
+    set(NV_USE_DEBUG_WINCRT ON)
+    if({CMAKE_BUILD_TYPE} STREQUAL Release)
+        set(NV_USE_DEBUG_WINCRT OFF)
     endif()
-    message(STATUS "Building PhysX... with CONFIG: ${PHYSX_CONFIG_TYPE}")
+
+    # message(WARNING "Value of debug wincrt:${NV_USE_DEBUG_WINCRT}")
+    message(STATUS "Building PhysX... with CONFIG: ${CMAKE_BUILD_TYPE}")
     execute_process(
         COMMAND 
             ${CMAKE_COMMAND}
             -S ${PX_ROOT_DIR}/physx
             -B ${CMAKE_BINARY_DIR}/physx
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             -DCMAKE_GENERATOR=${CMAKE_GENERATOR}
             -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
             -DCMAKE_MSVC_RUNTIME_LIBRARY=${CMAKE_MSVC_RUNTIME_LIBRARY}
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+            -DNV_USE_DEBUG_WINCRT=${NV_USE_DEBUG_WINCRT}
+            -DNV_USE_STATIC_WINCRT=ON
 
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/physx
         COMMAND_ECHO STDOUT
@@ -54,7 +55,7 @@ function(BuildPhysX PX_ROOT_DIR BUILD_PX_SAMPLES)
         COMMAND 
             ${CMAKE_COMMAND}
             --build ${CMAKE_BINARY_DIR}/physx
-            --config ${PHYSX_CONFIG_TYPE}
+            --config ${CMAKE_BUILD_TYPE}
 
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/physx
         COMMAND_ECHO STDOUT
@@ -68,7 +69,10 @@ function(BuildPhysX PX_ROOT_DIR BUILD_PX_SAMPLES)
     endif()
     message(STATUS "PhysX build complete")
 
+    # NOTE: This just calls the original build script that PhysX supplies
+    # You may want to build it elsewhere
     if(BUILD_PX_SAMPLES)
+        set(TARGET_BUILD_PLATFORM ${CMAKE_SYSTEM_NAME})
         message(STATUS "Building PhysX samples...")
         # message(STATUS "Building on platform: ${TARGET_BUILD_PLATFORM}")
         string(TOLOWER ${TARGET_BUILD_PLATFORM} TARGET_BUILD_PLATFORM)
