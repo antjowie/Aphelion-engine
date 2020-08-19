@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.16)
 ##############################
 # Options
 set(BUILD_SHARED_LIBS "OFF" CACHE BOOL "" FORCE)
+if(NOT DEFINED CMAKE_BUILD_TYPE)
+    message(WARNING "No build type specified. Assuming debug...")
+endif()
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "")
 
 # Set some global variables since these have to be consistent amongst all targets
