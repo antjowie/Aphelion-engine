@@ -139,16 +139,6 @@ add_library(Aphelion::Runtime ALIAS Runtime)
 # target_precompile_headers(Runtime REUSE_FROM Aphelion::Core)
 target_include_directories(Runtime PUBLIC src)
 
-# add_custom_command(
-#     TARGET Runtime
-#     POST_BUILD
-#     COMMAND ${CMAKE_COMMAND} 
-#     -E copy_if_different
-#     ${CMAKE_CURRENT_SOURCE_DIR}/res/
-#     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/res/
-#     COMMENT "Copying Aphelion resources to output dir"
-# )
-
 add_custom_command(
     TARGET Runtime
     POST_BUILD
