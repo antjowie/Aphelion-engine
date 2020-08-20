@@ -42,6 +42,7 @@ endif()
 set(BUILD_SHARED_LIBS_OLD ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS "OFF" CACHE BOOL "" FORCE)
 set(BUILD_TESTING "OFF" CACHE BOOL "" FORCE)
+set(CMAKE_FOLDER External)
 
 add_subdirectory(thirdParty/bitsery)
 add_subdirectory(thirdParty/enet)
@@ -63,6 +64,8 @@ set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD} CACHE BOOL "" FORCE)
 
 ################################
 # Configure main project
+
+set(CMAKE_FOLDER Aphelion)
 
 add_subdirectory(src/Aphelion/Core)
 add_subdirectory(src/Aphelion/Physics)
