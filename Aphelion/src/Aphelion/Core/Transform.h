@@ -52,8 +52,10 @@ namespace ap
     private:
     };
 
-    inline glm::vec3& Degrees(glm::vec3& radians) { return radians = radians / glm::pi<float>() * 180.f; }
-    inline glm::vec3& Radians(glm::vec3& degrees) { return degrees = degrees / 180.f * glm::pi<float>(); }
+    template <typename T> T Degrees(const T& radians) { return radians / glm::pi<float>() * 180.f; }
+    template <typename T> T Radians(const T& degrees) { return degrees / 180.f * glm::pi<float>(); }
+    template <typename T> T& Degrees(T& radians) { return radians = Degrees(radians)}
+    template <typename T> T& Radians(T& degrees) { return degrees = Radians(degrees)}
 }
 
 namespace bitsery

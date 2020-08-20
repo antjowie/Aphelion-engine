@@ -103,6 +103,8 @@ add_library(
     src/Aphelion/Renderer/PerspectiveCamera.h
     src/Aphelion/Renderer/PerspectiveCameraController.cpp
     src/Aphelion/Renderer/PerspectiveCameraController.h
+    src/Aphelion/Renderer/Primitive.cpp
+    src/Aphelion/Renderer/Primitive.h
     src/Aphelion/Renderer/RenderCommand.cpp
     src/Aphelion/Renderer/RenderCommand.h
     src/Aphelion/Renderer/Renderer.cpp
