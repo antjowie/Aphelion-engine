@@ -6,8 +6,8 @@ add_library(
     PhysicsActor.h
     PhysicsActor.cpp
     PhysicsError.h
-    PhysicsSystem.h
-    PhysicsSystem.cpp
+    PhysicsFoundation.h
+    PhysicsFoundation.cpp
     PhysicsScene.h
     PhysicsScene.cpp
 )
@@ -41,6 +41,7 @@ target_link_libraries(
     PUBLIC
     Aphelion::Core
     #PRIVATE temp while we test physics is initialized correctly
+    #PRIVATE
     PhysX::PhysXExtensions
     PhysX::PhysXCommon
 )

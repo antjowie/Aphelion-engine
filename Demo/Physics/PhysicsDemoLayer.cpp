@@ -14,6 +14,9 @@
 
 using namespace physx;
 
+#define USE_PX
+
+#ifdef USE_PX
 PxDefaultAllocator		gAllocator;
 PxDefaultErrorCallback	gErrorCallback;
 
@@ -28,6 +31,11 @@ PxMaterial* gMaterial = NULL;
 PxPvd* gPvd = NULL;
 
 PxReal stackZ = 10.0f;
+#else
+ap::PhysicsScene* scene;
+ap::PhysicsMaterial* material;
+float stackZ = 10.0f;
+#endif // 0
 
 PxRigidDynamic* createDynamic(const PxTransform & t, const PxGeometry & geometry, const PxVec3 & velocity = PxVec3(0))
 {
@@ -40,6 +48,8 @@ PxRigidDynamic* createDynamic(const PxTransform & t, const PxGeometry & geometry
 
 void createStack(const PxTransform & t, PxU32 size, PxReal halfExtent)
 {
+#ifdef USE_PX
+
 	PxShape* shape = gPhysics->createShape(PxBoxGeometry(halfExtent, halfExtent, halfExtent), *gMaterial);
 	for (PxU32 i = 0; i < size; i++)
 	{
@@ -53,6 +63,8 @@ void createStack(const PxTransform & t, PxU32 size, PxReal halfExtent)
 		}
 	}
 	shape->release();
+#else
+#endif
 }
 
 PhysicsDemoLayer::PhysicsDemoLayer() :
@@ -66,6 +78,7 @@ PhysicsDemoLayer::PhysicsDemoLayer() :
 
 void PhysicsDemoLayer::OnAttach()
 {
+#ifdef USE_PX
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 
 	gPvd = PxCreatePvd(*gFoundation);
@@ -88,6 +101,7 @@ void PhysicsDemoLayer::OnAttach()
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
+
 	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 
 	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
@@ -96,12 +110,42 @@ void PhysicsDemoLayer::OnAttach()
 	for (PxU32 i = 0; i < 5; i++)
 		createStack(PxTransform(PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);
 
-	//if (!interactive)
-		createDynamic(PxTransform(PxVec3(0, 40, 100)), PxSphereGeometry(10), PxVec3(0, -50, -100));
+	createDynamic(PxTransform(PxVec3(0, 40, 100)), PxSphereGeometry(10), PxVec3(0, -50, -100));
+#else
+	// Set up the foundation
+	ap::PhysicsFoundationDesc desc;
+	desc.logCb = [](ap::PhysicsErrorCode code, const char* message, const char* file, int line)
+	{
+		AP_WARN("Physics error: {})", message);
+	};
+	desc.cores = 4;
+	ap::PhysicsFoundation::Init(desc);
+
+	ap::PhysicsSceneDesc sceneDesc;
+	sceneDesc.gravity = glm::vec3(0.f, -9.81f, 0.f);
+
+	scene = new ap::PhysicsScene(sceneDesc);
+	material = new ap::PhysicsMaterial(0.5f, 0.5f, 0.6f);
+	
+	// Rigid bodies, volumes and collision triggers are actors. They are built from shapes which are built from geometry.
+	// (The shape can be compared to collider component in Unity (I think))
+	// We skip the shape class and just construct them in the actor
+	ap::RigidStatic groundPlane = ap::RigidStatic(ap::PhysicsGeometry::CreatePlane(up), transform, *material);
+	scene->AddActor(groundPlane);
+
+	for (PxU32 i = 0; i < 5; i++)
+		createStack(PxTransform(PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);
+
+	ap::RigidDynamic dynamic = ap::RigidDynamic(ap::PhysicsGeometry::CreateSphere(radius), transform, *material);
+#endif // 0
+
 }
 
 void PhysicsDemoLayer::OnDetach() 
 {
+#ifdef USE_PX
+
+
 	PX_RELEASE(gScene);
 	PX_RELEASE(gDispatcher);
 	PX_RELEASE(gPhysics);
@@ -112,6 +156,11 @@ void PhysicsDemoLayer::OnDetach()
 		PX_RELEASE(transport);
 	}
 	PX_RELEASE(gFoundation);
+#else
+	delete material;
+	delete scene; // This releases the scene and sets it to an invalid scene
+	ap::PhysicsFoundation::Deinit();
+#endif // USE_PX
 }
 
 void PhysicsDemoLayer::OnEvent(ap::Event& event)
@@ -189,7 +238,9 @@ void renderActors(PxRigidActor** actors, const PxU32 numActors, bool shadows/*, 
 
 void PhysicsDemoLayer::OnUpdate(ap::Timestep ts) 
 {
-    gScene->simulate(1.0f / 60.0f);
+#ifdef USE_PX
+
+    gScene->simulate(ts);
     gScene->fetchResults(true);
 
 	m_camera.OnUpdate(ts);
@@ -208,4 +259,6 @@ void PhysicsDemoLayer::OnUpdate(ap::Timestep ts)
 	}
 
 	ap::Renderer::EndScene();
+#else
+#endif // USE_PX
 }

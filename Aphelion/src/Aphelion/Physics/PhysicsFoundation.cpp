@@ -1,5 +1,5 @@
 #pragma once
-#include "PhysicsSystem.h"
+#include "PhysicsFoundation.h"
 
 #include <PxPhysicsAPI.h>
 
@@ -27,7 +27,7 @@ namespace ap
         PhysicsErrorLogCb m_cb;
     };
 
-    bool PhysicsSystem::Init(const PhysicsSystemDesc& desc)
+    bool PhysicsFoundation::Init(const PhysicsFoundationDesc& desc)
     {
         desc.logCb ? errorCb = new ErrorCbWrapper(desc.logCb) : errorCb = new PxDefaultErrorCallback();
         foundation = PxCreateFoundation(PX_PHYSICS_VERSION, *allocatorCb, *errorCb);
@@ -41,13 +41,13 @@ namespace ap
         return foundation && physics;
     }
 
-    void PhysicsSystem::Shutdown()
+    void PhysicsFoundation::Shutdown()
     {    
         physics->release();
         foundation->release();
     }
 
-    //PhysicsScene PhysicsSystem::CreateScene()
+    //PhysicsScene PhysicsFoundation::CreateScene()
     //{
     //    
     //}
