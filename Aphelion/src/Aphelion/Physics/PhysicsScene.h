@@ -1,12 +1,47 @@
 #pragma once
 #include "Aphelion/Core/Core.h"
+#include "Aphelion/Physics/Actor/PhysicsActor.h"
+
+namespace physx
+{
+    class PxScene;
+}
 
 namespace ap
 {
     struct PhysicsSceneDesc
     {
-
+        glm::vec3 gravity;
     };
+
+    /**
+     * A scene for physics simulation
+     * 
+     * It holds all the actors in a scene and allows us to simulate the scene
+     */
+    class APHELION_API PhysicsScene
+    {
+    public:
+        PhysicsScene(const PhysicsSceneDesc& desc);
+
+        void AddActor(PhysicsActor& actor);
+        void Simulate(float dt);
+
+        std::vector<PhysicsActor*> GetActors(PhysicsActorType mask) const;
+
+    private:
+        physx::PxScene* m_handle;
+    };
+
+    //////////////////////////////////////////////
+    // Everything underneath is used internally //
+    //////////////////////////////////////////////
+
+    struct APHELION_API PhysicsSceneFactoryDesc
+    {
+        unsigned cores = 1; 
+    };
+
     /**
      * This system will be initialized by the PhysicsFoundation system 
      * 
@@ -23,17 +58,8 @@ namespace ap
      */
     class APHELION_API PhysicsSceneFactory
     {
-
-    };
-
-    /**
-     * A scene for physics simulation
-     * 
-     * It holds all the actors in a scene and allows us to simulate the scene
-     */
-    class APHELION_API PhysicsScene
-    {
     public:
-
+        static void Init(const PhysicsSceneFactoryDesc& desc);
+        static void Deinit();
     };
 }

@@ -12,6 +12,7 @@ namespace ap
     struct PhysicsFoundationDesc
     {
         PhysicsErrorLogCb logCb = nullptr;
+        unsigned cores = 1;
     };
     
     /**
@@ -27,7 +28,7 @@ namespace ap
     {
     public:
         static bool Init(const PhysicsFoundationDesc& desc);
-        static void Shutdown();
+        static void Deinit();
 
     private:
         bool m_isInitialized;

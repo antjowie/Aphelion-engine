@@ -8,10 +8,12 @@ namespace physx
 
 namespace ap
 {
-    enum class APHELION_API PhysicsActorType
+    enum PhysicsActorType
     {
-        RigidStatic,
-        RigidDynamic,
+        RigidStatic = Bit(0),
+        RigidDynamic = Bit(1),
+
+        AllMask
     };
 
     /**

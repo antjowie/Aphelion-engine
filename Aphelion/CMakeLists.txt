@@ -141,7 +141,17 @@ add_library(
 )
 
 add_library(Aphelion::Runtime ALIAS Runtime)
-target_precompile_headers(Runtime REUSE_FROM Aphelion::Core)
+# For some reason this causes an error where we need to use /FS
+# target_precompile_headers(Runtime REUSE_FROM Aphelion::Core)
+# https://gitlab.kitware.com/cmake/cmake/-/issues/19659
+# Here is something mentioned about pdb copying (our issue)
+get_target_property(CORE_PCH Aphelion::Core PRECOMPILE_HEADERS)
+target_precompile_headers(
+    Physics 
+    PUBLIC
+    ${CORE_PCH}
+)
+
 target_include_directories(Runtime PUBLIC src)
 
 add_custom_command(

@@ -16,5 +16,6 @@ namespace ap
     inline physx::PxVec4 APHELION_API MakeVec4(const glm::vec4& vec) { return physx::PxVec4(vec.r, vec.g, vec.b, vec.a); }
 
     inline glm::mat4 APHELION_API MakeMat4(const physx::PxMat44& mat) { return glm::make_mat4(mat.front()); }
-    inline physx::PxMat44 APHELION_API MakeMat4(const glm::mat4& mat) { return physx::PxMat44(glm::value_ptr(mat)); }
+    /// PxMat44 doesn't take a constant (even tho it copies the values)
+    inline physx::PxMat44 APHELION_API MakeMat4(const glm::mat4& mat) { auto m2 = mat; return physx::PxMat44(glm::value_ptr(m2)); }
 }

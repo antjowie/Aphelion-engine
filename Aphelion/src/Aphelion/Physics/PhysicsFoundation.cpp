@@ -1,5 +1,6 @@
 #pragma once
-#include "PhysicsFoundation.h"
+#include "Aphelion/Physics/PhysicsFoundation.h"
+#include "Aphelion/Physics/PhysicsScene.h"
 
 #include <PxPhysicsAPI.h>
 
@@ -9,6 +10,7 @@ namespace ap
 
     static PxFoundation* foundation = nullptr;
     static PxPhysics* physics = nullptr;
+    static PxPvd* pvd = nullptr;
 
     static PxAllocatorCallback* allocatorCb;
     static PxErrorCallback* errorCb;
@@ -29,22 +31,38 @@ namespace ap
 
     bool PhysicsFoundation::Init(const PhysicsFoundationDesc& desc)
     {
+        AP_CORE_ASSERT(!foundation, "PhysicsFoundation is already initialized");
+
         desc.logCb ? errorCb = new ErrorCbWrapper(desc.logCb) : errorCb = new PxDefaultErrorCallback();
         foundation = PxCreateFoundation(PX_PHYSICS_VERSION, *allocatorCb, *errorCb);
 
         // Pvd support
-        //gPvd = PxCreatePvd(*gFoundation);
-        //PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
-        //gPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
+        pvd = PxCreatePvd(*foundation);
+	    PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
+	    pvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
         physics = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, PxTolerancesScale()/*, true, gPvd*/);
-        return foundation && physics;
+
+        PhysicsSceneFactoryDesc sceneDesc;
+        sceneDesc.cores = desc.cores;
+        PhysicsSceneFactory::Init(sceneDesc);
+
+        return foundation && pvd && physics;
     }
 
-    void PhysicsFoundation::Shutdown()
+    void PhysicsFoundation::Deinit()
     {    
+        AP_CORE_ASSERT(foundation, "PhysicsFoundation has not been initialized");
+        
+        PhysicsSceneFactory::Deinit();
+
         physics->release();
+        pvd->release();
         foundation->release();
+
+        physics = nullptr;
+        pvd = nullptr;
+        foundation = nullptr;
     }
 
     //PhysicsScene PhysicsFoundation::CreateScene()
