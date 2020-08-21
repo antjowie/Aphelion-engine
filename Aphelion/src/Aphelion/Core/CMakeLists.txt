@@ -66,8 +66,6 @@ target_precompile_headers(
         <glm/gtc/type_ptr.hpp>
         <glm/gtx/quaternion.hpp>
         
-        <PxPhysicsAPI.h>
-
         Log.h
 )
 

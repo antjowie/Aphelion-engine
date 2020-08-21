@@ -24,7 +24,15 @@ add_library(
 
 add_library(Aphelion::Physics ALIAS Physics)
 
-# target_precompile_headers(Physics REUSE_FROM Aphelion::Core)
+get_target_property(CORE_PCH Aphelion::Core PRECOMPILE_HEADERS)
+target_precompile_headers(
+    Physics 
+    PUBLIC
+    ${CORE_PCH}
+
+    <PxPhysicsAPI.h>
+)
+
 target_include_directories(Physics PUBLIC ../../)
 
 target_link_libraries(

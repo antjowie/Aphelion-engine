@@ -141,7 +141,7 @@ add_library(
 )
 
 add_library(Aphelion::Runtime ALIAS Runtime)
-# target_precompile_headers(Runtime REUSE_FROM Aphelion::Core)
+target_precompile_headers(Runtime REUSE_FROM Aphelion::Core)
 target_include_directories(Runtime PUBLIC src)
 
 add_custom_command(

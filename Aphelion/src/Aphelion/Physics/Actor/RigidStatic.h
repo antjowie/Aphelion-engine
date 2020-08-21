@@ -24,7 +24,8 @@ namespace ap
         virtual physx::PxRigidStatic* GetHandle() override final { return m_handle; }
         virtual PhysicsActorType GetType() const override final { return PhysicsActorType::RigidStatic; }
         
-
+        //virtual void SetWorldTransform(const glm::mat4& transform) override final;
+        virtual const glm::mat4& GetWorldTransform() const override final;
 
     private:
         physx::PxRigidStatic* m_handle;

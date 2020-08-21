@@ -1,6 +1,13 @@
 #pragma once
 #include "Aphelion/Core/Core.h"
-#include "PhysicsActor.h"
+#include "Aphelion/Physics/Actor/PhysicsActor.h"
+#include "Aphelion/Physics/PhysicsGeometry.h"
+#include "Aphelion/Physics/PhysicsMaterial.h"
+
+namespace physx 
+{ 
+    class PxRigidDynamic; 
+}
 
 namespace ap
 {
@@ -13,7 +20,13 @@ namespace ap
     public:
         virtual ~RigidDynamic() = default;
 
-        virtual void* GetHandle() = 0;
-        virtual PhysicsActorType GetType() const = 0;
+        virtual physx::PxRigidDynamic* GetHandle() { return m_handle; }
+        virtual PhysicsActorType GetType() const { return PhysicsActorType::RigidDynamic; }
+
+        //virtual void SetWorldTransform(const glm::mat4& transform) override final;
+        virtual const glm::mat4& GetWorldTransform() const override final;
+
+    private:
+        physx::PxRigidDynamic* m_handle;
     };
 }
