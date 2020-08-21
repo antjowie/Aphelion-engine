@@ -4,6 +4,9 @@
 #include "PhysicsScene.h"
 
 #include <functional>
+
+#include <PxPhysicsAPI.h>
+
 namespace ap
 {
     struct PhysicsFoundationDesc

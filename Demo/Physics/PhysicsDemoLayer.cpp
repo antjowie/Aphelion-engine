@@ -14,7 +14,7 @@
 
 using namespace physx;
 
-#define USE_PX
+#define USE_PX 
 
 #ifdef USE_PX
 PxDefaultAllocator		gAllocator;
