@@ -33,6 +33,8 @@ namespace ap
     {
         AP_CORE_ASSERT(!foundation, "PhysicsFoundation is already initialized");
 
+        allocatorCb = new PxDefaultAllocator();
+
         desc.logCb ? errorCb = new ErrorCbWrapper(desc.logCb) : errorCb = new PxDefaultErrorCallback();
         foundation = PxCreateFoundation(PX_PHYSICS_VERSION, *allocatorCb, *errorCb);
 
@@ -60,9 +62,15 @@ namespace ap
         pvd->release();
         foundation->release();
 
+        delete allocatorCb;
+        delete errorCb;
+
         physics = nullptr;
         pvd = nullptr;
         foundation = nullptr;
+
+        allocatorCb = nullptr;
+        errorCb = nullptr;
     }
 
     //PhysicsScene PhysicsFoundation::CreateScene()

@@ -1,5 +1,7 @@
 #include "Aphelion/Physics/PhysicsScene.h"
 #include "Aphelion/Physics/PhysicsGLM.h"
+#include "Aphelion/Physics/Actor/RigidStatic.h"
+#include "Aphelion/Physics/Actor/RigidDynamic.h"
 
 #include <PxPhysicsAPI.h>
 
@@ -36,13 +38,34 @@ namespace ap
         m_handle->fetchResults(true);
     }
 
-    std::vector<PhysicsActor*> PhysicsScene::GetActors(PhysicsActorType mask) const
+    std::vector<std::unique_ptr<PhysicsActor>> PhysicsScene::GetActors(PhysicsActorType mask) const
     {
         physx::PxActorTypeFlags pxMask = static_cast<physx::PxActorTypeFlag::Enum>(mask);
-        return {};
-	 //   unsigned nbActors = m_handle->getNbActors(pxMask);
-		//std::vector<PxRigidActor*> actors(nbActors);
-		//scene->getActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC, reinterpret_cast<PxActor**>(&actors[0]), nbActors);
+        
+	    unsigned nbActors = m_handle->getNbActors(pxMask);
+		std::vector<physx::PxRigidActor*> actors(nbActors);
+		m_handle->getActors(pxMask, reinterpret_cast<physx::PxActor**>(&actors[0]), nbActors);
+
+		std::vector<std::unique_ptr<PhysicsActor>> ret(nbActors);
+        for(auto& actor : actors)
+        {
+            switch (actor->getType())
+            {
+            case physx::PxActorType::Enum::eRIGID_STATIC:
+                ret.push_back(std::make_unique<RigidStatic>(static_cast<physx::PxRigidStatic*>(actor)));
+                break;
+
+            case physx::PxActorType::Enum::eRIGID_DYNAMIC:
+                ret.push_back(std::make_unique<RigidDynamic>(static_cast<physx::PxRigidDynamic*>(actor)));
+                break;
+
+            default:
+                AP_CORE_ERROR("Physics actor type is not handled");
+                break;
+            }
+        }
+
+        return ret;
     }
 
     //////////////////////////////////////////////

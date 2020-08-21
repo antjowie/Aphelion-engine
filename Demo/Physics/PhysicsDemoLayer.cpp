@@ -3,6 +3,12 @@
 #include "Aphelion/Renderer/Renderer.h"
 #include "Aphelion/Renderer/Texture.h"
 
+#include "Aphelion/Physics/PhysicsFoundation.h"
+#include "Aphelion/Physics/PhysicsScene.h"
+#include "Aphelion/Physics/PhysicsMaterial.h"
+#include "Aphelion/Physics/Actor/RigidStatic.h"
+#include "Aphelion/Physics/Actor/RigidDynamic.h"
+
 #include <PxPhysicsAPI.h>
 
 #include <ctype.h>
@@ -12,11 +18,12 @@
 #define PVD_HOST "127.0.0.1"	//Set this to the IP address of the system running the PhysX Visual Debugger that you want to connect to.
 #define MAX_NUM_ACTOR_SHAPES 128
 
-using namespace physx;
 
-#define USE_PX 
+//#define USE_PX 
 
 #ifdef USE_PX
+using namespace physx;
+
 PxDefaultAllocator		gAllocator;
 PxDefaultErrorCallback	gErrorCallback;
 
@@ -37,6 +44,7 @@ ap::PhysicsMaterial* material;
 float stackZ = 10.0f;
 #endif // 0
 
+#ifdef USE_PX
 PxRigidDynamic* createDynamic(const PxTransform & t, const PxGeometry & geometry, const PxVec3 & velocity = PxVec3(0))
 {
 	PxRigidDynamic* dynamic = PxCreateDynamic(*gPhysics, t, geometry, *gMaterial, 10.0f);
@@ -45,10 +53,12 @@ PxRigidDynamic* createDynamic(const PxTransform & t, const PxGeometry & geometry
 	gScene->addActor(*dynamic);
 	return dynamic;
 }
+#else
+#endif // USE_PX
 
+#ifdef USE_PX
 void createStack(const PxTransform & t, PxU32 size, PxReal halfExtent)
 {
-#ifdef USE_PX
 
 	PxShape* shape = gPhysics->createShape(PxBoxGeometry(halfExtent, halfExtent, halfExtent), *gMaterial);
 	for (PxU32 i = 0; i < size; i++)
@@ -63,9 +73,27 @@ void createStack(const PxTransform & t, PxU32 size, PxReal halfExtent)
 		}
 	}
 	shape->release();
-#else
-#endif
 }
+#else
+void createStack(const glm::mat4& t, unsigned size, float halfExtent)
+{
+	//PxShape* shape = gPhysics->createShape(PxBoxGeometry(halfExtent, halfExtent, halfExtent), *gMaterial);
+	
+	for (unsigned i = 0; i < size; i++)
+	{
+		for (unsigned j = 0; j < size - i; j++)
+		{
+			glm::mat4 tm = glm::translate(glm::identity<glm::mat4>(), glm::vec3((float(j * 2) - float(size - i), float(i * 2 + 1), 0) * halfExtent));
+
+			auto body = ap::RigidDynamic(ap::PhysicsGeometry::CreateBox(glm::vec3(halfExtent)),*material,1.f,tm);
+
+			//PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
+			scene->AddActor(body);
+		}
+	}
+	//shape->release();
+}
+#endif
 
 PhysicsDemoLayer::PhysicsDemoLayer() :
 	m_camera(ap::Radians(45.f),16.f/9.f)
@@ -130,13 +158,17 @@ void PhysicsDemoLayer::OnAttach()
 	// Rigid bodies, volumes and collision triggers are actors. They are built from shapes which are built from geometry.
 	// (The shape can be compared to collider component in Unity (I think))
 	// We skip the shape class and just construct them in the actor
-	ap::RigidStatic groundPlane = ap::RigidStatic(ap::PhysicsGeometry::CreatePlane(up), transform, *material);
+	ap::RigidStatic groundPlane = ap::RigidStatic(ap::PhysicsGeometry::CreatePlane(), *material, glm::identity<glm::mat4>());
+	
 	scene->AddActor(groundPlane);
 
-	for (PxU32 i = 0; i < 5; i++)
-		createStack(PxTransform(PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);
+	for (unsigned i = 0; i < 5; i++)
+		createStack(glm::translate(glm::identity<glm::mat4>(),glm::vec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);
 
-	ap::RigidDynamic dynamic = ap::RigidDynamic(ap::PhysicsGeometry::CreateSphere(radius), transform, *material);
+	ap::RigidDynamic dynamic = ap::RigidDynamic(ap::PhysicsGeometry::CreateSphere(0.5f), *material, 10.f, glm::translate(glm::identity<glm::mat4>(),glm::vec3(0, 40, 100)));
+	dynamic.SetAngularDamping(0.5f);
+	dynamic.SetLinearVelocity(glm::vec3(0,-50,-100));
+	scene->AddActor(dynamic);
 #endif // 0
 
 }
@@ -168,6 +200,7 @@ void PhysicsDemoLayer::OnEvent(ap::Event& event)
 	m_camera.OnEvent(event);
 }
 
+#ifdef USE_PX
 void renderActors(PxRigidActor** actors, const PxU32 numActors, bool shadows/*, const PxVec3& color*/)
 {
 	const PxVec3 shadowDir(0.0f, -0.7071067f, -0.7071067f);
@@ -235,6 +268,7 @@ void renderActors(PxRigidActor** actors, const PxU32 numActors, bool shadows/*, 
 		}
 	}
 }
+#endif
 
 void PhysicsDemoLayer::OnUpdate(ap::Timestep ts) 
 {
@@ -260,5 +294,55 @@ void PhysicsDemoLayer::OnUpdate(ap::Timestep ts)
 
 	ap::Renderer::EndScene();
 #else
+	static auto cube = ap::CreateCube();
+	static auto shader = ap::Shader::Create("res/shader/Texture3D.glsl");
+	static auto texture = ap::Texture2D::Create(1,1);
+	static auto textureSleep = ap::Texture2D::Create(1, 1);
+
+	unsigned white = 0xccccccff;
+	unsigned grey = 0x505050ff;
+	texture->SetData(reinterpret_cast<void*>(&white), sizeof(white));
+	textureSleep->SetData(reinterpret_cast<void*>(&grey), sizeof(grey));
+
+	scene->Simulate(ts);
+	m_camera.OnUpdate(ts);
+
+	ap::Renderer::BeginScene(m_camera.GetCamera());
+	//ap::Renderer::Submit(shader, cube);
+	//texture->Bind();
+
+	for(const auto& actor : scene->GetActors(ap::PhysicsActorType::AllMask))
+	{
+		//if (sleeping)
+		//	textureSleep->Bind();
+		//else
+		texture->Bind();
+
+		ap::Renderer::Submit(shader, cube, actor->GetWorldTransform());	
+	}
+
+	//PxShape* shapes[MAX_NUM_ACTOR_SHAPES];
+	//for (PxU32 i = 0; i < numActors; i++)
+	//{
+	//	const PxU32 nbShapes = actors[i]->getNbShapes();
+	//	PX_ASSERT(nbShapes <= MAX_NUM_ACTOR_SHAPES);
+	//	actors[i]->getShapes(shapes, nbShapes);
+	//	const bool sleeping = actors[i]->is<PxRigidDynamic>() ? actors[i]->is<PxRigidDynamic>()->isSleeping() : false;
+
+	//	for (PxU32 j = 0; j < nbShapes; j++)
+	//	{
+	//		const PxMat44 shapePose(PxShapeExt::getGlobalPose(*shapes[j], *actors[i]));
+	//		const PxGeometryHolder h = shapes[j]->getGeometry();
+
+	//		if (sleeping)
+	//			textureSleep->Bind();
+	//		else
+	//			texture->Bind();
+
+	//		ap::Renderer::Submit(shader, cube, glm::scale(glm::make_mat4(shapePose.front()),glm::vec3(2)));
+
+
+	ap::Renderer::EndScene();
+
 #endif // USE_PX
 }

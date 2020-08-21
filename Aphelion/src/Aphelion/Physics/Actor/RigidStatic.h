@@ -19,12 +19,13 @@ namespace ap
     {
     public:
         RigidStatic(PhysicsGeometry& geometry, PhysicsMaterial& material, const glm::mat4& transform);
+        RigidStatic(physx::PxRigidStatic* handle);
         virtual ~RigidStatic();
 
         virtual physx::PxRigidStatic* GetHandle() override final { return m_handle; }
-        virtual PhysicsActorType GetType() const override final { return PhysicsActorType::RigidStatic; }
+        virtual PhysicsActorType GetType() const override final { return PhysicsActorType::RigidStaticType; }
         
-        //virtual void SetWorldTransform(const glm::mat4& transform) override final;
+        virtual void SetWorldTransform(const glm::mat4& transform) override final;
         virtual const glm::mat4& GetWorldTransform() const override final;
 
     private:

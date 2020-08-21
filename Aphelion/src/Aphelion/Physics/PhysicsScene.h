@@ -27,7 +27,7 @@ namespace ap
         void AddActor(PhysicsActor& actor);
         void Simulate(float dt);
 
-        std::vector<PhysicsActor*> GetActors(PhysicsActorType mask) const;
+        std::vector<std::unique_ptr<PhysicsActor>> GetActors(PhysicsActorType mask) const;
 
     private:
         physx::PxScene* m_handle;

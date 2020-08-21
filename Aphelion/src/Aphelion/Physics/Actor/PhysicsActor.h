@@ -10,8 +10,8 @@ namespace ap
 {
     enum PhysicsActorType
     {
-        RigidStatic = Bit(0),
-        RigidDynamic = Bit(1),
+        RigidStaticType = Bit(0),
+        RigidDynamicType = Bit(1),
 
         AllMask
     };
