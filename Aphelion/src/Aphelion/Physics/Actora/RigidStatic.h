@@ -1,6 +1,6 @@
 #pragma once
 #include "Aphelion/Core/Core.h"
-#include "Aphelion/Physics/Actor/PhysicsActor.h"
+//#include "Aphelion/Physics/Actor/PhysicsActor.h"
 #include "Aphelion/Physics/PhysicsGeometry.h"
 #include "Aphelion/Physics/PhysicsMaterial.h"
 

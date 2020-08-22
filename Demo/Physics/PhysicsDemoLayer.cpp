@@ -6,8 +6,6 @@
 #include "Aphelion/Physics/PhysicsFoundation.h"
 #include "Aphelion/Physics/PhysicsScene.h"
 #include "Aphelion/Physics/PhysicsMaterial.h"
-#include "Aphelion/Physics/Actor/RigidStatic.h"
-#include "Aphelion/Physics/Actor/RigidDynamic.h"
 
 #include <PxPhysicsAPI.h>
 
@@ -83,9 +81,22 @@ void createStack(const glm::mat4& t, unsigned size, float halfExtent)
 	{
 		for (unsigned j = 0; j < size - i; j++)
 		{
-			glm::mat4 tm = glm::translate(glm::identity<glm::mat4>(), glm::vec3((float(j * 2) - float(size - i), float(i * 2 + 1), 0) * halfExtent));
+			//PxTransform localTm(
+			//	PxVec3(
+			//		PxReal(j * 2) - PxReal(size - i), 
+			//		PxReal(i * 2 + 1), 
+			//		0) 
+			//	* halfExtent);
 
-			auto body = ap::RigidDynamic(ap::PhysicsGeometry::CreateBox(glm::vec3(halfExtent)),*material,1.f,tm);
+			glm::mat4 tm = glm::translate(
+				glm::identity<glm::mat4>(), 
+				glm::vec3(
+					float(j * 2) - float(size - i), 
+					float(i * 2 + 1),
+					0)
+				* halfExtent);
+
+			auto body = ap::RigidBody::CreateDynamic(ap::PhysicsGeometry::CreateBox(glm::vec3(halfExtent)),*material,1.f,tm * t);
 
 			//PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
 			scene->AddActor(body);
@@ -106,6 +117,8 @@ PhysicsDemoLayer::PhysicsDemoLayer() :
 
 void PhysicsDemoLayer::OnAttach()
 {
+	AP_WARN("Attaching");
+	ap::Timer timer;
 #ifdef USE_PX
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 
@@ -140,13 +153,16 @@ void PhysicsDemoLayer::OnAttach()
 
 	createDynamic(PxTransform(PxVec3(0, 40, 100)), PxSphereGeometry(10), PxVec3(0, -50, -100));
 #else
+
+
+
 	// Set up the foundation
 	ap::PhysicsFoundationDesc desc;
 	desc.logCb = [](ap::PhysicsErrorCode code, const char* message, const char* file, int line)
 	{
-		AP_WARN("Physics error: {})", message);
+		AP_WARN("[Physics {} File: {} Line: {}] {})", code,file,line, message);
 	};
-	desc.cores = 4;
+	desc.cores = 2;
 	ap::PhysicsFoundation::Init(desc);
 
 	ap::PhysicsSceneDesc sceneDesc;
@@ -158,19 +174,22 @@ void PhysicsDemoLayer::OnAttach()
 	// Rigid bodies, volumes and collision triggers are actors. They are built from shapes which are built from geometry.
 	// (The shape can be compared to collider component in Unity (I think))
 	// We skip the shape class and just construct them in the actor
-	ap::RigidStatic groundPlane = ap::RigidStatic(ap::PhysicsGeometry::CreatePlane(), *material, glm::identity<glm::mat4>());
-	
+	//ap::RigidStatic groundPlane = ap::RigidStatic(ap::PhysicsGeometry::CreatePlane(), *material, glm::identity<glm::mat4>());
+	ap::RigidBody groundPlane = PxCreatePlane(PxGetPhysics(), physx::PxPlane(0, 1, 0, 0), *material->GetHandle());
+
 	scene->AddActor(groundPlane);
 
 	for (unsigned i = 0; i < 5; i++)
-		createStack(glm::translate(glm::identity<glm::mat4>(),glm::vec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);
+		// Note: the normal half extent for cube is 0.5 but physx doesn't take scale for transform, only pos and rot
+		createStack(glm::translate(glm::identity<glm::mat4>(),glm::vec3(0, 0, stackZ -= 10.0f)), 10, 2.f);
 
-	ap::RigidDynamic dynamic = ap::RigidDynamic(ap::PhysicsGeometry::CreateSphere(0.5f), *material, 10.f, glm::translate(glm::identity<glm::mat4>(),glm::vec3(0, 40, 100)));
+	ap::RigidBody dynamic = ap::RigidBody::CreateDynamic(ap::PhysicsGeometry::CreateSphere(10.f), *material, 10.f, glm::translate(glm::identity<glm::mat4>(),glm::vec3(0, 40, 100)));
 	dynamic.SetAngularDamping(0.5f);
 	dynamic.SetLinearVelocity(glm::vec3(0,-50,-100));
 	scene->AddActor(dynamic);
-#endif // 0
 
+#endif // 0
+	AP_INFO("Attaching DONE {}", timer.Elapsed());
 }
 
 void PhysicsDemoLayer::OnDetach() 
@@ -272,6 +291,10 @@ void renderActors(PxRigidActor** actors, const PxU32 numActors, bool shadows/*, 
 
 void PhysicsDemoLayer::OnUpdate(ap::Timestep ts) 
 {
+	AP_WARN("Update...");
+	ap::Timer timer;
+
+
 #ifdef USE_PX
 
     gScene->simulate(ts);
@@ -303,22 +326,26 @@ void PhysicsDemoLayer::OnUpdate(ap::Timestep ts)
 	unsigned grey = 0x505050ff;
 	texture->SetData(reinterpret_cast<void*>(&white), sizeof(white));
 	textureSleep->SetData(reinterpret_cast<void*>(&grey), sizeof(grey));
+	AP_TRACE("Created vars {}", timer.Reset());
 
 	scene->Simulate(ts);
 	m_camera.OnUpdate(ts);
+	AP_TRACE("Simulated scene {}", timer.Reset());
 
 	ap::Renderer::BeginScene(m_camera.GetCamera());
 	//ap::Renderer::Submit(shader, cube);
 	//texture->Bind();
 
-	for(const auto& actor : scene->GetActors(ap::PhysicsActorType::AllMask))
+	for(const auto& actor : scene->GetActors(ap::RigidBodyType::AllMask))
 	{
 		//if (sleeping)
 		//	textureSleep->Bind();
 		//else
 		texture->Bind();
 
-		ap::Renderer::Submit(shader, cube, actor->GetWorldTransform());	
+		// TEMP: The scale is half ext / 0.5 (see create stack)
+		float scale = 4.f;
+		ap::Renderer::Submit(shader, cube, actor.GetWorldTransform() * glm::scale(glm::mat4(1),glm::vec3(scale)));	
 	}
 
 	//PxShape* shapes[MAX_NUM_ACTOR_SHAPES];
@@ -341,8 +368,10 @@ void PhysicsDemoLayer::OnUpdate(ap::Timestep ts)
 
 	//		ap::Renderer::Submit(shader, cube, glm::scale(glm::make_mat4(shapePose.front()),glm::vec3(2)));
 
-
 	ap::Renderer::EndScene();
+	AP_TRACE("Rendererd scene {}", timer.Reset());
 
 #endif // USE_PX
+
+	AP_INFO("Update DONE {}", timer.Total());
 }

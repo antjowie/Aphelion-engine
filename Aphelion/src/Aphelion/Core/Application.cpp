@@ -61,6 +61,7 @@ namespace ap
             const Timestep step(time.Elapsed());
             time.Reset();
             Time::dt = step;
+            Time::frameCount++;
 
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {

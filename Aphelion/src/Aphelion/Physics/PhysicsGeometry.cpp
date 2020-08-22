@@ -15,18 +15,18 @@ namespace ap
         //auto obj = PhysicsGeometry{ physx::PxPlaneGeometry() };
         //obj.m_isPlane = true;
         //return obj;
-        return { physx::PxPlaneGeometry() };
+        return physx::PxGeometryHolder(physx::PxPlaneGeometry());
     }
 
     PhysicsGeometry PhysicsGeometry::CreateSphere(float radius)
     {
-        return { physx::PxSphereGeometry(radius) };
+        return physx::PxGeometryHolder(physx::PxSphereGeometry(radius));
     }
 
     PhysicsGeometry PhysicsGeometry::CreateBox(const glm::vec3& halfSize)
     {
         // https://gameworksdocs.nvidia.com/PhysX/4.0/documentation/PhysXGuide/Manual/Geometry.html#boxes
         // TODO: Verify if x should be y in our case (to stay consistent with coordinate systems)
-        return { physx::PxBoxGeometry(halfSize.x,halfSize.y,halfSize.z) };
+        return physx::PxGeometryHolder(physx::PxBoxGeometry(halfSize.x,halfSize.y,halfSize.z));
     }
 }

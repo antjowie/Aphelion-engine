@@ -9,7 +9,7 @@ namespace ap
         : m_handle(physx::PxCreateDynamic(
             PxGetPhysics(),
             physx::PxTransform(ap::MakeMat4(transform)), 
-            geometry.GetHandle(), 
+            geometry.GetHandle().any(), 
             *material.GetHandle(),
             density))
     {

@@ -11,8 +11,13 @@ namespace ap
     class APHELION_API PhysicsGeometry
     {
     public:
-        PhysicsGeometry(physx::PxGeometry& geometry) : m_handle(geometry) {};
-        physx::PxGeometry& GetHandle() { return m_handle; }
+        static PhysicsGeometry CreatePlane();
+        static PhysicsGeometry CreateSphere(float radius);
+        static PhysicsGeometry CreateBox(const glm::vec3& halfSize);
+
+    public:
+        PhysicsGeometry(physx::PxGeometryHolder& geometry) : m_handle(geometry) {};
+        physx::PxGeometryHolder& GetHandle() { return m_handle; }
 
         /**
          * Some geometries need a special transform. To abstract this from the user
@@ -21,11 +26,7 @@ namespace ap
         //void ToGeomTransform(glm::mat4& transform);
         //void FromGeomTransform(glm::mat4& transform);
 
-        static PhysicsGeometry CreatePlane();
-        static PhysicsGeometry CreateSphere(float radius);
-        static PhysicsGeometry CreateBox(const glm::vec3& halfSize);
-
     private:
-        physx::PxGeometry& m_handle;
+        physx::PxGeometryHolder m_handle;
     };
 }

@@ -3,4 +3,5 @@
 namespace ap
 {
     Timestep Time::dt = 0.f;
+    unsigned Time::frameCount = 0;
 }

@@ -3,12 +3,10 @@ cmake_minimum_required(VERSION 3.16)
 add_library(
     Physics
 
-    Actor/PhysicsActor.h
-    
-    Actor/RigidDynamic.cpp
-    Actor/RigidDynamic.h
-    Actor/RigidStatic.cpp
-    Actor/RigidStatic.h
+    # Actor/RigidDynamic.cpp
+    # Actor/RigidDynamic.h
+    # Actor/RigidStatic.cpp
+    # Actor/RigidStatic.h
 
     PhysicsError.h
     PhysicsFoundation.cpp
@@ -20,6 +18,8 @@ add_library(
     PhysicsMaterial.h
     PhysicsScene.cpp
     PhysicsScene.h
+    RigidBody.cpp
+    RigidBody.h
 )
 
 add_library(Aphelion::Physics ALIAS Physics)
@@ -27,7 +27,7 @@ add_library(Aphelion::Physics ALIAS Physics)
 # target_precompile_headers(Physics REUSE_FROM Aphelion::Core)
 get_target_property(CORE_PCH Aphelion::Core PRECOMPILE_HEADERS)
 target_precompile_headers(
-    Physics 
+    Physics
     PUBLIC
     ${CORE_PCH}
 

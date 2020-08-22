@@ -25,6 +25,7 @@ namespace ap
     struct APHELION_API Time
     {
         static Timestep dt;
+        static unsigned frameCount;
     };
 
     class APHELION_API Timer
@@ -47,10 +48,11 @@ namespace ap
             return Timestep((Clock::now() - m_last).count() * 1e-9f); 
         }
 
-        Timer& Reset()
+        Timestep Reset()
         {
+            auto ts = Elapsed();
             m_last = Clock::now();
-            return *this;
+            return ts;
         }
     
     private:

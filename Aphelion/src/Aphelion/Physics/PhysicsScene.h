@@ -1,6 +1,6 @@
 #pragma once
 #include "Aphelion/Core/Core.h"
-#include "Aphelion/Physics/Actor/PhysicsActor.h"
+#include "Aphelion/Physics/RigidBody.h"
 
 namespace physx
 {
@@ -24,10 +24,10 @@ namespace ap
     public:
         PhysicsScene(const PhysicsSceneDesc& desc);
 
-        void AddActor(PhysicsActor& actor);
+        void AddActor(RigidBody& actor);
         void Simulate(float dt);
 
-        std::vector<std::unique_ptr<PhysicsActor>> GetActors(PhysicsActorType mask) const;
+        std::vector<RigidBody> GetActors(RigidBodyType mask) const;
 
     private:
         physx::PxScene* m_handle;
