@@ -12,19 +12,15 @@
 #include "Aphelion/Physics/PhysicsShape.h"
 #include "Aphelion/Physics/PhysicsScene.h"
 
-
-#include <ctype.h>
-
-// Taken from PhysX snippet: SnippetHelloWorld
-#define PX_RELEASE(x)	if(x)	{ x->release(); x = NULL;	}
-#define PVD_HOST "127.0.0.1"	//Set this to the IP address of the system running the PhysX Visual Debugger that you want to connect to.
-#define MAX_NUM_ACTOR_SHAPES 128
-
-
 //#define USE_PX 
 
 #ifdef USE_PX
 #include <PxPhysicsAPI.h>
+#include <ctype.h>
+// Taken from PhysX snippet: SnippetHelloWorld
+#define PX_RELEASE(x)	if(x)	{ x->release(); x = NULL;	}
+#define PVD_HOST "127.0.0.1"	//Set this to the IP address of the system running the PhysX Visual Debugger that you want to connect to.
+#define MAX_NUM_ACTOR_SHAPES 128
 using namespace physx;
 
 PxDefaultAllocator		gAllocator;
@@ -87,13 +83,7 @@ void createStack(const glm::mat4& t, unsigned size, float halfExtent)
 	{
 		for (unsigned j = 0; j < size - i; j++)
 		{
-			//PxTransform localTm(
-			//	PxVec3(
-			//		PxReal(j * 2) - PxReal(size - i), 
-			//		PxReal(i * 2 + 1), 
-			//		0) 
-			//	* halfExtent);
-
+			
 			glm::mat4 tm = glm::translate(
 				glm::identity<glm::mat4>(), 
 				glm::vec3(
@@ -104,7 +94,7 @@ void createStack(const glm::mat4& t, unsigned size, float halfExtent)
 
 			auto body = ap::RigidBody::CreateDynamic(shape,1.f,tm * t);
 
-			//PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
+			//physx::PxRigidBodyExt::updateMassAndInertia(body.GetHandle(), 10.0f);
 			scene->AddActor(body);
 		}
 	}
@@ -159,9 +149,6 @@ void PhysicsDemoLayer::OnAttach()
 
 	createDynamic(PxTransform(PxVec3(0, 40, 100)), PxSphereGeometry(10), PxVec3(0, -50, -100));
 #else
-
-
-
 	// Set up the foundation
 	ap::PhysicsFoundationDesc desc;
 	desc.logCb = [](ap::PhysicsErrorCode code, const char* message, const char* file, int line)
@@ -267,35 +254,6 @@ void renderActors(PxRigidActor** actors, const PxU32 numActors, bool shadows/*, 
 				texture->Bind();
 
 			ap::Renderer::Submit(shader, cube, glm::scale(glm::make_mat4(shapePose.front()),glm::vec3(4)));
-			//if (shapes[j]->getFlags() & PxShapeFlag::eTRIGGER_SHAPE)
-				//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			
-			// render object
-			//glPushMatrix();
-			//glMultMatrixf(&shapePose.column0.x);
-			//if (sleeping)
-			//{
-				//const PxVec3 darkColor = color * 0.25f;
-				//glColor4f(darkColor.x, darkColor.y, darkColor.z, 1.0f);
-			//}
-			//else
-				//glColor4f(color.x, color.y, color.z, 1.0f);
-			//renderGeometryHolder(h);
-			//glPopMatrix();
-
-			//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-			//if (shadows)
-			//{
-			//	glPushMatrix();
-			//	glMultMatrixf(shadowMat);
-			//	glMultMatrixf(&shapePose.column0.x);
-			//	glDisable(GL_LIGHTING);
-			//	glColor4f(0.1f, 0.2f, 0.3f, 1.0f);
-			//	renderGeometryHolder(h);
-			//	glEnable(GL_LIGHTING);
-			//	glPopMatrix();
-			//}
 		}
 	}
 }
@@ -361,26 +319,6 @@ void PhysicsDemoLayer::OnUpdate(ap::Timestep ts)
 		
 		ap::Renderer::Submit(shader, cube, actor.GetWorldTransform() * glm::scale(glm::mat4(1),bounds.GetDimensions()));	
 	}
-
-	//PxShape* shapes[MAX_NUM_ACTOR_SHAPES];
-	//for (PxU32 i = 0; i < numActors; i++)
-	//{
-	//	const PxU32 nbShapes = actors[i]->getNbShapes();
-	//	PX_ASSERT(nbShapes <= MAX_NUM_ACTOR_SHAPES);
-	//	actors[i]->getShapes(shapes, nbShapes);
-	//	const bool sleeping = actors[i]->is<PxRigidDynamic>() ? actors[i]->is<PxRigidDynamic>()->isSleeping() : false;
-
-	//	for (PxU32 j = 0; j < nbShapes; j++)
-	//	{
-	//		const PxMat44 shapePose(PxShapeExt::getGlobalPose(*shapes[j], *actors[i]));
-	//		const PxGeometryHolder h = shapes[j]->getGeometry();
-
-	//		if (sleeping)
-	//			textureSleep->Bind();
-	//		else
-	//			texture->Bind();
-
-	//		ap::Renderer::Submit(shader, cube, glm::scale(glm::make_mat4(shapePose.front()),glm::vec3(2)));
 
 	ap::Renderer::EndScene();
 	//AP_TRACE("Rendererd scene {}", timer.Reset());
