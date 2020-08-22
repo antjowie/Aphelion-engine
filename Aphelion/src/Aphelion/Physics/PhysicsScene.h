@@ -23,6 +23,7 @@ namespace ap
     {
     public:
         PhysicsScene(const PhysicsSceneDesc& desc);
+        ~PhysicsScene();
 
         void AddActor(RigidBody& actor);
         void Simulate(float dt);

@@ -20,7 +20,7 @@ namespace ap
     public:
         PhysicsShape(PhysicsGeometry& geometry, PhysicsMaterial& material, const glm::mat4& offset = glm::identity<glm::mat4>());
         PhysicsShape(physx::PxShape* shape);
-        //~PhysicsShape();
+        ~PhysicsShape();
 
         void SetLocalTransform(const glm::mat4& transform);
         glm::mat4 GetLocalTransform() const;
@@ -32,5 +32,6 @@ namespace ap
         
     private:
         physx::PxShape* m_handle;
+        bool m_creator;
     };
 }

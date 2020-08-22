@@ -6,12 +6,19 @@ namespace ap
 {
     PhysicsShape::PhysicsShape(PhysicsGeometry& geometry, PhysicsMaterial& material, const glm::mat4& offset)
        : m_handle(PxGetPhysics().createShape(geometry.GetHandle().any(), *material.GetHandle()))
+       , m_creator(true)
     {
     }
 
     PhysicsShape::PhysicsShape(physx::PxShape* shape)
         : m_handle(shape)
+        , m_creator(false)
     {
+    }
+
+    PhysicsShape::~PhysicsShape()
+    {
+        if (m_creator) m_handle->release();
     }
 
     void PhysicsShape::SetLocalTransform(const glm::mat4& transform)

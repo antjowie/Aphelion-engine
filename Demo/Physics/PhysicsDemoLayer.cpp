@@ -83,7 +83,7 @@ void createStack(const glm::mat4& t, unsigned size, float halfExtent)
 	{
 		for (unsigned j = 0; j < size - i; j++)
 		{
-			
+
 			glm::mat4 tm = glm::translate(
 				glm::identity<glm::mat4>(), 
 				glm::vec3(

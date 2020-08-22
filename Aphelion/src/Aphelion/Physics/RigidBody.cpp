@@ -22,7 +22,7 @@ namespace ap
                 density));
     }
 
-    RigidBody::RigidBody(physx::PxRigidActor* actor)
+    RigidBody::RigidBody(physx::PxRigidActor* actor, bool creator)
         : m_handle(actor)
         , m_rb(nullptr)
     {
@@ -38,7 +38,7 @@ namespace ap
             break;
         }
     }
-    
+
     void RigidBody::SetWorldTransform(const glm::mat4& transform)
     {
         m_handle->setGlobalPose(physx::PxTransform(ap::MakeMat4(transform)));

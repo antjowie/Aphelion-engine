@@ -30,8 +30,8 @@ namespace ap
         static RigidBody CreateDynamic(PhysicsShape& shape, float density, const glm::mat4& transform);
 
     public:
-        RigidBody(physx::PxRigidActor* actor);
-
+        RigidBody(physx::PxRigidActor* actor, bool creator = false);
+        
         void SetWorldTransform(const glm::mat4& transform);
         glm::mat4 GetWorldTransform() const;
         PhysicsBounds GetWorldBounds() const;
@@ -54,12 +54,13 @@ namespace ap
 
     private:
         physx::PxRigidActor* m_handle;
-
+        
         /**
          * This handle is only set if the handle type is a dynamic rb
          * It is used to save myself from having to reinterpret cast the whole time
          */
         physx::PxRigidBody* m_rb;
         RigidBodyType m_type;
+
     };
 }

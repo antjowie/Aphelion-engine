@@ -25,6 +25,11 @@ namespace ap
 	    }
     }
 
+    PhysicsScene::~PhysicsScene()
+    {
+        m_handle->release();
+    }
+
     void PhysicsScene::AddActor(RigidBody& actor)
     {
         m_handle->addActor(*actor.GetHandle());
