@@ -43,7 +43,7 @@ namespace ap
 	    PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
 	    pvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
-        physics = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, PxTolerancesScale()/*, true, gPvd*/);
+        physics = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, PxTolerancesScale(), true, pvd);
 
         PhysicsSceneFactoryDesc sceneDesc;
         sceneDesc.cores = desc.cores;

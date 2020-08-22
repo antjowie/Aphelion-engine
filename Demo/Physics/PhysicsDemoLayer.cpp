@@ -1,4 +1,9 @@
 #include "PhysicsDemoLayer.h"
+
+#include "Aphelion/Core/Application.h"
+#include "Aphelion/Core/Input/KeyCodes.h"
+#include "Aphelion/Event/KeyEvent.h"
+
 #include "Aphelion/Renderer/Primitive.h"
 #include "Aphelion/Renderer/Renderer.h"
 #include "Aphelion/Renderer/Texture.h"
@@ -217,6 +222,12 @@ void PhysicsDemoLayer::OnDetach()
 void PhysicsDemoLayer::OnEvent(ap::Event& event)
 {
 	m_camera.OnEvent(event);
+	ap::EventDispatcher d(event);
+	d.Dispatch<ap::KeyPressedEvent>([](ap::KeyPressedEvent& e)
+		{
+			if (e.GetKeyCode() == ap::KeyCode::Escape) ap::Application::Get().Exit();
+			return false;
+		});
 }
 
 #ifdef USE_PX
@@ -254,7 +265,7 @@ void renderActors(PxRigidActor** actors, const PxU32 numActors, bool shadows/*, 
 			else
 				texture->Bind();
 
-			ap::Renderer::Submit(shader, cube, glm::scale(glm::make_mat4(shapePose.front()),glm::vec3(2)));
+			ap::Renderer::Submit(shader, cube, glm::scale(glm::make_mat4(shapePose.front()),glm::vec3(4)));
 			//if (shapes[j]->getFlags() & PxShapeFlag::eTRIGGER_SHAPE)
 				//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			
