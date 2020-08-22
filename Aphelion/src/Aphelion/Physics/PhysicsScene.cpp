@@ -7,8 +7,11 @@ namespace ap
 {
     /// This is created in the PhysicsSceneFactory::Init method
     static physx::PxCpuDispatcher* dispatcher = nullptr;
+    static float maxStep = 0.1f;
     
     PhysicsScene::PhysicsScene(const PhysicsSceneDesc& desc)
+        : m_desc(desc)
+        , m_handle(nullptr)
     {
     	physx::PxSceneDesc sceneDesc(PxGetPhysics().getTolerancesScale());
 	    sceneDesc.gravity = ap::MakeVec3(desc.gravity);
@@ -37,6 +40,13 @@ namespace ap
 
     void PhysicsScene::Simulate(float dt)
     {
+        // Steps the simulation in steps if frame takes too long
+        while (dt > maxStep)
+        {
+            m_handle->simulate(maxStep);
+            m_handle->fetchResults(true);
+            dt -= maxStep;
+        }
         m_handle->simulate(dt);
         m_handle->fetchResults(true);
     }
@@ -67,6 +77,7 @@ namespace ap
     {
         AP_CORE_ASSERT(!dispatcher, "PhysicsSceneFactory is already initialized");
         dispatcher = physx::PxDefaultCpuDispatcherCreate(desc.cores);
+        maxStep = desc.maxStep;
     }
     
     void PhysicsSceneFactory::Deinit()

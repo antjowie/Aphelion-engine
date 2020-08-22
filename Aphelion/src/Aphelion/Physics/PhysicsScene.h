@@ -31,6 +31,8 @@ namespace ap
         std::vector<RigidBody> GetActors(RigidBodyType mask) const;
 
     private:
+        PhysicsSceneDesc m_desc;
+
         physx::PxScene* m_handle;
     };
 
@@ -41,6 +43,7 @@ namespace ap
     struct APHELION_API PhysicsSceneFactoryDesc
     {
         unsigned cores = 1; 
+        float maxStep = 0.1f;
     };
 
     /**
