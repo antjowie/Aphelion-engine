@@ -8,6 +8,8 @@ add_library(
     # Actor/RigidStatic.cpp
     # Actor/RigidStatic.h
 
+    PhysicsBounds.h
+    PhysicsBounds.cpp
     PhysicsError.h
     PhysicsFoundation.cpp
     PhysicsFoundation.h

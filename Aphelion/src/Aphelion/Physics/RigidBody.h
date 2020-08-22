@@ -1,6 +1,7 @@
 #pragma once
 #include "Aphelion/Core/Core.h"
 #include "Aphelion/Physics/PhysicsShape.h"
+#include "Aphelion/Physics/PhysicsBounds.h"
 
 namespace physx
 {
@@ -33,6 +34,7 @@ namespace ap
 
         void SetWorldTransform(const glm::mat4& transform);
         glm::mat4 GetWorldTransform() const;
+        PhysicsBounds GetWorldBounds() const;
 
         std::vector<PhysicsShape> GetShapes() const;
         bool IsSleeping() const;

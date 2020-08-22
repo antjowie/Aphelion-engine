@@ -12,7 +12,6 @@
 #include "Aphelion/Physics/PhysicsShape.h"
 #include "Aphelion/Physics/PhysicsScene.h"
 
-#include <PxPhysicsAPI.h>
 
 #include <ctype.h>
 
@@ -25,6 +24,7 @@
 //#define USE_PX 
 
 #ifdef USE_PX
+#include <PxPhysicsAPI.h>
 using namespace physx;
 
 PxDefaultAllocator		gAllocator;
@@ -356,8 +356,10 @@ void PhysicsDemoLayer::OnUpdate(ap::Timestep ts)
 		texture->Bind();
 
 		// TEMP: The scale is half ext / 0.5 (see create stack)
-		float scale = 4.f;
-		ap::Renderer::Submit(shader, cube, actor.GetWorldTransform() * glm::scale(glm::mat4(1),glm::vec3(scale)));	
+		//float scale = 4.f;
+		auto bounds = actor.GetWorldBounds();
+		
+		ap::Renderer::Submit(shader, cube, actor.GetWorldTransform() * glm::scale(glm::mat4(1),bounds.GetDimensions()));	
 	}
 
 	//PxShape* shapes[MAX_NUM_ACTOR_SHAPES];

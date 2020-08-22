@@ -48,6 +48,11 @@ namespace ap
         return ap::MakeMat4(physx::PxMat44(m_handle->getGlobalPose()));
     }
 
+    PhysicsBounds RigidBody::GetWorldBounds() const
+    {
+        return m_handle->getWorldBounds();
+    }
+
     std::vector<PhysicsShape> RigidBody::GetShapes() const
     {
         auto count = m_handle->getNbShapes();
