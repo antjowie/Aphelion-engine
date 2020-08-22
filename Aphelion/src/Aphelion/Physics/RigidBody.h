@@ -1,7 +1,6 @@
 #pragma once
 #include "Aphelion/Core/Core.h"
-#include "Aphelion/Physics/PhysicsGeometry.h"
-#include "Aphelion/Physics/PhysicsMaterial.h"
+#include "Aphelion/Physics/PhysicsShape.h"
 
 namespace physx
 {
@@ -26,14 +25,17 @@ namespace ap
     class APHELION_API RigidBody
     {
     public:
-        static RigidBody CreateStatic(PhysicsGeometry& geometry, PhysicsMaterial& material, const glm::mat4& transform);
-        static RigidBody CreateDynamic(PhysicsGeometry& geometry, PhysicsMaterial& material, float density, const glm::mat4& transform);
+        static RigidBody CreateStatic(PhysicsShape& shape, const glm::mat4& transform);
+        static RigidBody CreateDynamic(PhysicsShape& shape, float density, const glm::mat4& transform);
 
     public:
         RigidBody(physx::PxRigidActor* actor);
 
         void SetWorldTransform(const glm::mat4& transform);
         glm::mat4 GetWorldTransform() const;
+
+        std::vector<PhysicsShape> GetShapes() const;
+        bool IsSleeping() const;
 
         /**
          * The following functions only apply on dynamic rigid bodies.
@@ -52,7 +54,7 @@ namespace ap
         physx::PxRigidActor* m_handle;
 
         /**
-         * This handle is only set if the handle type is a dyamic rb
+         * This handle is only set if the handle type is a dynamic rb
          * It is used to save myself from having to reinterpret cast the whole time
          */
         physx::PxRigidBody* m_rb;

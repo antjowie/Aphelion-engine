@@ -3,24 +3,22 @@
 
 namespace ap
 {
-    RigidBody RigidBody::CreateStatic(PhysicsGeometry& geometry, PhysicsMaterial& material, const glm::mat4& transform)
+    RigidBody RigidBody::CreateStatic(PhysicsShape& shape, const glm::mat4& transform)
     {
         return RigidBody(
             physx::PxCreateStatic(
                 PxGetPhysics(),
                 physx::PxTransform(ap::MakeMat4(transform)),
-                geometry.GetHandle().any(),
-                *material.GetHandle()));
+                *shape.GetHandle()));
     }
-    
-    RigidBody RigidBody::CreateDynamic(PhysicsGeometry& geometry, PhysicsMaterial& material, float density, const glm::mat4& transform)
+
+    RigidBody RigidBody::CreateDynamic(PhysicsShape& shape, float density, const glm::mat4& transform)
     {
         return RigidBody(
             physx::PxCreateDynamic(
                 PxGetPhysics(),
                 physx::PxTransform(ap::MakeMat4(transform)),
-                geometry.GetHandle().any(),
-                *material.GetHandle(),
+                *shape.GetHandle(),
                 density));
     }
 
@@ -48,6 +46,24 @@ namespace ap
     glm::mat4 RigidBody::GetWorldTransform() const
     {
         return ap::MakeMat4(physx::PxMat44(m_handle->getGlobalPose()));
+    }
+
+    std::vector<PhysicsShape> RigidBody::GetShapes() const
+    {
+        auto count = m_handle->getNbShapes();
+        std::vector<physx::PxShape*> shapes;
+        m_handle->getShapes(shapes.data(), count);
+
+        std::vector<PhysicsShape> ret;
+        for (auto& shape : shapes)
+            ret.push_back(shape);
+
+        return ret;
+    }
+
+    bool RigidBody::IsSleeping() const
+    {
+        return m_handle->is<physx::PxRigidDynamic>() ? m_rb->is<physx::PxRigidDynamic>()->isSleeping() : false;
     }
     
     void RigidBody::SetAngularDamping(float damping)

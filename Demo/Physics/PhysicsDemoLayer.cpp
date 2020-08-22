@@ -9,8 +9,8 @@
 #include "Aphelion/Renderer/Texture.h"
 
 #include "Aphelion/Physics/PhysicsFoundation.h"
+#include "Aphelion/Physics/PhysicsShape.h"
 #include "Aphelion/Physics/PhysicsScene.h"
-#include "Aphelion/Physics/PhysicsMaterial.h"
 
 #include <PxPhysicsAPI.h>
 
@@ -81,7 +81,8 @@ void createStack(const PxTransform & t, PxU32 size, PxReal halfExtent)
 void createStack(const glm::mat4& t, unsigned size, float halfExtent)
 {
 	//PxShape* shape = gPhysics->createShape(PxBoxGeometry(halfExtent, halfExtent, halfExtent), *gMaterial);
-	
+	auto shape = ap::PhysicsShape(ap::PhysicsGeometry::CreateBox(glm::vec3(halfExtent)), *material);
+
 	for (unsigned i = 0; i < size; i++)
 	{
 		for (unsigned j = 0; j < size - i; j++)
@@ -101,7 +102,7 @@ void createStack(const glm::mat4& t, unsigned size, float halfExtent)
 					0)
 				* halfExtent);
 
-			auto body = ap::RigidBody::CreateDynamic(ap::PhysicsGeometry::CreateBox(glm::vec3(halfExtent)),*material,1.f,tm * t);
+			auto body = ap::RigidBody::CreateDynamic(shape,1.f,tm * t);
 
 			//PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
 			scene->AddActor(body);
@@ -188,7 +189,7 @@ void PhysicsDemoLayer::OnAttach()
 		// Note: the normal half extent for cube is 0.5 but physx doesn't take scale for transform, only pos and rot
 		createStack(glm::translate(glm::identity<glm::mat4>(),glm::vec3(0, 0, stackZ -= 10.0f)), 10, 2.f);
 
-	ap::RigidBody dynamic = ap::RigidBody::CreateDynamic(ap::PhysicsGeometry::CreateSphere(10.f), *material, 10.f, glm::translate(glm::identity<glm::mat4>(),glm::vec3(0, 40, 100)));
+	ap::RigidBody dynamic = ap::RigidBody::CreateDynamic(ap::PhysicsShape{ ap::PhysicsGeometry::CreateSphere(10.f), *material }, 10.f, glm::translate(glm::identity<glm::mat4>(), glm::vec3(0, 40, 100)));
 	dynamic.SetAngularDamping(0.5f);
 	dynamic.SetLinearVelocity(glm::vec3(0,-50,-100));
 	scene->AddActor(dynamic);
@@ -302,7 +303,7 @@ void renderActors(PxRigidActor** actors, const PxU32 numActors, bool shadows/*, 
 
 void PhysicsDemoLayer::OnUpdate(ap::Timestep ts) 
 {
-	AP_WARN("Update...");
+	//AP_WARN("Update...");
 	ap::Timer timer;
 
 
@@ -337,11 +338,11 @@ void PhysicsDemoLayer::OnUpdate(ap::Timestep ts)
 	unsigned grey = 0x505050ff;
 	texture->SetData(reinterpret_cast<void*>(&white), sizeof(white));
 	textureSleep->SetData(reinterpret_cast<void*>(&grey), sizeof(grey));
-	AP_TRACE("Created vars {}", timer.Reset());
+	//AP_TRACE("Created vars {}", timer.Reset());
 
 	scene->Simulate(ts);
 	m_camera.OnUpdate(ts);
-	AP_TRACE("Simulated scene {}", timer.Reset());
+	//AP_TRACE("Simulated scene {}", timer.Reset());
 
 	ap::Renderer::BeginScene(m_camera.GetCamera());
 	//ap::Renderer::Submit(shader, cube);
@@ -349,9 +350,9 @@ void PhysicsDemoLayer::OnUpdate(ap::Timestep ts)
 
 	for(const auto& actor : scene->GetActors(ap::RigidBodyType::AllMask))
 	{
-		//if (sleeping)
-		//	textureSleep->Bind();
-		//else
+		if (actor.IsSleeping())
+			textureSleep->Bind();
+		else
 		texture->Bind();
 
 		// TEMP: The scale is half ext / 0.5 (see create stack)
@@ -380,9 +381,9 @@ void PhysicsDemoLayer::OnUpdate(ap::Timestep ts)
 	//		ap::Renderer::Submit(shader, cube, glm::scale(glm::make_mat4(shapePose.front()),glm::vec3(2)));
 
 	ap::Renderer::EndScene();
-	AP_TRACE("Rendererd scene {}", timer.Reset());
+	//AP_TRACE("Rendererd scene {}", timer.Reset());
 
 #endif // USE_PX
 
-	AP_INFO("Update DONE {}", timer.Total());
+	//AP_INFO("Update DONE {}", timer.Total());
 }

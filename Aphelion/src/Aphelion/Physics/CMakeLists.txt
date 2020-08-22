@@ -18,6 +18,8 @@ add_library(
     PhysicsMaterial.h
     PhysicsScene.cpp
     PhysicsScene.h
+    PhysicsShape.cpp
+    PhysicsShape.h
     RigidBody.cpp
     RigidBody.h
 )

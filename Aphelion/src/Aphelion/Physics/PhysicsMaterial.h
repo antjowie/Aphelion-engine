@@ -15,9 +15,13 @@ namespace ap
     {
     public:
         PhysicsMaterial(float staticFriction, float dynamicFriction, float restitution);
+        PhysicsMaterial(physx::PxMaterial* handle);
+        ~PhysicsMaterial();
+
         physx::PxMaterial* GetHandle(); 
 
     private:
         physx::PxMaterial* m_handle;
+        bool m_creator;
     };
 }

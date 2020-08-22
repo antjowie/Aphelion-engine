@@ -6,8 +6,20 @@
 namespace ap
 {
     PhysicsMaterial::PhysicsMaterial(float staticFriction, float dynamicFriction, float restitution)
+        : m_handle(PxGetPhysics().createMaterial(staticFriction, dynamicFriction, restitution))
+        , m_creator(true)
     {
-        m_handle = PxGetPhysics().createMaterial(staticFriction,dynamicFriction,restitution);
+    }
+
+    PhysicsMaterial::PhysicsMaterial(physx::PxMaterial* handle)
+        : m_handle(handle)
+        , m_creator(false)
+    {
+    }
+
+    PhysicsMaterial::~PhysicsMaterial()
+    {
+        if(m_creator) m_handle->release();
     }
 
     physx::PxMaterial* PhysicsMaterial::GetHandle()
