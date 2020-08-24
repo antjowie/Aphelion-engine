@@ -53,6 +53,27 @@ PxRigidDynamic* createDynamic(const PxTransform & t, const PxGeometry & geometry
 	return dynamic;
 }
 #else
+void createDynamic(const ap::Transform& t)
+{
+	//ap::RigidBody dynamic = 
+	//	ap::RigidBody::CreateDynamic(
+	//		ap::PhysicsShape{ ap::PhysicsGeometry::CreateSphere(10.f), *material }, 
+	//		10.f, 
+	//		glm::translate(glm::identity<glm::mat4>(), glm::vec3(0, 40, 100)));
+
+	//
+	//dynamic.SetAngularDamping(0.5f);
+	//dynamic.SetLinearVelocity(glm::vec3(0, -50, -100));
+	//scene->AddActor(dynamic);
+	ap::RigidBody dynamic =
+		ap::RigidBody::CreateDynamic(
+			ap::PhysicsShape{ ap::PhysicsGeometry::CreateSphere(10.f), *material },
+			10.f,t.GetWorldMatrix());
+
+	dynamic.SetAngularDamping(0.5f);
+	dynamic.SetLinearVelocity(t.GetForward() * -100.f);// glm::vec3(0, -50, -100));
+	scene->AddActor(dynamic);
+}
 #endif // USE_PX
 
 #ifdef USE_PX
@@ -150,13 +171,13 @@ void PhysicsDemoLayer::OnAttach()
 	createDynamic(PxTransform(PxVec3(0, 40, 100)), PxSphereGeometry(10), PxVec3(0, -50, -100));
 #else
 	// Set up the foundation
-	ap::PhysicsFoundationDesc desc;
-	desc.logCb = [](ap::PhysicsErrorCode code, const char* message, const char* file, int line)
-	{
-		AP_WARN("[Physics {} File: {} Line: {}] {})", code,file,line, message);
-	};
-	desc.cores = 2;
-	ap::PhysicsFoundation::Init(desc);
+	//ap::PhysicsFoundationDesc desc;
+	//desc.logCb = [](ap::PhysicsErrorCode code, const char* message, const char* file, int line)
+	//{
+	//	AP_WARN("[Physics {} File: {} Line: {}] {})", code,file,line, message);
+	//};
+	//desc.cores = 2;
+	//ap::PhysicsFoundation::Init(desc);
 
 	ap::PhysicsSceneDesc sceneDesc;
 	sceneDesc.gravity = glm::vec3(0.f, -9.81f, 0.f);
@@ -176,10 +197,8 @@ void PhysicsDemoLayer::OnAttach()
 		// Note: the normal half extent for cube is 0.5 but physx doesn't take scale for transform, only pos and rot
 		createStack(glm::translate(glm::identity<glm::mat4>(),glm::vec3(0, 0, stackZ -= 10.0f)), 10, 2.f);
 
-	ap::RigidBody dynamic = ap::RigidBody::CreateDynamic(ap::PhysicsShape{ ap::PhysicsGeometry::CreateSphere(10.f), *material }, 10.f, glm::translate(glm::identity<glm::mat4>(), glm::vec3(0, 40, 100)));
-	dynamic.SetAngularDamping(0.5f);
-	dynamic.SetLinearVelocity(glm::vec3(0,-50,-100));
-	scene->AddActor(dynamic);
+
+	//createDynamic
 
 #endif // 0
 	AP_INFO("Attaching DONE {}", timer.Elapsed());
@@ -203,7 +222,7 @@ void PhysicsDemoLayer::OnDetach()
 #else
 	delete material;
 	delete scene; // This releases the scene and sets it to an invalid scene
-	ap::PhysicsFoundation::Deinit();
+	//ap::PhysicsFoundation::Deinit();
 #endif // USE_PX
 }
 
@@ -211,9 +230,13 @@ void PhysicsDemoLayer::OnEvent(ap::Event& event)
 {
 	m_camera.OnEvent(event);
 	ap::EventDispatcher d(event);
-	d.Dispatch<ap::KeyPressedEvent>([](ap::KeyPressedEvent& e)
+	d.Dispatch<ap::KeyPressedEvent>([&](ap::KeyPressedEvent& e)
 		{
 			if (e.GetKeyCode() == ap::KeyCode::Escape) ap::Application::Get().Exit();
+			if (e.GetKeyCode() == ap::KeyCode::Space) createDynamic(m_camera.GetCamera().transform);
+			if (e.GetKeyCode() == ap::KeyCode::Z) 
+			createStack(glm::translate(glm::identity<glm::mat4>(), glm::vec3(0, 0, stackZ -= 10.0f)), 10, 2.f);
+
 			return false;
 		});
 }

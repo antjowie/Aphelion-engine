@@ -1,11 +1,9 @@
 #pragma once
 #include "Aphelion/Core/Core.h"
-#include "PhysicsError.h"
-#include "PhysicsScene.h"
+#include "Aphelion/Physics/PhysicsError.h"
+#include "Aphelion/Physics/PhysicsScene.h"
 
 #include <functional>
-
-#include <PxPhysicsAPI.h>
 
 namespace ap
 {

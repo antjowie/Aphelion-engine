@@ -97,6 +97,10 @@ target_link_libraries(
     PRIVATE
     Glad::glad
     glfw
+
+    # Temporary. When importing the header of the physics physx sdk is required. 
+    # We should add a event callback for the ecs
+    PhysX::PhysXFoundation
 )
 
 # Set up target definitions

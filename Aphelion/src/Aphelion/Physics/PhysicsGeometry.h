@@ -1,7 +1,8 @@
 #pragma once
 #include "Aphelion/Core/Core.h"
 
-#include <PxPhysicsAPI.h>
+//#include <PxPhysicsAPI.h>
+#include <geometry/PxGeometryHelpers.h>
 
 namespace ap
 {

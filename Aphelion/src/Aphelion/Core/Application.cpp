@@ -1,12 +1,14 @@
 #include "Aphelion/Core/Application.h"
 #include "Aphelion/Core/Time.h"
 
-#include "Aphelion/Core/ImGui/ImGuiLayer.h"
 #include "Aphelion/Renderer/Renderer.h"
 #include "Aphelion/Renderer/RenderCommand.h"
 
 #include "Aphelion/Net/ClientLayer.h"
 #include "Aphelion/Net/ServerLayer.h"
+#include "Aphelion/Physics/PhysicsLayer.h"
+#include "Aphelion/Core/ImGui/ImGuiLayer.h"
+
 #include <enet/enet.h>
 
 namespace ap
@@ -33,6 +35,8 @@ namespace ap
         
         m_imguiLayer = new ImGuiLayer();
         m_layerStack.PushOverlay(m_imguiLayer);
+
+        m_layerStack.PushLayer(new PhysicsLayer());
 
         auto clientLayer = new NetClientLayer();
         clientLayer->SetEventCB(AP_BIND_FN(Application::OnEvent));

@@ -16,6 +16,7 @@ add_library(
     PhysicsGeometry.cpp
     PhysicsGeometry.h
     PhysicsGLM.h
+    PhysicsLayer.h
     PhysicsMaterial.cpp
     PhysicsMaterial.h
     PhysicsScene.cpp
