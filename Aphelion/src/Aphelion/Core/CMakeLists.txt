@@ -1,12 +1,26 @@
 cmake_minimum_required(VERSION 3.16)
 
+# The Core is code that every module in our application needs
+# These include math libraries, events, the layer stack but also
+# configuration data such as export macros, log macros, etc
+
 add_library(
     Core
 
+    Event/ApplicationEvent.h
+    Event/Event.h
+    Event/KeyEvent.h
+    Event/MouseEvent.h
+    Event/NetEvent.h
+
+    ImGui/ImGuiBuild.cpp
+    ImGui/ImGuiLayer.cpp
+    ImGui/ImGuiLayer.h
+
+    Input/Input.cpp
+    Input/Input.h
     Input/KeyCodes.h
     Input/MouseCodes.h
-    Input/Input.h
-    Input/Input.cpp
 
     Application.cpp
     Application.h
@@ -26,14 +40,7 @@ add_library(
     Window.cpp
     Window.h
 
-    # TODO: These bottom dependencies will need to be refactored
-    ../Event/ApplicationEvent.h
-    ../Event/Event.h
-    ../Event/KeyEvent.h
-    ../Event/MouseEvent.h
-    ../Event/NetEvent.h
-
-    # These depend on current platform so we should move them in the future
+    # These depend on current platform and should be their own system
     ../../Platform/Windows/WindowsWindow.cpp
     ../../Platform/Windows/WindowsWindow.h
     ../../Platform/Windows/WindowsInput.cpp
@@ -74,13 +81,22 @@ target_include_directories(Core PUBLIC ../../)
 target_link_libraries(    
     Core
     PUBLIC
-    Glad::glad
-    Enet::enet
-    glfw
-    Bitsery::bitsery
+    Enet::enet          # Net event includes Enet. Need to think up another way to 
+    Bitsery::bitsery    # handle event system. Same for Bitsery
     glm::glm
     spdlog::spdlog
     ImGui::imgui
+
+    # These are needed since the Core makes a window, but they should be refactored
+    # to the renderer. Although this could become a bit odd when the Core will
+    # need the renderer (which is probably why the runtime application should be
+    # defined in the Runtime, but Runtime will depend on all systems). 
+    # ...
+    # I'll need to reconsider the design one day. For now these dependencies
+    # are copied over in the Renderer script
+    PRIVATE
+    Glad::glad
+    glfw
 )
 
 # Set up target definitions

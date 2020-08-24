@@ -1,8 +1,8 @@
 #include "Platform/Windows/WindowsWindow.h"
 
-#include "Aphelion/Event/ApplicationEvent.h"
-#include "Aphelion/Event/MouseEvent.h"
-#include "Aphelion/Event/KeyEvent.h"
+#include "Aphelion/Core/Event/ApplicationEvent.h"
+#include "Aphelion/Core/Event/MouseEvent.h"
+#include "Aphelion/Core/Event/KeyEvent.h"
 
 #include <GLFW/glfw3.h>
 

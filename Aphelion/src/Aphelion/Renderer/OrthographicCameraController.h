@@ -1,7 +1,7 @@
 #pragma once
 #include "Aphelion/Core/Core.h"
 #include "Aphelion/Core/Time.h"
-#include "Aphelion/Event/Event.h"
+#include "Aphelion/Core/Event/Event.h"
 
 #include "Aphelion/Renderer/OrthographicCamera.h"
 

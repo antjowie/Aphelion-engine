@@ -9,7 +9,7 @@
 #include <Aphelion/ECS/Scene.h>
 #include <Aphelion/Renderer/Renderer.h>
 #include <Aphelion/Renderer/Texture.h>
-#include <Aphelion/Event/NetEvent.h>
+#include <Aphelion/Core/Event/NetEvent.h>
 
 void GenerateChunk(ChunkDataComponent& chunk);
 void GenerateChunkMesh(const ChunkDataComponent& chunk, ap::VertexArrayRef& vao);

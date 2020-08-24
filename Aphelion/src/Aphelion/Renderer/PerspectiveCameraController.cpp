@@ -1,6 +1,6 @@
 #include "Aphelion/Renderer/PerspectiveCameraController.h"
 
-#include "Aphelion/Event/MouseEvent.h"
+#include "Aphelion/Core/Event/MouseEvent.h"
 
 #include "Aphelion/Core/Input/Input.h"
 #include "Aphelion/Core/Input/KeyCodes.h"

@@ -5,7 +5,7 @@
 #include "Component/ServerComponent.h"
 
 #include <Aphelion/Core/Application.h>
-#include <Aphelion/Event/NetEvent.h>
+#include <Aphelion/Core/Event/NetEvent.h>
 #include <Aphelion/Net/Server.h>
 #include <Aphelion/Net/ServerLayer.h>
 

@@ -1,6 +1,6 @@
 #include "Aphelion/Net/ServerLayer.h"
 #include "Aphelion/Net/Server.h"
-#include "Aphelion/Event/NetEvent.h"
+#include "Aphelion/Core/Event/NetEvent.h"
 
 namespace ap
 {

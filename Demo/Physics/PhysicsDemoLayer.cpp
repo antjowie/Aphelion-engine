@@ -2,7 +2,7 @@
 
 #include "Aphelion/Core/Application.h"
 #include "Aphelion/Core/Input/KeyCodes.h"
-#include "Aphelion/Event/KeyEvent.h"
+#include "Aphelion/Core/Event/KeyEvent.h"
 
 #include "Aphelion/Renderer/Primitive.h"
 #include "Aphelion/Renderer/Renderer.h"

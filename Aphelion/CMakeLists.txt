@@ -1,5 +1,18 @@
 cmake_minimum_required(VERSION 3.16)
 
+# This is the entry script for the Aphelion engine
+# It's in quite the refactor at the moment, but this script
+# is a superbuild that builds all our targets.
+# Then in the systems themselves we set up their dependencies.
+# This allows us to easily isolate systems and keep stuff uncoupled
+# which helps when we scale up our project our try to isolate things out
+#
+# This script creates the Runtime library which at the moment is the final target
+# that users link against. It brings all the systems into one target. 
+# It also builds the systems that are not isolated yet, such as the 
+# ECS and Net system since these two are coupled to each other and will
+# require refactoring
+
 ################################
 # Set up this project
 project(
@@ -69,6 +82,7 @@ set(CMAKE_FOLDER Aphelion)
 
 add_subdirectory(src/Aphelion/Core)
 add_subdirectory(src/Aphelion/Physics)
+add_subdirectory(src/Aphelion/Renderer)
 
 add_library(
     Runtime
@@ -80,10 +94,6 @@ add_library(
     src/Aphelion/ECS/Scene.cpp
     src/Aphelion/ECS/Scene.h
     
-    src/Aphelion/ImGui/ImGuiBuild.cpp
-    src/Aphelion/ImGui/ImGuiLayer.cpp
-    src/Aphelion/ImGui/ImGuiLayer.h
-
     src/Aphelion/Net/Client.cpp
     src/Aphelion/Net/Client.h
     src/Aphelion/Net/ClientLayer.cpp
@@ -95,49 +105,6 @@ add_library(
     src/Aphelion/Net/Server.h
     src/Aphelion/Net/ServerLayer.cpp
     src/Aphelion/Net/ServerLayer.h
-
-    src/Aphelion/Renderer/GraphicsContext.cpp
-    src/Aphelion/Renderer/GraphicsContext.h
-    src/Aphelion/Renderer/OrthographicCamera.cpp
-    src/Aphelion/Renderer/OrthographicCamera.h
-    src/Aphelion/Renderer/OrthographicCameraController.cpp
-    src/Aphelion/Renderer/OrthographicCameraController.h
-    src/Aphelion/Renderer/PerspectiveCamera.cpp
-    src/Aphelion/Renderer/PerspectiveCamera.h
-    src/Aphelion/Renderer/PerspectiveCameraController.cpp
-    src/Aphelion/Renderer/PerspectiveCameraController.h
-    src/Aphelion/Renderer/Primitive.cpp
-    src/Aphelion/Renderer/Primitive.h
-    src/Aphelion/Renderer/RenderCommand.cpp
-    src/Aphelion/Renderer/RenderCommand.h
-    src/Aphelion/Renderer/Renderer.cpp
-    src/Aphelion/Renderer/Renderer.h
-    src/Aphelion/Renderer/Renderer2D.cpp
-    src/Aphelion/Renderer/Renderer2D.h
-    src/Aphelion/Renderer/RendererAPI.cpp
-    src/Aphelion/Renderer/RendererAPI.h
-    src/Aphelion/Renderer/Shader.cpp
-    src/Aphelion/Renderer/Shader.h
-    src/Aphelion/Renderer/Texture.cpp
-    src/Aphelion/Renderer/Texture.h
-    src/Aphelion/Renderer/VertexArray.cpp
-    src/Aphelion/Renderer/VertexArray.h
-    src/Aphelion/Renderer/VertexBuffer.cpp
-    src/Aphelion/Renderer/VertexBuffer.h
-
-    # TODO: These depend on current platform so we should move them in the future
-    src/Platform/OpenGL/OpenGLRendererAPI.cpp
-    src/Platform/OpenGL/OpenGLRendererAPI.h
-    src/Platform/OpenGL/OpenGLContext.cpp
-    src/Platform/OpenGL/OpenGLContext.h
-    src/Platform/OpenGL/OpenGLShader.cpp
-    src/Platform/OpenGL/OpenGLShader.h
-    src/Platform/OpenGL/OpenGLTexture.cpp
-    src/Platform/OpenGL/OpenGLTexture.h
-    src/Platform/OpenGL/OpenGLVertexArray.cpp
-    src/Platform/OpenGL/OpenGLVertexArray.h
-    src/Platform/OpenGL/OpenGLVertexBuffer.cpp
-    src/Platform/OpenGL/OpenGLVertexBuffer.h
 )
 
 add_library(Aphelion::Runtime ALIAS Runtime)
@@ -169,10 +136,7 @@ target_link_libraries(
     PUBLIC 
     Aphelion::Core
     Aphelion::Physics
+    Aphelion::Renderer
     Enet::enet
     EnTT::EnTT
-    Glad::glad
-    glfw
-    ImGui::imgui
-    stb_image::stb_image
 )

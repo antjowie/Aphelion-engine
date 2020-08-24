@@ -6,7 +6,7 @@
 #include <Aphelion/Core/Application.h>
 #include <Aphelion/Core/Input/Input.h>
 #include <Aphelion/ECS/Scene.h>
-#include <Aphelion/Event/NetEvent.h>
+#include <Aphelion/Core/Event/NetEvent.h>
 #include <Aphelion/Renderer/Renderer.h>
 
 static float movespeed = 1.f;

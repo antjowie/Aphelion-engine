@@ -6,7 +6,7 @@
 #include "System/ChunkSystem.h"
 
 #include "Aphelion/Core/Application.h"
-#include "Aphelion/Event/NetEvent.h"
+#include "Aphelion/Core/Event/NetEvent.h"
 #include "Aphelion/Net/Client.h"
 #include "Aphelion/Net/ClientLayer.h"
 

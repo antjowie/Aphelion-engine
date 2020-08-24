@@ -17,9 +17,9 @@
 
 #include "Aphelion/ECS/Registry.h"
 
-#include "Aphelion/Event/Event.h"
-#include "Aphelion/Event/KeyEvent.h"
-#include "Aphelion/Event/MouseEvent.h"
+#include "Aphelion/Core/Event/Event.h"
+#include "Aphelion/Core/Event/KeyEvent.h"
+#include "Aphelion/Core/Event/MouseEvent.h"
 
 #include "Aphelion/Renderer/Renderer.h"
 #include "Aphelion/Renderer/Renderer2D.h"
@@ -30,4 +30,4 @@
 #include "Aphelion/Renderer/Shader.h"
 #include "Aphelion/Renderer/Texture.h"
 
-#include "Aphelion/ImGui/ImGuiLayer.h"
+#include "Aphelion/Core/ImGui/ImGuiLayer.h"

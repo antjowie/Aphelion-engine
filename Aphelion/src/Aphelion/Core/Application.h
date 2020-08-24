@@ -3,9 +3,9 @@
 #include "Aphelion/Core/LayerStack.h"
 #include "Aphelion/Core/Window.h"
 
-#include "Aphelion/Event/ApplicationEvent.h"
+#include "Aphelion/Core/Event/ApplicationEvent.h"
 
-#include "Aphelion/ImGui/ImGuiLayer.h"
+#include "Aphelion/Core/ImGui/ImGuiLayer.h"
 
 #include <memory>
 

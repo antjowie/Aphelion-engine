@@ -5,8 +5,8 @@
 #include "Aphelion/Core/Application.h"
 #include "Aphelion/Core/Layer.h"
 #include "Aphelion/Core/Input/KeyCodes.h"
-#include "Aphelion/Event/KeyEvent.h"
-#include "Aphelion/Event/NetEvent.h"
+#include "Aphelion/Core/Event/KeyEvent.h"
+#include "Aphelion/Core/Event/NetEvent.h"
 
 class MainMenuLayer : public ap::Layer
 {
