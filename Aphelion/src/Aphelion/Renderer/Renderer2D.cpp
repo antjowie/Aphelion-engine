@@ -53,7 +53,7 @@ namespace ap
         data.vertexArray->SetIndexBuffer(index);
     }
 
-	void Renderer2D::Shutdown()
+	void Renderer2D::Deinit()
     {
     }
 

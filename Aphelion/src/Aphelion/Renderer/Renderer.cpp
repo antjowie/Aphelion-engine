@@ -21,9 +21,9 @@ namespace ap
         Renderer2D::Init();
     }
 
-    void Renderer::Shutdown()
+    void Renderer::Deinit()
     {    
-        Renderer2D::Shutdown();
+        Renderer2D::Deinit();
     }
         
     void Renderer::OnWindowResize(uint32_t width, uint32_t height)

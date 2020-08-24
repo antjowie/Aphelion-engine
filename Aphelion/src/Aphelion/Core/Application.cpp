@@ -50,6 +50,8 @@ namespace ap
         enet_deinitialize();
         AP_CORE_TRACE("ENet destroyed");
 
+        Renderer::Deinit();
+
         m_instance = nullptr;
     }
 

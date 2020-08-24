@@ -18,7 +18,7 @@ namespace ap
 	{
 	public:
 		static void Init();
-		static void Shutdown();
+		static void Deinit();
 		
 		static void OnWindowResize(uint32_t width, uint32_t height);
 
