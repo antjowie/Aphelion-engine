@@ -7,7 +7,7 @@ namespace ap
 {
     /// This is created in the PhysicsSceneFactory::Init method
     static physx::PxCpuDispatcher* dispatcher = nullptr;
-    static float maxStep = 0.1f;
+    static float maxStep = 1.f / 60.f;
     
     PhysicsScene::PhysicsScene(const PhysicsSceneDesc& desc)
         : m_desc(desc)
@@ -43,6 +43,7 @@ namespace ap
         // Steps the simulation in steps if frame takes too long
         while (dt > maxStep)
         {
+            AP_CORE_WARN("Stepping for {} frames...", int(dt / maxStep));
             m_handle->simulate(maxStep);
             m_handle->fetchResults(true);
             dt -= maxStep;

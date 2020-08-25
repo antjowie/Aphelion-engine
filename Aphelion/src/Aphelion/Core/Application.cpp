@@ -69,6 +69,10 @@ namespace ap
             Time::dt = step;
             Time::frameCount++;
 
+            // If the step is longer than a second, assume that system got stuck and discard current frame
+            if (step > 1.f)
+                continue;
+
             for (auto layer = m_layerStack.begin(); layer != m_layerStack.end(); layer++)
             {
                 (*layer)->OnUpdate(step);

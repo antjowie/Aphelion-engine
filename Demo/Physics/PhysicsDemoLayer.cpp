@@ -137,7 +137,8 @@ void PhysicsDemoLayer::OnAttach()
 	AP_WARN("Attaching");
 	ap::Timer timer;
 #ifdef USE_PX
-	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+	//gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+	gFoundation = &PxGetFoundation();
 
 	gPvd = PxCreatePvd(*gFoundation);
 	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
@@ -233,9 +234,14 @@ void PhysicsDemoLayer::OnEvent(ap::Event& event)
 	d.Dispatch<ap::KeyPressedEvent>([&](ap::KeyPressedEvent& e)
 		{
 			if (e.GetKeyCode() == ap::KeyCode::Escape) ap::Application::Get().Exit();
+
+#ifndef USE_PX
+
+
 			if (e.GetKeyCode() == ap::KeyCode::Space) createDynamic(m_camera.GetCamera().transform);
 			if (e.GetKeyCode() == ap::KeyCode::Z) 
 			createStack(glm::translate(glm::identity<glm::mat4>(), glm::vec3(0, 0, stackZ -= 10.0f)), 10, 2.f);
+#endif // !USE_PX
 
 			return false;
 		});
