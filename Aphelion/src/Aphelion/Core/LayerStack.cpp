@@ -2,11 +2,14 @@
 
 #include "Aphelion/Core/Log.h"
 
+// TODO: Change the API of layerstack so that we don't have to worry about resizing
+constexpr size_t stackSize = 10;
+
 namespace ap
 {
     LayerStack::LayerStack()
     {
-        m_layers.reserve(6);
+        m_layers.reserve(stackSize);
     }
     
     LayerStack::~LayerStack()
@@ -20,7 +23,7 @@ namespace ap
         m_layers.emplace(m_layers.begin() + m_layerIndex, layer);
         layer->OnAttach();
         m_layerIndex++;
-        AP_CORE_ASSERT(m_layers.size() <= 6, "Can't push more than 6 layers. Otherwise the vector resizes");
+        AP_CORE_ASSERT(m_layers.size() <= stackSize, "Can't push more layers. Otherwise the vector resizes");
     }
 
     void LayerStack::PushOverlay(Layer* overlay)
@@ -28,7 +31,7 @@ namespace ap
         AP_CORE_TRACE("Pushed overlay {0}. Current overlay count ({1})", overlay->GetName(), m_layers.size() - m_layerIndex);
         m_layers.emplace_back(overlay);
         overlay->OnAttach();
-        AP_CORE_ASSERT(m_layers.size() <= 6, "Can't push more than 6 layers. Otherwise the vector resizes");
+        AP_CORE_ASSERT(m_layers.size() <= stackSize, "Can't push more layers. Otherwise the vector resizes");
     }
 
     void LayerStack::PopLayer(Layer* layer)

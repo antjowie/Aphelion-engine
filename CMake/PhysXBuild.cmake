@@ -18,11 +18,16 @@ function(BuildPhysX PX_ROOT_DIR BUILD_PX_SAMPLES)
     # message(STATUS "  Populating PhysX...")
     # FetchContent_Populate(physx)
     # message(STATUS "  Configuring PhysX...")
-   string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_CONFIG) 
+    string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_CONFIG) 
 
     set(NV_USE_DEBUG_WINCRT ON)
     if({CMAKE_BUILD_TYPE} STREQUAL Release)
         set(NV_USE_DEBUG_WINCRT OFF)
+    endif()
+
+    if(${CMAKE_BUILD_TYPE} STREQUAL RelWithDebInfo)
+        set(CMAKE_BUILD_TYPE release)
+        # message(FATAL_ERROR "PhysX doesn't support this configuration (or it is called checked). This behavior has yet to be implemented")
     endif()
 
     # message(WARNING "Value of debug wincrt:${NV_USE_DEBUG_WINCRT}")
@@ -42,8 +47,8 @@ function(BuildPhysX PX_ROOT_DIR BUILD_PX_SAMPLES)
 
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/physx
         COMMAND_ECHO STDOUT
-        # OUTPUT_FILE       ${physx_BINARY_DIR}/configure_output.log
-        # ERROR_FILE        ${physx_BINARY_DIR}/configure_output.log
+        # OUTPUT_FILE       ${CMAKE_BINARY_DIR}/physx/configure_output.log
+        # ERROR_FILE        ${CMAKE_BINARY_DIR}/physx/configure_output.log
         RESULT_VARIABLE   result_config
     )
     if(result_config)
@@ -59,8 +64,8 @@ function(BuildPhysX PX_ROOT_DIR BUILD_PX_SAMPLES)
 
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/physx
         COMMAND_ECHO STDOUT
-        # OUTPUT_FILE       ${physx_BINARY_DIR}/build_output.log
-        # ERROR_FILE        ${physx_BINARY_DIR}/build_output.log
+        # OUTPUT_FILE       ${CMAKE_BINARY_DIR}/physx/build_output.log
+        # ERROR_FILE        ${CMAKE_BINARY_DIR}/physx/build_output.log
         RESULT_VARIABLE   result_build
     )
     if(result_build)
