@@ -5,58 +5,75 @@ namespace ap
     void SetVBOElements(ap::VertexBufferRef& buffer)
     {
         buffer->AddElement({ ap::ShaderDataType::Float3, "aPos" });
+        buffer->AddElement({ ap::ShaderDataType::Float3, "aNormal"});
         buffer->AddElement({ ap::ShaderDataType::Float2, "aTex", true });
     }
 
 
-    // pos3, tex2
+    // pos3,  nor3, tex2
     constexpr float cubeVertices[]
     {
-        // Front face
-        -0.5f, -0.5f, 0.5f, 0.f, 0.f,
-        0.5f, -0.5f, 0.5f, 1.f, 0.f,
-        0.5f, 0.5f, 0.5f, 1.f, 1.f,
-        -0.5f, 0.5f, 0.5f, 0.f, 1.f,
+        // top
+        -0.5f, 0.5f, -0.5f, 0.f, 1.f, 0.f, 0.f, 1.f,
+        -0.5f, 0.5f,  0.5f, 0.f, 1.f, 0.f, 0.f, 0.f,
+         0.5f, 0.5f,  0.5f, 0.f, 1.f, 0.f, 1.f, 0.f,
+         0.5f, 0.5f, -0.5f, 0.f, 1.f, 0.f, 1.f, 1.f,
 
-        // Back face
-        -0.5f, -0.5f, -0.5f, 1.f, 0.f,
-        -0.5f, 0.5f, -0.5f, 1.f, 1.f,
-        0.5f, 0.5f, -0.5f, 0.f, 1.f,
-        0.5f, -0.5f, -0.5f, 0.f, 0.f,
+        // bottom
+         0.5f, -0.5f, -0.5f, 0.f, -1.f, 0.f, 1.f, 1.f,
+         0.5f, -0.5f,  0.5f, 0.f, -1.f, 0.f, 1.f, 0.f,
+        -0.5f, -0.5f,  0.5f, 0.f, -1.f, 0.f, 0.f, 0.f,
+        -0.5f, -0.5f, -0.5f, 0.f, -1.f, 0.f, 0.f, 1.f,
 
-        // Top face
-        -0.5f, 0.5f, -0.5f, 0.f, 1.f,
-        -0.5f, 0.5f, 0.5f, 0.f, 0.f,
-        0.5f, 0.5f, 0.5f, 1.f, 0.f,
-        0.5f, 0.5f, -0.5f, 1.f, 1.f,
+        // left
+        -0.5f,  0.5f, -0.5f, -1.f, 0.f, 0.f, 1.f, 1.f,
+        -0.5f, -0.5f, -0.5f, -1.f, 0.f, 0.f, 1.f, 0.f,
+        -0.5f, -0.5f,  0.5f, -1.f, 0.f, 0.f, 0.f, 0.f,
+        -0.5f,  0.5f,  0.5f, -1.f, 0.f, 0.f, 0.f, 1.f,
 
-        // Bottom face
-        -0.5f, -0.5f, -0.5f, 0.f, 0.f,
-        0.5f, -0.5f, -0.5f, 1.f, 0.f,
-        0.5f, -0.5f, 0.5f, 1.f, 1.f,
-        -0.5f, -0.5f, 0.5f, 0.f, 1.f,
+        // right
+        0.5f,  0.5f,  0.5f, 1.f, 0.f, 0.f, 0.f, 1.f,
+        0.5f, -0.5f,  0.5f, 1.f, 0.f, 0.f, 0.f, 0.f,
+        0.5f, -0.5f, -0.5f, 1.f, 0.f, 0.f, 1.f, 0.f,
+        0.5f,  0.5f, -0.5f, 1.f, 0.f, 0.f, 1.f, 1.f,
 
-        // Right face
-        0.5f, -0.5f, -0.5f, 1.f, 0.f,
-        0.5f, 0.5f, -0.5f, 1.f, 1.f,
-        0.5f, 0.5f, 0.5f, 0.f, 1.f,
-        0.5f, -0.5f, 0.5f, 0.f, 0.f,
-
-        // Left face
-        -0.5f, -0.5f, -0.5f, 0.f, 0.f,
-        -0.5f, -0.5f, 0.5f, 1.f, 0.f,
-        -0.5f, 0.5f, 0.5f, 1.f, 1.f,
-        -0.5f, 0.5f, -0.5f, 0.f, 1.f,
+        // back
+         0.5f,  0.5f, -0.5f, 0.f, 0.f, -1.f, 1.f, 1.f,
+         0.5f, -0.5f, -0.5f, 0.f, 0.f, -1.f, 1.f, 0.f,
+        -0.5f, -0.5f, -0.5f, 0.f, 0.f, -1.f, 0.f, 0.f,
+        -0.5f,  0.5f, -0.5f, 0.f, 0.f, -1.f, 0.f, 1.f,
+        
+        // front
+        -0.5f,  0.5f, 0.5f, 0.f, 0.f, 1.f, 0.f, 1.f,
+        -0.5f, -0.5f, 0.5f, 0.f, 0.f, 1.f, 0.f, 0.f,
+         0.5f, -0.5f, 0.5f, 0.f, 0.f, 1.f, 1.f, 0.f,
+         0.5f,  0.5f, 0.5f, 0.f, 0.f, 1.f, 1.f, 1.f,
     };
 
-    constexpr uint32_t cubeIndices[]{
-        0, 1, 2, 0, 2, 3, // front
-        4, 5, 6, 4, 6, 7, // back
-        8, 9, 10, 8, 10, 11, // top
-        12, 13, 14, 12, 14, 15, // bottom
-        16, 17, 18, 16, 18, 19, // right
-        20, 21, 22, 20, 22, 23, // left
-    };
+    template <unsigned faceCount>
+    ap::IndexBufferRef GenerateIndices()
+    {
+        constexpr auto elementCount = faceCount * 6u;
+
+        std::array<unsigned, elementCount> ebo;
+        unsigned offset = 0;
+        for (unsigned i = 0; i < elementCount; i += 6)
+        {
+            ebo[i + 0] = 3 + offset;
+            ebo[i + 1] = 0 + offset;
+            ebo[i + 2] = 1 + offset;
+            ebo[i + 3] = 3 + offset;
+            ebo[i + 4] = 1 + offset;
+            ebo[i + 5] = 2 + offset;
+
+            //std::vector<unsigned> indices { 3 + offset,0 + offset,1 + offset,3 + offset,1 + offset,2 + offset };
+            //ebo.insert(ebo.end(), indices.begin(), indices.end());
+            //memcpy(&ebo[i], indices, 6 * sizeof(unsigned));
+            offset += 4;
+        }
+
+        return ap::IndexBuffer::Create(ebo.data(), ebo.size());
+    }
 
     VertexArrayRef CreateCube()
     {
@@ -64,7 +81,7 @@ namespace ap
         auto vbo = VertexBuffer::Create(cubeVertices, sizeof(cubeVertices));
         SetVBOElements(vbo);
 
-        auto ibo = IndexBuffer::Create(cubeIndices, sizeof(cubeIndices) / sizeof(cubeIndices[0]));
+        auto ibo = GenerateIndices<6>();
         vao->AddVertexBuffer(vbo);
         vao->SetIndexBuffer(ibo);
         

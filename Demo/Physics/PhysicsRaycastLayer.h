@@ -18,6 +18,8 @@
 
 #include "Aphelion/Renderer/PerspectiveCameraController.h"
 
+//#include <glm/gtc/type_ptr.hpp>
+
 class APHELION_API PhysicsRaycastLayer : public ap::Layer
 {
 public:
@@ -68,11 +70,15 @@ public:
         m_camera.OnUpdate(ts);
 
         static auto cube = ap::CreateCube();
-        static auto shader = ap::Shader::Create("res/shader/Texture3DFlat.glsl");
+        static auto shader = ap::Shader::Create("res/shader/Texture3D.glsl");
         static auto texture = ap::Texture2D::Create(1, 1);
         static auto redTexture = ap::Texture2D::Create(1, 1);
         constexpr uint32_t color = 0xffffffff;
         constexpr uint32_t red = 0xff0000ff;
+        static const auto lightDir = glm::normalize(glm::vec3(0.1f, -1.f, 0.4f));
+        shader->Bind();
+        shader->SetVec3("aLightDir", glm::value_ptr(lightDir));
+        shader->SetFloat("aAmbient", 0.2f);
         texture->SetData(reinterpret_cast<const void*>(&color),sizeof(color));
         redTexture->SetData(reinterpret_cast<const void*>(&red), sizeof(red));
 
