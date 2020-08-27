@@ -31,7 +31,8 @@ namespace ap
 
     public:
         RigidBody(physx::PxRigidActor* actor, bool creator = false);
-        
+        RigidBody();
+
         void SetWorldTransform(const glm::mat4& transform);
         glm::mat4 GetWorldTransform() const;
         PhysicsBounds GetWorldBounds() const;
@@ -61,6 +62,5 @@ namespace ap
          */
         physx::PxRigidBody* m_rb;
         RigidBodyType m_type;
-
     };
 }

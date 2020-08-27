@@ -26,6 +26,7 @@ namespace ap
         ~PhysicsScene();
 
         void AddActor(RigidBody& actor);
+        void RemoveActor(RigidBody& actor);
         void Simulate(float dt);
 
         std::vector<RigidBody> GetActors(RigidBodyType mask) const;

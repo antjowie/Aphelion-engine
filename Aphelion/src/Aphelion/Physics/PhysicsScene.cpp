@@ -38,6 +38,11 @@ namespace ap
         m_handle->addActor(*actor.GetHandle());
     }
 
+    void PhysicsScene::RemoveActor(RigidBody& actor)
+    {
+        m_handle->removeActor(*actor.GetHandle());
+    }
+
     void PhysicsScene::Simulate(float dt)
     {
         // Steps the simulation in steps if frame takes too long

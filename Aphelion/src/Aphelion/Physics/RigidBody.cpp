@@ -39,6 +39,12 @@ namespace ap
         }
     }
 
+    RigidBody::RigidBody()
+        : m_handle(nullptr)
+        , m_rb(nullptr)
+    {
+    }
+
     void RigidBody::SetWorldTransform(const glm::mat4& transform)
     {
         m_handle->setGlobalPose(physx::PxTransform(ap::MakeMat4(transform)));

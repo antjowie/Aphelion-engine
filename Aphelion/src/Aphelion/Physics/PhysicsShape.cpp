@@ -16,6 +16,12 @@ namespace ap
     {
     }
 
+    PhysicsShape::PhysicsShape()
+        : m_handle(nullptr)
+        , m_creator(false)
+    {
+    }
+
     PhysicsShape::~PhysicsShape()
     {
         if (m_creator) m_handle->release();
