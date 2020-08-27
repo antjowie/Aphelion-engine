@@ -30,8 +30,10 @@ namespace ap
         void RemoveActor(RigidBody& actor);
         void Simulate(float dt);
 
-        /// Check return type to see if a hit has been made
-        PhysicsRaycastHit Raycast(const glm::vec3& origin, const glm::vec3& dir, float maxDistance = 0.f);
+        /**
+         * distance may not be zero
+         */
+        PhysicsRaycastHit Raycast(const glm::vec3& origin, const glm::vec3& dir, float distance);
 
         std::vector<RigidBody> GetActors(RigidBodyType mask = RigidBodyType::AllMask) const;
 

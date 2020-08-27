@@ -57,10 +57,11 @@ namespace ap
         m_handle->fetchResults(true);
     }
 
-    PhysicsRaycastHit PhysicsScene::Raycast(const glm::vec3& origin, const glm::vec3& dir, float maxDistance)
+    PhysicsRaycastHit PhysicsScene::Raycast(const glm::vec3& origin, const glm::vec3& dir, float distance)
     {
+        AP_CORE_ASSERT(distance != 0, "distance may not be zero");
         physx::PxRaycastBuffer hitCb;
-        m_handle->raycast(ap::MakeVec3(origin), ap::MakeVec3(dir), maxDistance, hitCb);
+        m_handle->raycast(ap::MakeVec3(origin), ap::MakeVec3(dir), distance, hitCb);
 
         return hitCb.hasBlock ? PhysicsRaycastHit(hitCb.block) : PhysicsRaycastHit();
     }

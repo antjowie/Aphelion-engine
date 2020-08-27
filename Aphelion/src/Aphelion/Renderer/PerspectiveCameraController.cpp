@@ -17,18 +17,18 @@ namespace ap
 
     void PerspectiveCameraController::OnUpdate(Timestep ts)
     {
+        if (!m_isRotating) return;
+
         glm::vec3 offset(0);
-        const glm::vec3 forward(m_camera.transform.GetForward());
+        // NOTE: I flipped the forward for the camera. This is because OpenGL by default 'looks' into the -z
+        // direction. We want to transform relatively among the camera view dir. Camera view dir and transform forward are not the same
+        const glm::vec3 forward(-m_camera.transform.GetForward());
         const glm::vec3 right(m_camera.transform.GetRight());
         const glm::vec3 up(m_camera.transform.GetUp());
 
-        // NOTE: I flipped the forward for the camera. This is because OpenGL by default 'looks' into the -z
-        // direction. Since I reuse the transform class and don't want to modify too many things, I change 
-        // the direction for the camera. This is something to keep in mind. It should not affect anything else
-        // and we can continue on as we like to.
-        if (Input::IsKeyPressed(KeyCode::W)) offset += -forward;
+        if (Input::IsKeyPressed(KeyCode::W)) offset += forward;
         if (Input::IsKeyPressed(KeyCode::A)) offset += -right;
-        if (Input::IsKeyPressed(KeyCode::S)) offset += forward;
+        if (Input::IsKeyPressed(KeyCode::S)) offset += -forward;
         if (Input::IsKeyPressed(KeyCode::D)) offset += right;
         if (Input::IsKeyPressed(KeyCode::E)) offset += up;
         if (Input::IsKeyPressed(KeyCode::Q)) offset += -up;
@@ -41,20 +41,17 @@ namespace ap
     void PerspectiveCameraController::OnEvent(Event& e)
     {
         EventDispatcher d(e);
-        
-        static bool isRotating = false;
-        static glm::vec2 prevPos(0);
-        if (isRotating)
+        static glm::dvec2 oldCursorPos(0);
+
+        if (m_isRotating)
         {
             d.Dispatch<MouseMovedEvent>([&](MouseMovedEvent& e)
                 {
                     // TODO: Add a sensitivity variable for offset
-                    /*const */auto offset = glm::vec2(e.GetX(), e.GetY()) - prevPos;
-                    offset = offset / 25.f * glm::two_pi<float>();
+                    auto offset = glm::dvec2(e.GetX(), e.GetY()) - oldCursorPos;
+                    offset = offset / 25. * glm::two_pi<double>();
 
-                    prevPos = Input::GetCursorPos();
-
-                    m_camera.transform.Rotate(Radians(glm::vec3(-offset.y, -offset.x, 0)));
+                    m_camera.transform.Rotate(Radians(glm::vec3(-offset.y, offset.x, 0)));
                     return false;
                 });
         }
@@ -64,8 +61,7 @@ namespace ap
                 if (e.GetButton() == ButtonCode::Right)
                 {
                     Input::EnableCursor(false);
-                    isRotating = true;
-                    prevPos = Input::GetCursorPos();
+                    m_isRotating = true;
                 }
                 return false;
             });
@@ -74,9 +70,11 @@ namespace ap
                 if (e.GetButton() == ButtonCode::Right)
                 {
                     Input::EnableCursor(true);
-                    isRotating = false;
+                    m_isRotating = false;
                 }
                 return false;
             });
+
+        oldCursorPos = Input::GetCursorPos();
     }
 }

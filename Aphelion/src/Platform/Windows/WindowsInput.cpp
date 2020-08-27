@@ -46,7 +46,7 @@ namespace ap
         glfwSetCursorPos(GetNativeWindow(), GetCursorXImpl(), y);
     }
 
-    glm::vec2 WindowsInput::GetCursorPosImpl() 
+    glm::dvec2 WindowsInput::GetCursorPosImpl() 
     {
         glm::dvec2 ret;
         glfwGetCursorPos(GetNativeWindow(), &ret.x, &ret.y);

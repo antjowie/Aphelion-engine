@@ -9,6 +9,7 @@
 
 #include "Aphelion/Renderer/Primitive.h"
 #include "Aphelion/Renderer/Renderer.h"
+#include "Aphelion/Renderer/Renderer2D.h"
 #include "Aphelion/Renderer/Texture.h"
 
 #include "Aphelion/Physics/PhysicsFoundation.h"
@@ -66,23 +67,41 @@ public:
     {
         m_camera.OnUpdate(ts);
 
-
         static auto cube = ap::CreateCube();
         static auto shader = ap::Shader::Create("res/shader/Texture3DFlat.glsl");
         static auto texture = ap::Texture2D::Create(1, 1);
+        static auto redTexture = ap::Texture2D::Create(1, 1);
         constexpr uint32_t color = 0xffffffff;
+        constexpr uint32_t red = 0xff0000ff;
         texture->SetData(reinterpret_cast<const void*>(&color),sizeof(color));
-        texture->Bind();
+        redTexture->SetData(reinterpret_cast<const void*>(&red), sizeof(red));
 
         m_scene.Simulate(ts);
 
+        auto hit = m_scene.Raycast(
+            m_camera.GetCamera().transform.GetPosition(), 
+            m_camera.GetCamera().GetViewDirection(),
+            100.f);
+
         ap::Renderer::BeginScene(m_camera.GetCamera());
-        for (const auto& actor : m_scene.GetActors())
+        for (auto& actor : m_scene.GetActors())
         {
+            texture->Bind();
+            if (hit && hit.rb.GetHandle() == actor.GetHandle())
+                redTexture->Bind();
             auto bounds = actor.GetWorldBounds();
             ap::Renderer::Submit(shader, cube, actor.GetWorldTransform() * glm::scale(glm::mat4(1), bounds.GetDimensions()));
         }
         ap::Renderer::EndScene();
+
+        // Render little crosshair
+        static ap::OrthographicCamera ortho(-16,16,-9,9);
+        ap::Renderer2D::BeginScene(ortho);
+        ap::Render2DData data;
+        data.size = glm::vec2(0.5f);
+        data.color = glm::vec4(0, 255, 0, 255);
+        ap::Renderer2D::Submit(data);
+        ap::Renderer2D::EndScene();
     }
 
     //virtual void OnGuiRender() override final;

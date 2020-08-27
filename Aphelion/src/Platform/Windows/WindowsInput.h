@@ -15,7 +15,7 @@ namespace ap
         virtual void SetCursorXImpl(float x) override final;
         virtual void SetCursorYImpl(float y) override final;
 
-        virtual glm::vec2 GetCursorPosImpl() override final;
+        virtual glm::dvec2 GetCursorPosImpl() override final;
         virtual float GetCursorXImpl() override final;
         virtual float GetCursorYImpl() override final;
     };

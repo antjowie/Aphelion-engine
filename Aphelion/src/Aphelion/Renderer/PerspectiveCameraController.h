@@ -19,7 +19,6 @@ namespace ap
         const PerspectiveCamera& GetCamera() const { return m_camera; }
 
     private:
-
         bool m_isRotating;
         PerspectiveCamera m_camera;
     };

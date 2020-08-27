@@ -33,7 +33,7 @@ namespace ap
         /**
          * Returns the position in screen coordinates
          */
-        static glm::vec2 GetCursorPos() { return m_instance->GetCursorPosImpl(); }
+        static glm::dvec2 GetCursorPos() { return m_instance->GetCursorPosImpl(); }
         static float GetCursorX() { return m_instance->GetCursorXImpl(); }
         static float GetCursorY() { return m_instance->GetCursorYImpl(); }
 
@@ -47,7 +47,7 @@ namespace ap
         virtual void SetCursorXImpl(float x) = 0;
         virtual void SetCursorYImpl(float y) = 0;
 
-        virtual glm::vec2 GetCursorPosImpl() = 0;
+        virtual glm::dvec2 GetCursorPosImpl() = 0;
         virtual float GetCursorXImpl() = 0;
         virtual float GetCursorYImpl() = 0;
 

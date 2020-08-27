@@ -31,12 +31,12 @@ namespace ap
                 {
                 case ap::PhysicsErrorCode::NoError:
                     type = "NoError";
-                    AP_CORE_TRACE("Physics {} File: {} Line: {}] {}|", type, file, line, message);
+                    AP_CORE_TRACE("Physics {} File: {} Line: {}] {}", type, file, line, message);
                     break;
 
                 case ap::PhysicsErrorCode::DebugInfo:
                     type = "DebugInfo";
-                    AP_CORE_INFO("Physics {} File: {} Line: {}] {}|", type, file, line, message);
+                    AP_CORE_INFO("Physics {} File: {} Line: {}] {}", type, file, line, message);
                     break;
 
                 case ap::PhysicsErrorCode::DebugWarning:
@@ -47,23 +47,23 @@ namespace ap
                     type = "InvalidParameter";
                 case ap::PhysicsErrorCode::InvalidOperation:
                     type = "InvalidOperation";
-                    AP_CORE_WARN("Physics {} File: {} Line: {}] {}|", type, file, line, message);
+                    AP_CORE_WARN("Physics {} File: {} Line: {}] {}", type, file, line, message);
                     break;
 
                 case ap::PhysicsErrorCode::OutOfMemory:
                     type = "OutOfMemory";
                 case ap::PhysicsErrorCode::InternalError:
                     type = "InternalError";
-                    AP_CORE_ERROR("Physics {} File: {} Line: {}] {}|", type, file, line, message);
+                    AP_CORE_ERROR("Physics {} File: {} Line: {}] {}", type, file, line, message);
                     break;
                 case ap::PhysicsErrorCode::Abort:
                     type = "Abort";
-                    AP_CORE_CRITICAL("Physics {} File: {} Line: {}] {}|", type, file, line, message);
+                    AP_CORE_CRITICAL("Physics {} File: {} Line: {}] {}", type, file, line, message);
                     break;
 
                 case ap::PhysicsErrorCode::MaskAll:
                     type = "MaskAll";
-                    AP_CORE_TRACE("Physics {} File: {} Line: {}] {}|", type, file, line, message);
+                    AP_CORE_TRACE("Physics {} File: {} Line: {}] {}", type, file, line, message);
                     break;
                 }
             };

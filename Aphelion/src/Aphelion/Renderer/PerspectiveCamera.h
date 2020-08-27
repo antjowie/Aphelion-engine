@@ -29,7 +29,11 @@ namespace ap
         const glm::mat4& GetProjectionMatrix() const { CalculateMatrices(); return m_projectionMatrix; }
         const glm::mat4& GetViewMatrix() const { CalculateMatrices(); return m_viewMatrix; }
         const glm::mat4& GetViewProjectionMatrix() const { CalculateMatrices(); return m_viewProjectionMatrix; }
-
+        /**
+         * The camera views along the -z direction. The forward points towards the +z direction
+         * The transform forward and camera view direction are not the same
+         */
+        const glm::vec3 GetViewDirection() const { return -transform.GetForward(); }
 
     public: 
         Transform transform;
