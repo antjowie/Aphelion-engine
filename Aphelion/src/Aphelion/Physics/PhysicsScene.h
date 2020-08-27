@@ -1,6 +1,7 @@
 #pragma once
 #include "Aphelion/Core/Core.h"
 #include "Aphelion/Physics/RigidBody.h"
+#include "Aphelion/Physics/PhysicsQuery.h"
 
 namespace physx
 {
@@ -28,6 +29,9 @@ namespace ap
         void AddActor(RigidBody& actor);
         void RemoveActor(RigidBody& actor);
         void Simulate(float dt);
+
+        /// Check return type to see if a hit has been made
+        PhysicsRaycastHit Raycast(const glm::vec3& origin, const glm::vec3& dir, float maxDistance = 0.f);
 
         std::vector<RigidBody> GetActors(RigidBodyType mask) const;
 

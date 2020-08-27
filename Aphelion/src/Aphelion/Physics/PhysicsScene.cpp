@@ -57,6 +57,14 @@ namespace ap
         m_handle->fetchResults(true);
     }
 
+    PhysicsRaycastHit PhysicsScene::Raycast(const glm::vec3& origin, const glm::vec3& dir, float maxDistance)
+    {
+        physx::PxRaycastBuffer hitCb;
+        m_handle->raycast(ap::MakeVec3(origin), ap::MakeVec3(dir), maxDistance, hitCb);
+
+        return hitCb.hasBlock ? PhysicsRaycastHit(hitCb.block) : PhysicsRaycastHit();
+    }
+
     std::vector<RigidBody> PhysicsScene::GetActors(RigidBodyType mask) const
     {
         physx::PxActorTypeFlags pxMask = static_cast<physx::PxActorTypeFlag::Enum>(mask);

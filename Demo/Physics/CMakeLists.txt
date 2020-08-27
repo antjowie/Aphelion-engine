@@ -6,6 +6,8 @@ add_executable(
     Entry.cpp
     PhysicsDemoLayer.h
     PhysicsDemoLayer.cpp
+    PhysicsRaycastLayer.h
+
 )
 
 target_link_libraries(
