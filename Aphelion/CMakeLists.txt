@@ -121,15 +121,15 @@ target_precompile_headers(
 
 target_include_directories(Runtime PUBLIC src)
 
-add_custom_command(
-    TARGET Runtime
-    POST_BUILD
+add_custom_target(
+    AphelionResources    
     COMMAND ${CMAKE_COMMAND} 
     -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/res/
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/res/
     COMMENT "Copying Aphelion resources to output dir"
 )
+add_dependencies(Runtime AphelionResources)
 
 target_link_libraries(
     Runtime

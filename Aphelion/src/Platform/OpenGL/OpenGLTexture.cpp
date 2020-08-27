@@ -91,7 +91,7 @@ namespace ap
         return m_height;
     }
 
-    void OpenGLTexture2D::SetData(void* data, uint32_t size)
+    void OpenGLTexture2D::SetData(const void* data, uint32_t size)
     {
 		uint32_t bpp = m_dataFormat == GL_RGBA ? 4 : 3;
 		AP_CORE_ASSERT(size == m_width * m_height * bpp, "Data must be entire texture!");
@@ -203,7 +203,7 @@ namespace ap
         return m_height;
     }
 
-    void OpenGLArrayTexture2D::SetData(void* data, uint32_t size)
+    void OpenGLArrayTexture2D::SetData(const void* data, uint32_t size)
     {
 		uint32_t bpp = m_dataFormat == GL_RGBA ? 4 : 3;
 		AP_CORE_ASSERT(size == m_width * m_height * bpp, "Data must be entire texture!");

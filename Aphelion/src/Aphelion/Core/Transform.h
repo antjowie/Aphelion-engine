@@ -23,7 +23,7 @@ namespace ap
         
         static constexpr glm::vec3 GetWorldUp() { return glm::vec3(0, 1, 0); }
         static constexpr glm::vec3 GetWorldRight() { return glm::vec3(1, 0, 0); }
-        static constexpr glm::vec3 GetWorldForward() { return glm::vec3(0, 0, 1); }
+        static constexpr glm::vec3 GetWorldForward() { return glm::vec3(0, 0, -1); }
 
         glm::vec3 GetUp() const { return GetWorldMatrix()[1]; }
         glm::vec3 GetRight() const { return GetWorldMatrix()[0]; }

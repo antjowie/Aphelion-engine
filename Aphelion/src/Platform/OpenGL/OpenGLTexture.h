@@ -17,7 +17,7 @@ namespace ap
         virtual uint32_t GetWidth() const override final;
         virtual uint32_t GetHeight() const override final;
 
-        virtual void SetData(void* data, uint32_t size) override final;
+        virtual void SetData(const void* data, uint32_t size) override final;
 
     private:
         uint32_t m_width, m_height;
@@ -37,7 +37,7 @@ namespace ap
         virtual uint32_t GetWidth() const override final;
         virtual uint32_t GetHeight() const override final;
 
-        virtual void SetData(void* data, uint32_t size) override final;
+        virtual void SetData(const void* data, uint32_t size) override final;
         virtual void SetLayer(unsigned layer) override final;
 
     private:

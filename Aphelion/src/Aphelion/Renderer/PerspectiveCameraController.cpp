@@ -44,6 +44,21 @@ namespace ap
         
         static bool isRotating = false;
         static glm::vec2 prevPos(0);
+        if (isRotating)
+        {
+            d.Dispatch<MouseMovedEvent>([&](MouseMovedEvent& e)
+                {
+                    // TODO: Add a sensitivity variable for offset
+                    /*const */auto offset = glm::vec2(e.GetX(), e.GetY()) - prevPos;
+                    offset = offset / 25.f * glm::two_pi<float>();
+
+                    prevPos = Input::GetCursorPos();
+
+                    m_camera.transform.Rotate(Radians(glm::vec3(-offset.y, -offset.x, 0)));
+                    return false;
+                });
+        }
+
         d.Dispatch<MouseButtonPressedEvent>([&](MouseButtonPressedEvent& e)
             {
                 if (e.GetButton() == ButtonCode::Right)
@@ -63,20 +78,5 @@ namespace ap
                 }
                 return false;
             });
-
-        if (isRotating)
-        {
-            d.Dispatch<MouseMovedEvent>([&](MouseMovedEvent& e)
-                {
-                    // TODO: Add a sensitivity variable for offset
-                    /*const */auto offset = glm::vec2(e.GetX(), e.GetY()) - prevPos;
-                    offset = offset / 25.f * glm::two_pi<float>();
-
-                    prevPos = Input::GetCursorPos();
-                    
-                    m_camera.transform.Rotate(Radians(glm::vec3(-offset.y, -offset.x , 0)));
-                    return false;
-                });
-        }
     }
 }

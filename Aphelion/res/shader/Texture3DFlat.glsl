@@ -7,8 +7,6 @@ layout (location = 1) in vec2 aTex;
 uniform mat4 aVP;
 uniform mat4 aTransform;
 
-// uniform mat4 aLightDir;
-
 out vec2 tex;
 
 void main()

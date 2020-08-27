@@ -33,7 +33,7 @@ namespace ap
         /// Check return type to see if a hit has been made
         PhysicsRaycastHit Raycast(const glm::vec3& origin, const glm::vec3& dir, float maxDistance = 0.f);
 
-        std::vector<RigidBody> GetActors(RigidBodyType mask) const;
+        std::vector<RigidBody> GetActors(RigidBodyType mask = RigidBodyType::AllMask) const;
 
     private:
         PhysicsSceneDesc m_desc;

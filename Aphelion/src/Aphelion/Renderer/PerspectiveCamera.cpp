@@ -11,6 +11,8 @@ namespace ap
         , m_near(zNear)
         , m_far(zFar)
     {
+        AP_CORE_ASSERT(fovY != 0, "FOV can't be zero");
+        AP_CORE_ASSERT(aspectRatio != 0, "Aspect ratio can't be zero");
         SetProjection(fovY, aspectRatio, zNear, zFar);
     }
 
