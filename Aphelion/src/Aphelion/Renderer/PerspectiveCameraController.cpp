@@ -51,7 +51,15 @@ namespace ap
                     auto offset = glm::dvec2(e.GetX(), e.GetY()) - oldCursorPos;
                     offset = offset / 25. * glm::two_pi<double>();
 
-                    m_camera.transform.Rotate(Radians(glm::vec3(-offset.y, offset.x, 0)));
+                    // rhs coordinates
+                    // positive x is ccw rotation
+                    // offset is from top left
+                    // Move cursor right with 10 px == -x rotation
+                    // Cursor right is + offset, so negate x
+
+                    // Move cursor up with 10 px == +y rotation
+                    // Cursor up is - offset, so negate y
+                    m_camera.transform.Rotate(Radians(glm::vec3(-offset.y, -offset.x, 0)));
                     return false;
                 });
         }

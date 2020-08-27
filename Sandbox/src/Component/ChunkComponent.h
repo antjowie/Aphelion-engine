@@ -11,7 +11,7 @@
 #include <bitsery/traits/array.h>
 
 /// IVec so that we can use it easily in calculations
-constexpr glm::ivec3 chunkDimensions {32,32,32};
+constexpr glm::vec<3,uint8_t> chunkDimensions {32,32,32};
 constexpr unsigned chunkCount = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
 /// TODO: Instead of using default alloc, create a ChunkAlloc
 //template <typename T>

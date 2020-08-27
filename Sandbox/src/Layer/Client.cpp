@@ -87,7 +87,8 @@ void ClientLayer::OnUpdate(ap::Timestep ts)
     if (!client.IsConnected()) return;
 
     m_camera.OnUpdate(ts);
-    
+    //m_camera.GetCamera().transform.Rotate(ap::Radians(glm::vec3(0, ts * 180.f, 0)));
+
     // Poll packets
     ap::Packet p;
     m_packets.Swap();
