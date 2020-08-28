@@ -5,6 +5,17 @@
 
 namespace ap
 {
+    class APHELION_API Entity;
+
+    /**
+     * ComponentCb gets called when the entity makes or removes a component
+     * It passes it's own id as well as the compnent id to the registry
+     * 
+     * The registry then forwards this information to another callback that the user can set up per component
+     * The callbacks are stored in the CompData structure in Registry
+     */
+    using ComponentCb = std::function<void(Entity handle, unsigned compID)>;
+
     /**
      * A handle into a container of components. Don't store entities since they get invalidated every frame
      * 
@@ -20,16 +31,20 @@ namespace ap
     {
     public:
         Entity() {}
-        Entity(const entt::entity handle, entt::registry& registry) 
+        Entity(const entt::entity handle, entt::registry& registry, ComponentCb createCb, ComponentCb removeCb)
             : m_handle(handle)
             , m_reg(&registry)
+            , m_createCb(createCb)
+            , m_removeCb(removeCb)
         {}
 
         template <typename Component, typename... Args>
         Component& AddComponent(Args&&... args)
         {
             AP_CORE_ASSERT(*this, "Entity is not valid");
-            return m_reg->emplace<Component>(m_handle, std::forward<Args>(args)...);
+            auto& comp = m_reg->emplace<Component>(m_handle, std::forward<Args>(args)...);
+            m_createCb(*this, entt::type_info<Component>::id());
+            return comp;
         }
 
         template <typename Component>
@@ -37,6 +52,7 @@ namespace ap
         {
             AP_CORE_ASSERT(*this, "Entity is not valid");
             AP_CORE_ASSERT(m_reg->has<Component>(m_handle), "Entity does not have that component");
+            m_removeCb(*this, entt::type_info<Component>::id());
             m_reg->remove<Component>(m_handle);
         }
 
@@ -71,11 +87,13 @@ namespace ap
          * It only server for debug purposes. It represent the entt handle. This
          * handle is unique on each machine and used to communicate with the EnTT API
          */
-        entt::entity GetHandle() const {return m_handle;}
+        entt::entity GetHandle() const { return m_handle; }
 #endif
 
     private:
         entt::entity m_handle = entt::null;
         entt::registry* m_reg = nullptr;
+        ComponentCb m_createCb;
+        ComponentCb m_removeCb;
     };
 }

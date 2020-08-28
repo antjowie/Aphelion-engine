@@ -89,21 +89,24 @@ namespace ap
         using UnpackAndReconcileFunc = std::function<bool(entt::registry& reg, entt::entity handle, Packet& packet)>;
 
         using EntityCb = std::function<void(Entity)>;
-
+        
         struct CompData
         {
             std::string_view name;
             StampFunc stamp;
             UnpackFunc unpack;
             UnpackAndReconcileFunc unpackAndReconcile;
+            EntityCb createComp;
+            EntityCb removeComp;
         };
 
     public:
         Entity Create(const std::string& tag = {});
         /// Used when recreating an existing entity (from another source such as network for example)
-        Entity Create(unsigned guid);
+        Entity Create(unsigned guid, const std::string& tag = {});
         void Destroy(Entity entity);
-        Entity Get(unsigned guid) { return { m_idToHandle.at(guid),m_reg }; }
+        Entity Get(unsigned guid);
+        Entity Get(entt::entity handle);
         bool Has(unsigned guid) const { return m_idToHandle.count(guid) == 1; }
 
         size_t Count() const { return m_reg.size(); }
@@ -112,7 +115,7 @@ namespace ap
         void View(CB& callback, TypeList<Exclude...> = {}) {
             auto view = m_reg.view<Component...>(entt::exclude<Exclude...>);
             auto cbWrap = [&](entt::entity entity, auto&... param) 
-            { callback(Entity(entity, m_reg), param...); };
+            { callback(Get(entity), param...); };
 
             view.each(cbWrap);
 

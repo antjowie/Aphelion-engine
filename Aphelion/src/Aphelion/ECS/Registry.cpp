@@ -20,21 +20,10 @@ namespace ap
         }
 
         // Create the entity 
-
-        auto handle = m_reg.create();
-        Entity entity = { handle, m_reg };
-
-        entity.AddComponent<TransformComponent>();
-        entity.AddComponent<TagComponent>(tag);
-        entity.AddComponent<GUIDComponent>(guid);
-        
-        m_idToHandle[guid] = handle;
-
-        if (m_onCreate) m_onCreate(entity);
-        return entity;
+        return Create(guid,tag);
     }
 
-    Entity Registry::Create(unsigned guid)
+    Entity Registry::Create(unsigned guid, const std::string& tag)
     {
         if (m_idToHandle.count(guid) == 1)
         {
@@ -45,13 +34,13 @@ namespace ap
         }
 
         auto handle = m_reg.create();
-        Entity entity = { handle, m_reg };
+        m_idToHandle[guid] = handle;
+        auto entity = Get(guid);
 
         entity.AddComponent<TransformComponent>();
         entity.AddComponent<TagComponent>();
         entity.AddComponent<GUIDComponent>(guid);
 
-        m_idToHandle[guid] = handle;
 
         if (m_onCreate) m_onCreate(entity);
         return entity;
@@ -65,6 +54,26 @@ namespace ap
         m_idToHandle.erase(entity.GetComponent<GUIDComponent>().guid);
 
         m_reg.destroy(handle);
+    }
+
+    Entity Registry::Get(unsigned guid)
+    { 
+        return Get(m_idToHandle.at(guid));
+    }
+
+    Entity Registry::Get(entt::entity handle)
+    {
+        static auto createCb = [&](Entity handle, unsigned compID)
+        {
+            auto& cb = m_compData[compID].createComp;
+            if (cb) cb(handle);
+        };
+        static auto removeCb = [&](Entity handle, unsigned compID)
+        {
+            auto& cb = m_compData[compID].removeComp;
+            if (cb) cb(handle);
+        };
+        return Entity{ handle, m_reg, createCb, removeCb };
     }
 
     void Registry::HandlePacket(unsigned guid, Packet& packet)
