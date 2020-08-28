@@ -30,7 +30,7 @@ public:
 
     virtual void OnAttach() override final
     {
-        m_camera.GetCamera().transform.SetPosition(ap::Transform::GetWorldForward() * -10.f + ap::Transform::GetWorldUp() * 5.f);
+        m_camera.GetCamera().transform.SetPosition(ap::Transform::GetWorldForward() * 10.f + ap::Transform::GetWorldUp() * 5.f);
         m_camera.GetCamera().transform.LookAt(glm::vec3(0));
         auto mat = ap::PhysicsMaterial(0.5f, 0.5f, 0.5f);
 
@@ -75,7 +75,7 @@ public:
         static auto redTexture = ap::Texture2D::Create(1, 1);
         constexpr uint32_t color = 0xffffffff;
         constexpr uint32_t red = 0xff0000ff;
-        static const auto lightDir = glm::normalize(glm::vec3(0.1f, -1.f, 0.4f));
+        static const auto lightDir = glm::normalize(glm::vec3(0.1f, -1.f, -0.4f));
         shader->Bind();
         shader->SetVec3("aLightDir", glm::value_ptr(lightDir));
         shader->SetFloat("aAmbient", 0.2f);

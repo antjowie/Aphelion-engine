@@ -152,7 +152,11 @@ public:
         : m_cam(std::move(camera))
         , m_shader(ap::Shader::Create("res/shader/Voxel.glsl"))
         , m_texture(ap::ArrayTexture2D::Create(2,2,"res/texture.png"))
-    {}
+    {
+        static const auto lightDir = glm::normalize(glm::vec3(0.1f, -1.f, -0.4f));
+        m_shader->SetVec3("aLightDir", glm::value_ptr(lightDir));
+        m_shader->SetFloat("aAmbient", 0.5f);
+    }
 
     void operator() (ap::Scene& scene)
     {

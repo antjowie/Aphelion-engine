@@ -2,6 +2,7 @@
 
 FaceVertices GenerateFaceVertices(FaceDir dir, float x, float y, float z, float texIndex)
 {
+    // Pos3 Nor3 Tex2 Index1
     switch (dir)
     {
     case FaceDir::Top:

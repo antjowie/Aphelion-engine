@@ -3,7 +3,7 @@
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
-layout (location = 1) in vec2 aTex;
+layout (location = 2) in vec2 aTex;
 
 uniform mat4 aVP;
 uniform mat4 aTransform;
@@ -21,8 +21,8 @@ void main()
 #type fragment
 #version 450 core
 
-in vec3 normal;
 in vec2 tex;
+in vec3 normal;
 out vec4 finalColor;
 
 uniform vec3 aLightDir;

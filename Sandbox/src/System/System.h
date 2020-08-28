@@ -73,6 +73,10 @@ public:
         : m_cam(std::move(camera))
     {
         m_shader = ap::Shader::Create("res/shader/Voxel.glsl");
+        static const auto lightDir = glm::normalize(glm::vec3(0.1f, -1.f, -0.4f));
+        m_shader->Bind();
+        m_shader->SetVec3("aLightDir", glm::value_ptr(lightDir));
+        m_shader->SetFloat("aAmbient", 0.5f);
         //m_texture = ap::Texture2D::Create("res/image.png");
         m_texture = ap::ArrayTexture2D::Create(2,2,"res/texture.png");
 
@@ -113,6 +117,7 @@ public:
         reg.View<ap::Transform, Sprite>(
             [&](ap::Entity e, ap::Transform& t, Sprite& s)
         {
+            m_shader->Bind();
             ap::Renderer::Submit(m_shader,m_vao,t.GetWorldMatrix());
 
             // Tint player light blue

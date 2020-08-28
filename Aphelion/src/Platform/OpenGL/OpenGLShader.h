@@ -28,8 +28,9 @@ namespace ap
 
     private:
         void Compile(const std::unordered_map<unsigned, std::string>& shaders);
+        int GetUniformLocation(const char* name) const;
 
-        unsigned int m_id;
+        unsigned m_id;
         std::string m_name;
     };
 }

@@ -166,36 +166,48 @@ namespace ap
     { 
         glUseProgram(0); 
     }
+
+    int OpenGLShader::GetUniformLocation(const char* name) const
+    {
+        int loc = glGetUniformLocation(m_id, name);
+
+#ifdef AP_DEBUG
+        if(loc == -1)
+            AP_CORE_WARN("Shader {} can't find uniform {}", m_name, name);
+#endif 
+
+        return loc;
+    }
     
     void OpenGLShader::SetInt(const char* name, const int val) const
-    { 
-        glUniform1i(glGetUniformLocation(m_id, name), val); 
+    {
+        glProgramUniform1i(m_id, GetUniformLocation(name), val); 
     }
     void OpenGLShader::SetFloat(const char* name, const float val) const
     { 
-        glUniform1f(glGetUniformLocation(m_id, name), val); 
+        glProgramUniform1f(m_id, GetUniformLocation(name), val); 
     }
     void OpenGLShader::SetBool(const char* name, const bool val) const
     { 
-        glUniform1i(glGetUniformLocation(m_id, name), val); 
+        glProgramUniform1i(m_id, GetUniformLocation(name), val); 
     }
     void OpenGLShader::SetMat4(const char* name, const float* val) const
     { 
-        glUniformMatrix4fv(glGetUniformLocation(m_id, name), 1, GL_FALSE, val); 
+        glProgramUniformMatrix4fv(m_id, GetUniformLocation(name), 1, GL_FALSE, val); 
     }
     
     void OpenGLShader::SetVec2(const char* name, const float* val) const
     { 
-        glUniform2fv(glGetUniformLocation(m_id, name), 1, val); 
+        glProgramUniform2fv(m_id, GetUniformLocation(name), 1, val); 
     }
 
     void OpenGLShader::SetVec3(const char* name, const float* val) const
     { 
-        glUniform3fv(glGetUniformLocation(m_id, name), 1, val); 
+        glProgramUniform3fv(m_id, GetUniformLocation(name), 1, val); 
     }
 
     void OpenGLShader::SetVec4(const char* name, const float* val) const
     {
-        glUniform4fv(glGetUniformLocation(m_id, name), 1, val);
+        glProgramUniform4fv(m_id, GetUniformLocation(name), 1, val);
     }
 }
