@@ -62,7 +62,8 @@ void serialize(S& s, Sprite& o)
 inline void RegisterComponents()
 {
     ap::Registry::RegisterComponent<Player>();
-    ap::Registry::RegisterComponent<ap::Transform>();
+    //ap::Registry::RegisterComponent<ap::Transform>(
+    //    );
     ap::Registry::RegisterComponent<Sprite>();
     ap::Registry::RegisterComponent<Health>();
 }

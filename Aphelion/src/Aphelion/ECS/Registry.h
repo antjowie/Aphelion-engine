@@ -88,6 +88,7 @@ namespace ap
         using UnpackFunc = std::function<void(entt::registry& reg, entt::entity handle, Packet& packet)>;
         using UnpackAndReconcileFunc = std::function<bool(entt::registry& reg, entt::entity handle, Packet& packet)>;
 
+        /// EntityCb is also used for create and destroy component cb
         using EntityCb = std::function<void(Entity)>;
         
         struct CompData
@@ -96,8 +97,8 @@ namespace ap
             StampFunc stamp;
             UnpackFunc unpack;
             UnpackAndReconcileFunc unpackAndReconcile;
-            EntityCb createComp;
-            EntityCb removeComp;
+            EntityCb createCompCb;
+            EntityCb removeCompCb;
         };
 
     public:
@@ -140,14 +141,20 @@ namespace ap
          * (hopefully meaning that every machine allocates the same component ID). I have not however verified this.
          */
         template <typename T>
-        static void RegisterComponent()
+        static void RegisterComponent(EntityCb createCb = {}, EntityCb removeCb = {})
         {
             auto id = entt::type_info<T>::id();
             AP_CORE_ASSERT(m_compData.count(id) == 0, "Component has already been registered");
-            m_compData[id].stamp = StampFn<T>;
-            m_compData[id].unpack = UnpackFn<T>;
-            m_compData[id].unpackAndReconcile = UnpackAndReconcileFn<T>;
-            m_compData[id].name = entt::type_info<T>::name();
+            auto& data = m_compData[id];
+            data.stamp = StampFn<T>;
+            data.unpack = UnpackFn<T>;
+            data.unpackAndReconcile = UnpackAndReconcileFn<T>;
+            data.name = entt::type_info<T>::name();
+            data.createCompCb = createCb;
+            data.removeCompCb = removeCb;
+
+            if (data.createCompCb) AP_CORE_TRACE("Registered component create cb for {}", data.name);
+            if (data.removeCompCb) AP_CORE_TRACE("Registered component remove cb for {}", data.name);
         }
 
         void SetOnEntityDestroyCb(EntityCb cb)  { m_onCreate = cb; }

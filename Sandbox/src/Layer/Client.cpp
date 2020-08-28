@@ -34,11 +34,11 @@ void ClientLayer::OnAttach()
 #ifdef AP_DEBUG
     m_scene.SetOnEntityCreateCb([](ap::Entity entity)
     {
-        AP_INFO("Created {}", entity.GetComponent<ap::GUIDComponent>());
+        //AP_INFO("Created {}", entity.GetComponent<ap::GUIDComponent>());
     });
     m_scene.SetOnEntityDestroyCb([](ap::Entity entity)
     {
-        AP_WARN("Destroyed {}", entity.GetComponent<ap::GUIDComponent>());    
+        //AP_WARN("Destroyed {}", entity.GetComponent<ap::GUIDComponent>());    
     });
 #endif
 

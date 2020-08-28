@@ -104,7 +104,10 @@ void ForEach(const ChunkContainer& chunk, Callable& callable)
 inline void RegisterChunkComponents()
 {
     ap::Registry::RegisterComponent<ChunkDataComponent>();
-    ap::Registry::RegisterComponent<ChunkMeshComponent>();
+    ap::Registry::RegisterComponent<ChunkMeshComponent>(
+        [](ap::Entity e) { AP_TRACE("Create mesh CB"); },
+        [](ap::Entity e) { AP_TRACE("Remove mesh CB"); }
+    );
     ap::Registry::RegisterComponent<ChunkModifiedComponent>();
     ap::Registry::RegisterComponent<ChunkSpawnCooldownComponent>();
     ap::Registry::RegisterComponent<ChunkSpawnComponent>();

@@ -118,7 +118,7 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
     reg.View<ChunkDataComponent, ChunkModifiedComponent>(
         [&](ap::Entity e, ChunkDataComponent& chunk, ChunkModifiedComponent& modified)
     {
-        AP_TRACE("Building chunk {}", e.GetComponent<ap::GUIDComponent>());
+        //AP_TRACE("Building chunk {}", e.GetComponent<ap::GUIDComponent>());
 
         // Generate the chunk vao
         if(!e.HasComponent<ChunkMeshComponent>()) e.AddComponent<ChunkMeshComponent>();

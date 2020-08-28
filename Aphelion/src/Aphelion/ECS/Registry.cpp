@@ -65,13 +65,13 @@ namespace ap
     {
         static auto createCb = [&](Entity handle, unsigned compID)
         {
-            auto& cb = m_compData[compID].createComp;
-            if (cb) cb(handle);
+            auto& data = m_compData.at(compID);
+            if (data.createCompCb) data.createCompCb(handle);
         };
         static auto removeCb = [&](Entity handle, unsigned compID)
         {
-            auto& cb = m_compData[compID].removeComp;
-            if (cb) cb(handle);
+            auto& data = m_compData.at(compID);
+            if (data.removeCompCb) data.removeCompCb(handle);
         };
         return Entity{ handle, m_reg, createCb, removeCb };
     }
