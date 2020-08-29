@@ -16,6 +16,15 @@ namespace ap
         return targetIndex;
     }
 
+    Scene::Scene()
+        : m_physicsScene(PhysicsSceneDesc{})
+    {
+        for (size_t i = 0; i < maxSimulations; i++)
+        {
+            m_registries[i].SetScene(*this);
+        }
+    }
+
     Registry& Scene::GetRegistry(unsigned rollback)
     {
         return m_registries[GetSimulationIndex(m_currentSimulation,rollback)];
@@ -35,6 +44,8 @@ namespace ap
             m_currentSimulation = 0;
 
         // Execute simulation
+        m_physicsScene.Simulate(ts);
+
         for (auto& system : m_systems)
             system(*this);
     }
@@ -54,5 +65,35 @@ namespace ap
     {
         for(size_t i = 0; i < maxSimulations; i++)
             m_registries[i].SetOnEntityDestroyCb(cb);
+    }
+    
+    void Scene::HandleComponentCreate(Entity e, unsigned compID)
+    {
+        switch (compID)
+        {
+            case entt::type_info<PhysicsComponent>::id():
+            {
+                e.GetComponent<PhysicsComponent>().OnCreate(m_physicsScene, e.GetComponent<ap::GUIDComponent>());
+            }
+            break;
+            
+            default:
+            AP_CORE_ASSERT(false, "HandleComponentCreate is called but is not handled in the Scene Handle function");
+        }
+    }
+    
+    void Scene::HandleComponentRemove(Entity e, unsigned compID)
+    {
+        switch(compID)
+        {
+            case entt::type_info<PhysicsComponent>::id():
+            {
+                e.GetComponent<PhysicsComponent>().OnRemove();
+            }
+            break;
+            
+            default:
+            AP_CORE_ASSERT(false, "HandleComponentCreate is called but is not handled in the Scene Handle function");
+        }
     }
 }

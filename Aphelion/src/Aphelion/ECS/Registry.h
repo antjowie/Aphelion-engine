@@ -76,6 +76,8 @@ namespace ap
     template <typename... T>
     inline constexpr TypeList<T...> typeList{};
 
+    class APHELION_API Scene;
+
     /**
      * The registry stores entities and their components
      */
@@ -88,17 +90,21 @@ namespace ap
         using UnpackFunc = std::function<void(entt::registry& reg, entt::entity handle, Packet& packet)>;
         using UnpackAndReconcileFunc = std::function<bool(entt::registry& reg, entt::entity handle, Packet& packet)>;
 
-        /// EntityCb is also used for create and destroy component cb
         using EntityCb = std::function<void(Entity)>;
-        
+        /**
+         * We need the scene since physics component needs access to the physics scene
+         * which is stored inside scene. So we 
+         */
+        using ComponentCb = std::function<void(Scene&, Entity)>;
+
         struct CompData
         {
             std::string_view name;
             StampFunc stamp;
             UnpackFunc unpack;
             UnpackAndReconcileFunc unpackAndReconcile;
-            EntityCb createCompCb;
-            EntityCb removeCompCb;
+            ComponentCb createCompCb;
+            ComponentCb removeCompCb;
         };
 
     public:
@@ -115,7 +121,7 @@ namespace ap
         template<typename... Component, typename... Exclude, typename CB>
         void View(CB& callback, TypeList<Exclude...> = {}) {
             auto view = m_reg.view<Component...>(entt::exclude<Exclude...>);
-            auto cbWrap = [&](entt::entity entity, auto&... param) 
+            auto cbWrap = [&](entt::entity entity, auto&... param)
             { callback(Get(entity), param...); };
 
             view.each(cbWrap);
@@ -131,6 +137,7 @@ namespace ap
         void HandlePacket(unsigned guid, Packet& packet);
         bool HandleAndReconcilePacket(unsigned guid, Packet& packet);
         void Clone(Registry& from);
+        void SetScene(Scene& scene) { m_scene = &scene; }
 
         /**
          * Be sure to register components.
@@ -141,7 +148,7 @@ namespace ap
          * (hopefully meaning that every machine allocates the same component ID). I have not however verified this.
          */
         template <typename T>
-        static void RegisterComponent(EntityCb createCb = {}, EntityCb removeCb = {})
+        static void RegisterComponent(ComponentCb createCb = {}, ComponentCb removeCb = {})
         {
             auto id = entt::type_info<T>::id();
             AP_CORE_ASSERT(m_compData.count(id) == 0, "Component has already been registered");
@@ -168,6 +175,8 @@ namespace ap
     private:
         static std::unordered_map<entt::id_type, CompData> m_compData;
         static PRNG m_prng;
+
+        Scene* m_scene = nullptr;
 
         std::unordered_map<unsigned, entt::entity> m_idToHandle;
 

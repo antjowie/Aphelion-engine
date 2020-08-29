@@ -98,4 +98,14 @@ namespace ap
     {
         return m_type;
     }
+    
+    void RigidBody::SetUserData(void* data)
+    {
+        m_handle->userData = data;
+    }
+    
+    void* RigidBody::GetUserData()
+    {
+        return m_handle->userData;
+    }
 }

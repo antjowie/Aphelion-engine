@@ -122,6 +122,14 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
 
         // Generate the chunk vao
         if(!e.HasComponent<ChunkMeshComponent>()) e.AddComponent<ChunkMeshComponent>();
+
+        // TEMP
+        if (!e.HasComponent<ap::PhysicsComponent>()) e.AddComponent<ap::PhysicsComponent>();
+        auto& physics = e.GetComponent<ap::PhysicsComponent>();
+        
+        auto shape = ap::PhysicsShape(ap::PhysicsGeometry::CreateBox(chunkDimensions / 2u), ap::PhysicsMaterial(1.f, 1.f, 1.f));
+        physics.CreateStatic(shape, glm::translate(glm::identity<glm::mat4>(), chunk.pos + (glm::vec3)chunkDimensions / 2.f));
+
         auto& mesh = e.GetComponent<ChunkMeshComponent>();
         GenerateChunkMesh(chunk, mesh.vao);
 

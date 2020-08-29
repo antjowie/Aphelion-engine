@@ -7,20 +7,22 @@ namespace ap
     class Timestep;
 
     /**
-     * @brief A Scene (aka game world) hold our registry and versions of it.
+     * A Scene (aka game world) hold our registry and versions of it.
      * 
-     * @detail This is used to rollback the simulation for net features such as
+     * This is used to rollback the simulation for net features such as
      * server reconciliation, client prediction and interpolation
      *
      * TODO: Make the simulation multi-threaded
      */
-    class APHELION_API Scene
+    class APHELION_API Scene : public NonCopyable
     {
     public:
-        constexpr static unsigned maxSimulations = 256;
+        constexpr static unsigned maxSimulations = 256 / 4;
         using SystemFunc = std::function<void(Scene& scene)>;
 
     public:
+        Scene();
+
         Registry& GetRegistry(unsigned rollback = 0);
 
         unsigned GetSimulationCount() const { return m_simulationCount; }
@@ -29,8 +31,9 @@ namespace ap
         void Simulate(Timestep ts);
 
         /**
-         * @brief Register a system that this ECS should use
-         * @detail Registering systems allows us to simulate the world via one call.
+         * Register a system that this ECS should use
+         * 
+         * Registering systems allows us to simulate the world via one call.
          * This allows us to reconcile the world.
          *
          * @param system Must be a callable
@@ -45,11 +48,20 @@ namespace ap
 
         void ClearSystems();
 
+
         void SetOnEntityDestroyCb(Registry::EntityCb cb);
         void SetOnEntityCreateCb(Registry::EntityCb cb);
 
+        /**
+         * Called in the create/remove component callback if they need the scene
+         * An example is the physics component
+         */
+        void HandleComponentCreate(Entity e, unsigned compID);
+        void HandleComponentRemove(Entity e, unsigned compID);
+
     private:
         Registry m_registries[maxSimulations];
+        PhysicsScene m_physicsScene;
         unsigned m_currentSimulation = 0;
         unsigned m_simulationCount = 0;
 

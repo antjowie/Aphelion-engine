@@ -1,13 +1,16 @@
 #include "Aphelion/Core/Application.h"
 #include "Aphelion/Core/Time.h"
+#include "Aphelion/Core/ImGui/ImGuiLayer.h"
 
 #include "Aphelion/Renderer/Renderer.h"
 #include "Aphelion/Renderer/RenderCommand.h"
 
 #include "Aphelion/Net/ClientLayer.h"
 #include "Aphelion/Net/ServerLayer.h"
+
+#include "Aphelion/ECS/Component.h"
 #include "Aphelion/Physics/PhysicsLayer.h"
-#include "Aphelion/Core/ImGui/ImGuiLayer.h"
+
 
 #include <enet/enet.h>
 
@@ -22,21 +25,30 @@ namespace ap
         AP_CORE_ASSERT(!m_instance,"Can not create multiple Applications");
         m_instance = this;
 
-        int status = enet_initialize();
-        if (status == 0) AP_CORE_TRACE("Enet initialized");
-        else AP_CORE_ERROR("ENet failed to initialize with error code {}", status);
 
+        // Window
         m_window = Window::Create(props);
         m_window->SetEventCallback(AP_BIND_FN(Application::OnEvent));
         m_window->SetVSync(true);
 
+        // Renderer
         Renderer::Init();
         RenderCommand::SetClearColor(0.5f, 0.f, 0.5f, 1.f);
         
+        // GUI
         m_imguiLayer = new ImGuiLayer();
         m_layerStack.PushOverlay(m_imguiLayer);
 
+        // ECS
+        RegisterECSComponents();
+
+        // Physics
         m_layerStack.PushLayer(new PhysicsLayer());
+
+        // Net
+        int status = enet_initialize();
+        if (status == 0) AP_CORE_TRACE("Enet initialized");
+        else AP_CORE_ERROR("ENet failed to initialize with error code {}", status);
 
         auto clientLayer = new NetClientLayer();
         clientLayer->SetEventCB(AP_BIND_FN(Application::OnEvent));

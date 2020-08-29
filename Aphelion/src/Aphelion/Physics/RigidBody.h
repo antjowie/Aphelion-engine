@@ -53,6 +53,11 @@ namespace ap
         physx::PxRigidActor* GetHandle();
         RigidBodyType GetType() const;
 
+        void SetUserData(void* data);
+        void* GetUserData();
+
+        operator bool() const { return m_handle; }
+
     private:
         physx::PxRigidActor* m_handle;
         

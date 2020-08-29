@@ -11,7 +11,7 @@
 #include <bitsery/traits/array.h>
 
 /// IVec so that we can use it easily in calculations
-constexpr glm::vec<3,uint8_t> chunkDimensions {32,32,32};
+constexpr glm::uvec3 chunkDimensions {32,32,32};
 constexpr unsigned chunkCount = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
 /// TODO: Instead of using default alloc, create a ChunkAlloc
 //template <typename T>
@@ -105,8 +105,8 @@ inline void RegisterChunkComponents()
 {
     ap::Registry::RegisterComponent<ChunkDataComponent>();
     ap::Registry::RegisterComponent<ChunkMeshComponent>(
-        [](ap::Entity e) { AP_TRACE("Create mesh CB"); },
-        [](ap::Entity e) { AP_TRACE("Remove mesh CB"); }
+        [](ap::Scene& scene, ap::Entity e) { AP_TRACE("Create mesh CB");},
+        [](ap::Scene& scene, ap::Entity e) { AP_TRACE("Remove mesh CB");}
     );
     ap::Registry::RegisterComponent<ChunkModifiedComponent>();
     ap::Registry::RegisterComponent<ChunkSpawnCooldownComponent>();

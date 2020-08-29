@@ -12,7 +12,7 @@ namespace ap
 {
     struct PhysicsSceneDesc
     {
-        glm::vec3 gravity;
+        glm::vec3 gravity = glm::vec3(0, -9.81, 0);
     };
 
     /**

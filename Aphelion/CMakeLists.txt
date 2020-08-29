@@ -87,6 +87,7 @@ add_subdirectory(src/Aphelion/Renderer)
 add_library(
     Runtime
 
+    src/Aphelion/ECS/Component.cpp
     src/Aphelion/ECS/Component.h
     src/Aphelion/ECS/Entity.h
     src/Aphelion/ECS/Registry.cpp
