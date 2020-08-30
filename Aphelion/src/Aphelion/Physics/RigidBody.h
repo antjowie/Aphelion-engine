@@ -56,7 +56,8 @@ namespace ap
         void SetUserData(void* data);
         void* GetUserData();
 
-        operator bool() const { return m_handle; }
+        bool Valid() const { return m_handle; }
+        operator bool() const { return Valid(); }
 
     private:
         physx::PxRigidActor* m_handle;

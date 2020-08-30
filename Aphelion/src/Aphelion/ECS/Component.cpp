@@ -25,6 +25,7 @@ namespace ap
 
     void PhysicsComponent::CreateStatic(PhysicsShape& shape, const glm::mat4& transform)
     {
+        AP_CORE_ASSERT(m_scene, "The scene is a nullptr");
         OnRemove();
         m_rb = RigidBody::CreateStatic(shape, transform);
         // TODO: See if there is a way to do this without allocating.
@@ -34,6 +35,7 @@ namespace ap
     
     void PhysicsComponent::CreateDynamic(PhysicsShape& shape, float density, const glm::mat4& transform)
     {
+        AP_CORE_ASSERT(m_scene, "The scene is a nullptr");
         OnRemove();
         m_rb = RigidBody::CreateDynamic(shape, density, transform);
         m_rb.SetUserData(new int(m_guid));

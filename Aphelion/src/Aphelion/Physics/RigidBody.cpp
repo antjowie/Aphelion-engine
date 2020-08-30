@@ -91,21 +91,25 @@ namespace ap
 
     physx::PxRigidActor* RigidBody::GetHandle()
     {
+        AP_CORE_ASSERT(Valid(), "Rigidbody has no valid handle");
         return m_handle;
     }
     
     RigidBodyType RigidBody::GetType() const
     {
+        AP_CORE_ASSERT(Valid(), "Rigidbody has no valid handle");
         return m_type;
     }
     
     void RigidBody::SetUserData(void* data)
     {
+        AP_CORE_ASSERT(Valid(), "Rigidbody has no valid handle");
         m_handle->userData = data;
     }
     
     void* RigidBody::GetUserData()
     {
+        AP_CORE_ASSERT(Valid(), "Rigidbody has no valid handle");
         return m_handle->userData;
     }
 }
