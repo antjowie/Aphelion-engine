@@ -4,6 +4,21 @@ void GenerateChunk(ChunkDataComponent& chunk)
 {
     ForEach(chunk.chunk,[](BlockType& block, int x, int y, int z)
         {
+            if (x == 16 && z == 16)
+            {
+                if (y == 10)
+                    block = BlockType::Grass;
+
+                if (y == 6)
+                    block = BlockType::Dirt;
+
+                if (y == 3)
+                    block = BlockType::Stone;
+            }
+            else
+                block = BlockType::Air;
+            return;
+
             // TODO: Refactor to chunk strategy
             if(y > 25)
                 block = BlockType::Air;
