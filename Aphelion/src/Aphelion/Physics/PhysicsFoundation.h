@@ -28,6 +28,8 @@ namespace ap
         static bool Init(const PhysicsFoundationDesc& desc);
         static void Deinit();
 
+        static physx::PxCooking& GetCooking();
+
     private:
         bool m_isInitialized;
     };

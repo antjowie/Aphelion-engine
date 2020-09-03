@@ -1,4 +1,5 @@
-#include "PhysicsGeometry.h"
+#include "Aphelion/Physics/PhysicsGeometry.h"
+#include "Aphelion/Physics/PhysicsFoundation.h"
 
 namespace ap
 {
@@ -28,5 +29,37 @@ namespace ap
         // https://gameworksdocs.nvidia.com/PhysX/4.0/documentation/PhysXGuide/Manual/Geometry.html#boxes
         // TODO: Verify if x should be y in our case (to stay consistent with coordinate systems)
         return physx::PxGeometryHolder(physx::PxBoxGeometry(halfSize.x,halfSize.y,halfSize.z));
+    }
+    PhysicsGeometry PhysicsGeometry::CreateTriangleMesh(std::vector<glm::vec3>& vertices, std::vector<uint32_t>& indices, size_t stride = sizeof(glm::vec3))
+    {
+        // https://gameworksdocs.nvidia.com/PhysX/4.0/documentation/PhysXGuide/Manual/Geometry.html
+        using namespace physx;
+        PxCookingParams params(PxGetPhysics().getTolerancesScale());
+        // disable mesh cleaning - perform mesh validation on development configurations
+        params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
+        // disable edge precompute, edges are set for each triangle, slows contact generation
+        params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_ACTIVE_EDGES_PRECOMPUTE;
+        // lower hierarchy for internal mesh
+        params.midphaseDesc.mBVH33Desc.meshCookingHint = PxMeshCookingHint::eCOOKING_PERFORMANCE;
+        auto& cooking = ap::PhysicsFoundation::GetCooking();
+        cooking.setParams(params);
+
+        PxTriangleMeshDesc meshDesc;
+        meshDesc.points.count = vertices.size();
+        meshDesc.points.stride = stride;
+        meshDesc.points.data = vertices.data();
+
+        meshDesc.triangles.count = indices.size();
+        meshDesc.triangles.stride = 3 * sizeof(PxU32);
+        meshDesc.triangles.data = indices.data();;
+
+#ifdef AP_DEBUG
+        // mesh should be validated before cooked without the mesh cleaning
+        bool res = cooking.validateTriangleMesh(meshDesc);
+        AP_CORE_ASSERT(res, "Cooking mesh is invalid!");
+#endif
+
+        PxTriangleMesh* aTriangleMesh = cooking.createTriangleMesh(meshDesc,
+            PxGetPhysics().getPhysicsInsertionCallback());
     }
 }

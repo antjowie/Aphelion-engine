@@ -81,4 +81,9 @@ namespace ap
         allocatorCb = nullptr;
         errorCb = nullptr;
     }
+
+    physx::PxCooking& PhysicsFoundation::GetCooking()
+    {
+        return *cooking;
+    }
 }

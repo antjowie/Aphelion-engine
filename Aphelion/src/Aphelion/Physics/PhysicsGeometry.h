@@ -15,6 +15,7 @@ namespace ap
         static PhysicsGeometry CreatePlane();
         static PhysicsGeometry CreateSphere(float radius);
         static PhysicsGeometry CreateBox(const glm::vec3& halfSize);
+        static PhysicsGeometry CreateTriangleMesh(std::vector<glm::vec3>& vertices, std::vector<uint32_t>& indices, size_t stride = sizeof(glm::vec3));
 
     public:
         PhysicsGeometry(physx::PxGeometryHolder& geometry) : m_handle(geometry) {};
