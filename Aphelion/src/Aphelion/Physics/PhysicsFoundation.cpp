@@ -2,7 +2,7 @@
 #include "Aphelion/Physics/PhysicsFoundation.h"
 #include "Aphelion/Physics/PhysicsScene.h"
 
-#include <PxPhysicsAPI.h>
+//#include <PxPhysicsAPI.h>
 
 namespace ap
 {
@@ -10,6 +10,7 @@ namespace ap
 
     static PxFoundation* foundation = nullptr;
     static PxPhysics* physics = nullptr;
+    static PxCooking* cooking = nullptr;
     static PxPvd* pvd = nullptr;
 
     static PxAllocatorCallback* allocatorCb;
@@ -37,19 +38,25 @@ namespace ap
 
         desc.logCb ? errorCb = new ErrorCbWrapper(desc.logCb) : errorCb = new PxDefaultErrorCallback();
         foundation = PxCreateFoundation(PX_PHYSICS_VERSION, *allocatorCb, *errorCb);
+        AP_CORE_ASSERT(foundation, "PxCreateFoundation failed!");
 
         // Pvd support
         pvd = PxCreatePvd(*foundation);
-	    PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
+        AP_CORE_ASSERT(pvd, "PxCreatePvd failed!");
+        PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
 	    pvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
         physics = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, PxTolerancesScale(), true, pvd);
+        AP_CORE_ASSERT(physics, "PxCreatePhysics failed!");
 
         PhysicsSceneFactoryDesc sceneDesc;
         sceneDesc.cores = desc.cores;
         PhysicsSceneFactory::Init(sceneDesc);
 
-        return foundation && pvd && physics;
+        cooking = PxCreateCooking(PX_PHYSICS_VERSION, *foundation, physics->getTolerancesScale());
+        AP_CORE_ASSERT(cooking,"PxCreateCooking failed!");
+
+        return foundation && pvd && physics && cooking;
     }
 
     void PhysicsFoundation::Deinit()
@@ -61,6 +68,7 @@ namespace ap
         physics->release();
         pvd->release();
         foundation->release();
+        cooking->release();
 
         delete allocatorCb;
         delete errorCb;
@@ -68,14 +76,9 @@ namespace ap
         physics = nullptr;
         pvd = nullptr;
         foundation = nullptr;
+        cooking = nullptr;
 
         allocatorCb = nullptr;
         errorCb = nullptr;
     }
-
-    //PhysicsScene PhysicsFoundation::CreateScene()
-    //{
-    //    
-    //}
-
 }

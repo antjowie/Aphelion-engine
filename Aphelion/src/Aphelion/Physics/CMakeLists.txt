@@ -48,4 +48,5 @@ target_link_libraries(
     # PRIVATE
     PhysX::PhysXExtensions
     PhysX::PhysXCommon
+    PhysX::PhysXCooking
 )
