@@ -27,8 +27,13 @@ namespace ap
         virtual void Unbind() const override final;
 
         virtual void SetData(const void* data, uint32_t size) override final;
+        virtual const std::vector<float>& GetData() const override final;
 
     private:
+        uint32_t m_size; // NOTE: size is bytes, count is amount
+        mutable std::vector<float> m_data;
+        mutable bool m_dirty = true;
+
         unsigned m_id;
     };
 
@@ -42,9 +47,15 @@ namespace ap
         virtual void Bind() const override final;
         virtual void Unbind() const override final;
 
+        virtual const std::vector<uint32_t>& GetData() const override final;
+
         virtual uint32_t GetCount() const override final;
 
     private:
+        uint32_t m_size;
+        mutable std::vector<uint32_t> m_data;
+        mutable bool m_dirty = true;
+
         unsigned m_id;
         unsigned m_count;
     };

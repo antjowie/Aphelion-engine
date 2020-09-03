@@ -78,6 +78,7 @@ namespace ap
         virtual void Unbind() const = 0;
 
         virtual void SetData(const void* data, uint32_t size) = 0;
+		virtual const std::vector<float>& GetData() const = 0;
 
         virtual void AddElement(const BufferElement& elem);
         virtual const std::vector<BufferElement>& GetElements() const;
@@ -100,6 +101,7 @@ namespace ap
 
         virtual void Bind() const = 0;
         virtual void Unbind() const = 0;
+		virtual const std::vector<uint32_t>& GetData() const = 0;
 
         virtual uint32_t GetCount() const = 0;
 
