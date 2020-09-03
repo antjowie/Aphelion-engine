@@ -43,6 +43,16 @@ namespace ap
         m_handle->removeActor(*actor.GetHandle());
     }
 
+    void PhysicsScene::AddAggregate(PhysicsAggregate& aggregate)
+    {
+        m_handle->addAggregate(*aggregate.GetHandle());
+    }
+
+    void PhysicsScene::RemoveAggregate(PhysicsAggregate& aggregate)
+    {
+        m_handle->removeAggregate(*aggregate.GetHandle());
+    }
+
     void PhysicsScene::Simulate(float dt)
     {
         // Steps the simulation in steps if frame takes too long
@@ -79,6 +89,22 @@ namespace ap
         for (auto& actor : actors)
         {
             ret.push_back(RigidBody(actor));
+        }
+
+        return ret;
+    }
+
+    std::vector<PhysicsAggregate> PhysicsScene::GetAggregates() const
+    {
+        unsigned nbAggregates = m_handle->getNbAggregates();
+        std::vector<physx::PxAggregate*> aggregates(nbAggregates);
+        m_handle->getAggregates(reinterpret_cast<physx::PxAggregate**>(aggregates.data()), nbAggregates);
+
+        std::vector<PhysicsAggregate> ret;
+        ret.reserve(nbAggregates);
+        for (auto& aggregate : aggregates)
+        {
+            ret.push_back(PhysicsAggregate(aggregate));
         }
 
         return ret;

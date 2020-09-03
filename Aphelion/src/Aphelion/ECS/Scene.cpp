@@ -71,9 +71,9 @@ namespace ap
     {
         switch (compID)
         {
-            case entt::type_info<PhysicsComponent>::id():
+            case entt::type_info<RigidBodyComponent>::id():
             {
-                e.GetComponent<PhysicsComponent>().OnCreate(m_physicsScene, e.GetComponent<ap::GUIDComponent>());
+                e.GetComponent<RigidBodyComponent>().OnCreate(m_physicsScene, e.GetComponent<ap::GUIDComponent>());
             }
             break;
             
@@ -86,9 +86,9 @@ namespace ap
     {
         switch(compID)
         {
-            case entt::type_info<PhysicsComponent>::id():
+            case entt::type_info<RigidBodyComponent>::id():
             {
-                e.GetComponent<PhysicsComponent>().OnRemove();
+                e.GetComponent<RigidBodyComponent>().OnRemove();
             }
             break;
             

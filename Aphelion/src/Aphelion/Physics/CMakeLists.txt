@@ -3,11 +3,8 @@ cmake_minimum_required(VERSION 3.16)
 add_library(
     Physics
 
-    # Actor/RigidDynamic.cpp
-    # Actor/RigidDynamic.h
-    # Actor/RigidStatic.cpp
-    # Actor/RigidStatic.h
-
+    PhysicsAggregate.h
+    PhysicsAggregate.cpp
     PhysicsBounds.h
     PhysicsBounds.cpp
     PhysicsError.h

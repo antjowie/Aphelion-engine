@@ -33,7 +33,7 @@ namespace ap
     template<typename S> void serialize(S& s, GUIDComponent& v) { s.value4b(v.guid); }
     inline bool operator==(const GUIDComponent& lhs, const GUIDComponent& rhs) { return lhs.guid == rhs.guid; }
 
-    class APHELION_API PhysicsComponent
+    class APHELION_API RigidBodyComponent
     {
     public:
         /// These are called in Scene::HandleComponentCreate and Scene::HandleComponentRemove
@@ -41,8 +41,8 @@ namespace ap
         /// NOTE: not sure if this correctly deletes the integer
         void OnRemove() { if (m_rb) { delete reinterpret_cast<int*>(m_rb.GetUserData());  m_scene->RemoveActor(m_rb); } }
 
-        void CreateStatic(PhysicsShape& shape, const glm::mat4& transform);
-        void CreateDynamic(PhysicsShape& shape, float density, const glm::mat4& transform);
+        void CreateStatic(const glm::mat4& transform);
+        void CreateDynamic(float density, const glm::mat4& transform);
 
         RigidBody& GetRigidBody() { return m_rb; }
         const RigidBody& GetRigidBody() const { return m_rb; }
@@ -52,8 +52,8 @@ namespace ap
         RigidBody m_rb;
         PhysicsScene* m_scene = nullptr;
     };
-    template<typename S> void serialize(S& s, PhysicsComponent& v) { }
-    inline bool operator==(const PhysicsComponent& lhs, const PhysicsComponent& rhs) { return true; }
+    template<typename S> void serialize(S& s, RigidBodyComponent& v) { }
+    inline bool operator==(const RigidBodyComponent& lhs, const RigidBodyComponent& rhs) { return true; }
 
     void APHELION_API RegisterECSComponents();
 }

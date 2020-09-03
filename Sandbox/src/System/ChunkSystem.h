@@ -43,7 +43,7 @@ inline void ChunkStrategySystem(ap::Scene& scene)
 
 /// A client system that makes sure that we don't request the same chunk every frame
 /// Maybe we want to refactor the chunk system to not rely on the ECS or be one object
-inline void ChunkRequestCooldownSysten(ap::Scene& scene)
+inline void ChunkRequestCooldownSystem(ap::Scene& scene)
 {
     auto& reg = scene.GetRegistry();
 
@@ -90,9 +90,26 @@ inline void ChunkRequestResponseSystem(ap::Scene& scene)
             targetChunkEntity = scene.GetRegistry().Create();
             auto& chunkData = targetChunkEntity.AddComponent<ChunkDataComponent>();
 
+            // Generate block types
             chunkData.chunk.resize(chunkCount);
             chunkData.pos = spawnRequest.pos;
             GenerateChunk(chunkData);
+
+            //// Setup additional block data (rbs)
+            //auto material = ap::PhysicsMaterial(1.f, 1.f, 1.f);
+            //auto shape = ap::PhysicsShape(ap::PhysicsGeometry::CreateBox(glm::vec3(0.5f)), material);
+
+            //ForEach(chunkData.chunk, [&](const BlockType& block, int x, int y, int z)
+            //    {
+            //        // TODO: Use a block library
+            //        if (block != BlockType::Air)
+            //        {
+            //            auto t = glm::translate(glm::identity<glm::mat4>(), glm::vec3(x, y, z));
+            //            auto rb = ap::RigidBody::CreateStatic(shape, t);
+
+            //            chunkData.rbs.push_back(rb);
+            //        }
+            //    });
 
             targetChunkData = &chunkData;
         }
@@ -118,17 +135,39 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
     reg.View<ChunkDataComponent, ChunkModifiedComponent>(
         [&](ap::Entity e, ChunkDataComponent& chunk, ChunkModifiedComponent& modified)
     {
-        //AP_TRACE("Building chunk {}", e.GetComponent<ap::GUIDComponent>());
+        AP_TRACE("Building chunk {}", e.GetComponent<ap::GUIDComponent>());
 
         // Generate the chunk vao
-        if(!e.HasComponent<ChunkMeshComponent>()) e.AddComponent<ChunkMeshComponent>();
+        if (!e.HasComponent<ChunkMeshComponent>()) e.AddComponent<ChunkMeshComponent>();
 
         // TEMP
-        if (!e.HasComponent<ap::PhysicsComponent>()) e.AddComponent<ap::PhysicsComponent>();
-        auto& physics = e.GetComponent<ap::PhysicsComponent>();
+        else
+        {
+            e.RemoveComponent<ChunkModifiedComponent>();
+            return;
+        }
+        // Setup additional block data (rbs)
+        if (!e.HasComponent<ap::RigidBodyComponent>()) e.AddComponent<ap::RigidBodyComponent>();
+        auto& physics = e.GetComponent<ap::RigidBodyComponent>();
         
-        auto shape = ap::PhysicsShape(ap::PhysicsGeometry::CreateBox(chunkDimensions / 2u), ap::PhysicsMaterial(1.f, 1.f, 1.f));
-        physics.CreateStatic(shape, glm::translate(glm::identity<glm::mat4>(), chunk.pos + (glm::vec3)chunkDimensions / 2.f));
+        auto material = ap::PhysicsMaterial(1.f, 1.f, 1.f);
+        //auto shape = ap::PhysicsShape(ap::PhysicsGeometry::CreateBox(glm::vec3(0.5f)), material, t);
+        //physics.CreateStatic(glm::translate(glm::identity<glm::mat4>(), chunk.pos + (glm::vec3)chunkDimensions / 2.f));
+
+        ap::PhysicsAggregate aggregate = ap::PhysicsAggregate::Create(chunkCount, false);
+
+        ForEach(chunk.chunk, [&](const BlockType& block, int x, int y, int z)
+            {
+                // TODO: Use a block library
+                if (block == BlockType::Air)
+                {
+                    auto t = glm::translate(glm::identity<glm::mat4>(), glm::vec3(x, y, z));
+                    //auto 
+
+                    //physics.GetRigidBody().AddShape(shape);
+                }
+            });
+
 
         auto& mesh = e.GetComponent<ChunkMeshComponent>();
         GenerateChunkMesh(chunk, mesh.vao);

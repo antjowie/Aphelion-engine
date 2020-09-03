@@ -20,6 +20,9 @@ void ClientLayer::OnAttach()
     m_scene.RegisterSystem(ChunkMeshBuilderSystem);
     m_scene.RegisterSystem(ChunkRenderSystem(m_camera.GetCamera()));
 
+    m_camera.GetCamera().transform.SetPosition(glm::vec3(30, -5, 100));
+    //m_camera.GetCamera().transform.LookAt(glm::vec3(1, 0, 0));
+
     // TEMP: Spawn some nice chunks here
     auto& reg = m_scene.GetRegistry();
     for(int x = -2; x < 5; x++)

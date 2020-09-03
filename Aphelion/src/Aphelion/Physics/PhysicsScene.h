@@ -1,6 +1,7 @@
 #pragma once
 #include "Aphelion/Core/Core.h"
 #include "Aphelion/Physics/RigidBody.h"
+#include "Aphelion/Physics/PhysicsAggregate.h"
 #include "Aphelion/Physics/PhysicsQuery.h"
 
 namespace physx
@@ -28,6 +29,9 @@ namespace ap
 
         void AddActor(RigidBody& actor);
         void RemoveActor(RigidBody& actor);
+        void AddAggregate(PhysicsAggregate& aggregate);
+        void RemoveAggregate(PhysicsAggregate& aggregate);
+
         void Simulate(float dt);
 
         /**
@@ -36,6 +40,7 @@ namespace ap
         PhysicsRaycastHit Raycast(const glm::vec3& origin, const glm::vec3& dir, float distance);
 
         std::vector<RigidBody> GetActors(RigidBodyType mask = RigidBodyType::AllMask) const;
+        std::vector<PhysicsAggregate> GetAggregates() const;
 
     private:
         PhysicsSceneDesc m_desc;

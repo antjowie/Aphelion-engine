@@ -12,6 +12,12 @@ namespace ap
                 *shape.GetHandle()));
     }
 
+    RigidBody RigidBody::CreateStatic(const glm::mat4& transform)
+    {
+        return RigidBody(PxGetPhysics().createRigidStatic(
+                physx::PxTransform(ap::MakeMat4(transform))));
+    }
+
     RigidBody RigidBody::CreateDynamic(PhysicsShape& shape, float density, const glm::mat4& transform)
     {
         return RigidBody(
@@ -20,6 +26,15 @@ namespace ap
                 physx::PxTransform(ap::MakeMat4(transform)),
                 *shape.GetHandle(),
                 density));
+    }
+
+    RigidBody RigidBody::CreateDynamic(float density, const glm::mat4& transform)
+    {
+        auto rb = PxGetPhysics().createRigidDynamic(
+            physx::PxTransform(ap::MakeMat4(transform)));
+
+        physx::PxRigidBodyExt::updateMassAndInertia(*rb, density);
+        return RigidBody(rb);
     }
 
     RigidBody::RigidBody(physx::PxRigidActor* actor, bool creator)
@@ -57,6 +72,16 @@ namespace ap
     PhysicsBounds RigidBody::GetWorldBounds() const
     {
         return m_handle->getWorldBounds();
+    }
+
+    void RigidBody::AddShape(PhysicsShape& shape)
+    {
+        m_handle->attachShape(*shape.GetHandle());
+    }
+
+    void RigidBody::RemoveShape(PhysicsShape& shape)
+    {
+        m_handle->detachShape(*shape.GetHandle());
     }
 
     std::vector<PhysicsShape> RigidBody::GetShapes() const

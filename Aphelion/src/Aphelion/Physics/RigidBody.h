@@ -27,7 +27,9 @@ namespace ap
     {
     public:
         static RigidBody CreateStatic(PhysicsShape& shape, const glm::mat4& transform);
+        static RigidBody CreateStatic(const glm::mat4& transform);
         static RigidBody CreateDynamic(PhysicsShape& shape, float density, const glm::mat4& transform);
+        static RigidBody CreateDynamic(float density, const glm::mat4& transform);
 
     public:
         RigidBody(physx::PxRigidActor* actor, bool creator = false);
@@ -37,6 +39,8 @@ namespace ap
         glm::mat4 GetWorldTransform() const;
         PhysicsBounds GetWorldBounds() const;
 
+        void AddShape(PhysicsShape& shape);
+        void RemoveShape(PhysicsShape& shape);
         std::vector<PhysicsShape> GetShapes() const;
         bool IsSleeping() const;
 
