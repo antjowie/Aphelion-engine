@@ -19,6 +19,8 @@ void main()
 #type fragment
 #version 450 core
 
+uniform vec4 aColor = vec4(1);
+
 in vec2 tex;
 out vec4 color;
 
@@ -26,5 +28,5 @@ uniform sampler2D textureSampler;
 
 void main()
 {
-    color = texture(textureSampler,tex);
+    color = texture(textureSampler,tex) * aColor;
 }

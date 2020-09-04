@@ -4,15 +4,15 @@ void GenerateChunk(ChunkDataComponent& chunk)
 {
     ForEach(chunk.chunk,[](BlockType& block, int x, int y, int z)
         {
-            if (x == 16 && z == 16)
+            if (x == 0 && z == 0)
             {
-                if (y == 10)
+                if (y == 4)
                     block = BlockType::Grass;
 
-                if (y == 6)
+                if (y == 2)
                     block = BlockType::Dirt;
 
-                if (y == 3)
+                if (y == 0)
                     block = BlockType::Stone;
             }
             else
