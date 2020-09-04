@@ -4,6 +4,7 @@
 #include "Component/ChunkComponent.h"
 #include "System/System.h"
 #include "System/ChunkSystem.h"
+#include "System/PlayerSystem.h"
 
 #include "Aphelion/Core/Application.h"
 #include "Aphelion/Core/Event/NetEvent.h"
@@ -19,6 +20,8 @@ void ClientLayer::OnAttach()
     m_scene.RegisterSystem(ChunkStrategySystem);
     m_scene.RegisterSystem(ChunkMeshBuilderSystem);
     m_scene.RegisterSystem(ChunkRenderSystem(m_camera.GetCamera()));
+
+    m_scene.RegisterSystem(PlayerView);
 
     m_camera.GetCamera().transform.SetPosition(glm::vec3(30, -5, 100));
     //m_camera.GetCamera().transform.LookAt(glm::vec3(1, 0, 0));
@@ -144,6 +147,9 @@ void ClientLayer::OnGuiRender()
 {
     if (ImGui::Begin("Stats"))
     {
+
+
+
         if(ImGui::CollapsingHeader("Client"))
         {
             DrawSceneStats(m_scene);
@@ -151,6 +157,28 @@ void ClientLayer::OnGuiRender()
             static int tick = 60;
             ImGui::SliderInt("Tickrate", &tick, 1, 200);
             ap::NetClientLayer::m_config.rate = 1.f / (float)tick;
+
+#ifdef AP_DEBUG
+            if (ImGui::CollapsingHeader("Inspector"))
+            {
+                const auto& entities = m_scene.GetRegistry().GetEntities();
+                int i = 0;
+                for (auto e : entities)
+                {
+                    const auto& name = e.GetComponent<ap::TagComponent>().tag;
+
+                    if (ImGui::TreeNode((void*)(intptr_t)i, "%s", name.empty() ? "Entity" : name.c_str()))
+                    {
+                        ImGui::Text("blah blah");
+                        ImGui::SameLine();
+                        if (ImGui::SmallButton("button")) {}
+                        ImGui::TreePop();
+                    }
+                    ++i;
+                }
+            }
+
+#endif // AP_DEBUG
         }
         ImGui::SliderFloat("Movespeed", &movespeed, 0.f, 5.f);
         ImGui::End();

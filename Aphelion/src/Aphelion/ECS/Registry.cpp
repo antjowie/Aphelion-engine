@@ -76,6 +76,17 @@ namespace ap
         return Entity{ handle, m_reg, createCb, removeCb };
     }
 
+    std::vector<Entity> Registry::GetEntities()
+    {
+        std::vector<Entity> entities;
+        for (auto guid : m_idToHandle)
+        {
+            entities.push_back(Get(guid.first));
+        }
+        
+        return entities;
+    }
+
     void Registry::HandlePacket(unsigned guid, Packet& packet)
     {
         //m_compData[compID].unpack(m_reg, entity, packet);

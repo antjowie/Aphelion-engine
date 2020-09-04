@@ -29,6 +29,7 @@ namespace ap
         unsigned GetCurrentSimulationIndex() const { return m_currentSimulation; }
 
         void Simulate(Timestep ts);
+        std::vector<std::pair<Entity,PhysicsRaycastHit>> Raycast(const glm::vec3& origin, const glm::vec3& dir, float distance);
 
         /**
          * Register a system that this ECS should use

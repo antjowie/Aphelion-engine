@@ -112,11 +112,13 @@ namespace ap
         /// Used when recreating an existing entity (from another source such as network for example)
         Entity Create(unsigned guid, const std::string& tag = {});
         void Destroy(Entity entity);
+
         Entity Get(unsigned guid);
         Entity Get(entt::entity handle);
         bool Has(unsigned guid) const { return m_idToHandle.count(guid) == 1; }
 
         size_t Count() const { return m_reg.size(); }
+        std::vector<Entity> GetEntities();
 
         template<typename... Component, typename... Exclude, typename CB>
         void View(CB& callback, TypeList<Exclude...> = {}) {
@@ -168,7 +170,7 @@ namespace ap
         void SetOnEntityCreateCb(EntityCb cb) { m_onDestroy = cb; }
 
 #ifdef AP_DEBUG
-        // Should be used ONLY for debugging purposes
+        // This map contains the data of components such as their name, their stamp and clone function
         static std::unordered_map<entt::id_type, CompData>& GetComponentData() { return m_compData; }
 #endif
 

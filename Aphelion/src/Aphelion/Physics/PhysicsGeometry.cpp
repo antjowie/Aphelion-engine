@@ -56,7 +56,7 @@ namespace ap
         meshDesc.points.stride = stride;
         meshDesc.points.data = vertices.data();
 
-        meshDesc.triangles.count = indices.size();
+        meshDesc.triangles.count = indices.size() / 3;
         meshDesc.triangles.stride = 3 * sizeof(PxU32);
         meshDesc.triangles.data = indices.data();
 

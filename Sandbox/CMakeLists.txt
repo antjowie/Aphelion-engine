@@ -23,6 +23,7 @@ add_executable(Sandbox
 
     src/System/ChunkSystem.cpp
     src/System/ChunkSystem.h
+    src/System/PlayerSystem.h
     src/System/System.h
 
     src/Entry.cpp

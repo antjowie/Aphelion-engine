@@ -49,6 +49,20 @@ namespace ap
         for (auto& system : m_systems)
             system(*this);
     }
+
+    std::vector<std::pair<Entity, PhysicsRaycastHit>> Scene::Raycast(const glm::vec3& origin, const glm::vec3& dir, float distance)
+    {
+        auto hit = m_physicsScene.Raycast(origin, dir, distance);
+        
+        // TODO: This always returns one hit
+        std::vector<std::pair<Entity,PhysicsRaycastHit>> vec;
+        if (hit)
+        {
+            vec.emplace_back(GetRegistry(0).Get(*reinterpret_cast<unsigned*>(hit.rb.GetUserData())), hit);
+        }
+
+        return vec;
+    }
     
     void Scene::ClearSystems()
     {

@@ -36,6 +36,6 @@ namespace ap
         virtual void OnDetach() override final;
         //virtual void OnEvent(Event& event) override final;
         //virtual void OnUpdate() override final;
-        //virtual void OnGuiRender() override final;
+        virtual void OnGuiRender() override final;
     };
 }

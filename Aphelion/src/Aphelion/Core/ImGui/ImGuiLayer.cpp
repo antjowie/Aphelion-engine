@@ -90,9 +90,9 @@ namespace ap
 		ImGui::DestroyContext();
     }
 
-    //void ImGuiLayer::OnGuiRender()
-    //{
-    //    static bool show = true;
-    //    ImGui::ShowDemoWindow(&show);
-    //}
+    void ImGuiLayer::OnGuiRender()
+    {
+        static bool show = true;
+        ImGui::ShowDemoWindow(&show);
+    }
 }
