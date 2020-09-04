@@ -168,10 +168,12 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
                 vbo->GetData(),
                 mesh.vao->GetIndexBuffer()->GetData(),
                 stride),
-                material);
-        physics.CreateStatic(glm::translate(glm::identity<glm::mat4>(), chunk.pos + (glm::vec3)chunkDimensions / 2.f));
+                material/*,
+                glm::translate(glm::identity<glm::mat4>(), -chunk.pos)*/);
+        physics.CreateStatic(glm::translate(glm::identity<glm::mat4>(), chunk.pos /*+ (glm::vec3)chunkDimensions / 2.f*/));
         physics.GetRigidBody().AddShape(shape);
 
+        e.GetComponent<ap::TagComponent>().tag = "Chunk";
         // We only do one chunk per frame for now
         e.RemoveComponent<ChunkModifiedComponent>();
         //e.AddComponent<ChunkSpawnCooldownComponent>();

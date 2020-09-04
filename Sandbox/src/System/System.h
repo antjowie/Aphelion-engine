@@ -14,10 +14,10 @@ static float movespeed = 1.f;
 //inline void InputSystem(ap::Scene& scene)
 //{
 //    auto& reg = scene.GetRegistry();
-//    auto view = reg.Get().view<ap::Transform, Player>();
+//    auto view = reg.Get().view<ap::TransformComponent, Player>();
 //    for (auto& e : view)
 //    {
-//        auto& t = view.get<ap::Transform>(e);
+//        auto& t = view.get<ap::TransformComponent>(e);
 //        
 //        const auto speed = movespeed;
 //        glm::vec2 offset(0.f);
@@ -42,10 +42,10 @@ public:
     {
         auto& reg = scene.GetRegistry();
 
-        reg.View<ap::Transform, Player, ap::GUIDComponent>(
-            [&](ap::Entity e, ap::Transform& t, Player&, ap::GUIDComponent& guid)
+        reg.View<ap::TransformComponent, Player, ap::GUIDComponent>(
+            [&](ap::Entity e, ap::TransformComponent& t, Player&, ap::GUIDComponent& guid)
         {
-            t = m_cam.get().transform;
+            t.t = m_cam.get().transform;
             auto packet = ap::Serialize(t, guid);
             ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(packet));
         });
@@ -107,18 +107,18 @@ public:
     void operator() (ap::Scene& scene)
     {
         auto& reg = scene.GetRegistry();
-        //auto view = reg.Get().view<ap::Transform, Sprite>();
+        //auto view = reg.Get().view<ap::TransformComponent, Sprite>();
 
         m_texture->Bind();
 
         // TODO: Move BeginScene to Layer
         ap::Renderer::BeginScene(m_cam);
                
-        reg.View<ap::Transform, Sprite>(
-            [&](ap::Entity e, ap::Transform& t, Sprite& s)
+        reg.View<ap::TransformComponent, Sprite>(
+            [&](ap::Entity e, ap::TransformComponent& t, Sprite& s)
         {
             m_shader->Bind();
-            ap::Renderer::Submit(m_shader,m_vao,t.GetWorldMatrix());
+            ap::Renderer::Submit(m_shader,m_vao,t.t.GetWorldMatrix());
 
             // Tint player light blue
             //if (reg.Get().has<Player>(e)) data.color = glm::vec4(0.7f, 0.7f, 1.f, 1.f);

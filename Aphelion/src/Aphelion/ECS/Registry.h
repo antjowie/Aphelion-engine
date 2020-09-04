@@ -172,6 +172,7 @@ namespace ap
 #ifdef AP_DEBUG
         // This map contains the data of components such as their name, their stamp and clone function
         static std::unordered_map<entt::id_type, CompData>& GetComponentData() { return m_compData; }
+        entt::registry& GetHandle() { return m_reg; }
 #endif
 
     private:

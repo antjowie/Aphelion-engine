@@ -18,12 +18,24 @@ inline void PlayerView(ap::Scene& scene)
     ap::Renderer2D::Submit(data);
     ap::Renderer2D::EndScene();
 
+    //auto& handle = reg.GetHandle();
+    //auto view = handle.view<ap::Transform, ap::GUIDComponent>();
+    //AP_TRACE(view.size());
+    //AP_INFO(handle.size());
+
+    //reg.View<ap::TransformComponent, ap::GUIDComponent>(
+    //    [&](ap::Entity e, ap::TransformComponent& chunk, ap::GUIDComponent& mesh)
+    //    {
+    //        //AP_TRACE("OOF");
+    //    }
+    //);
+
     // Do a raycast from the player
-    reg.View<ap::Transform, Player, ap::GUIDComponent>(
-        [&](ap::Entity e, ap::Transform& t, Player&, ap::GUIDComponent& guid)
+    reg.View<ap::TransformComponent, Player, ap::GUIDComponent>(
+        [&](ap::Entity e, ap::TransformComponent& t, Player&, ap::GUIDComponent& guid)
         {
-            const auto& orig = t.GetPosition();
-            const auto& dir = t.GetForward();
+            const auto& orig = t.t.GetPosition();
+            const auto& dir = -t.t.GetForward(); // Camera faces opposite of view
             const auto& distance = 10.f;
             
             auto hits = scene.Raycast(orig, dir, distance);
