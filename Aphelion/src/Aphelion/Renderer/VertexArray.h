@@ -20,6 +20,7 @@ namespace ap
         virtual void SetIndexBuffer(const std::shared_ptr<IndexBuffer>& buffer) = 0;
 
         virtual VertexBufferRef GetVertexBuffer(unsigned index) = 0;
+        virtual const VertexBufferRef& GetVertexBuffer(unsigned index) const = 0;
 
         virtual const std::shared_ptr<IndexBuffer>& GetIndexBuffer() const = 0;
 

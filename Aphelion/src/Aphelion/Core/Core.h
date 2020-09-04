@@ -73,8 +73,8 @@
  * stop execution of the project if failed
  */
 #if defined(AP_DEBUG) || defined(KEEP_ASSERT)
-    #define AP_ASSERT(x, msg) { if(!(x)) { AP_ERROR("Assertion Failed: {0}", msg); __debugbreak(); } }
-    #define AP_CORE_ASSERT(x, msg) { if(!(x)) { AP_CORE_ERROR("Assertion Failed: {0}", msg); __debugbreak(); } }
+    #define AP_ASSERT(x, msg) { if(!(x)) { AP_ERROR("Assertion Failed: {0}", msg); ap::Log::GetClientLogger()->flush(); __debugbreak(); } }
+    #define AP_CORE_ASSERT(x, msg) { if(!(x)) { AP_CORE_ERROR("Assertion Failed: {0}", msg); ap::Log::GetCoreLogger()->flush(); __debugbreak(); } }
     #define AP_VERIFY(x, msg) { AP_ASSERT(x,msg); }
     #define AP_CORE_VERIFY(x, msg) { AP_CORE_ASSERT(x,msg); } 
 #else

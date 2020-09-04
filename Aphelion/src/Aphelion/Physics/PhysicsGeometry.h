@@ -15,7 +15,15 @@ namespace ap
         static PhysicsGeometry CreatePlane();
         static PhysicsGeometry CreateSphere(float radius);
         static PhysicsGeometry CreateBox(const glm::vec3& halfSize);
-        static PhysicsGeometry CreateTriangleMesh(std::vector<glm::vec3>& vertices, std::vector<uint32_t>& indices, size_t stride = sizeof(glm::vec3));
+
+        /**
+         * It is assumed that the vertex positions are adjacent in memory.
+         * If you use an interleaved buffer, specify the correct stride along with it
+         */
+        static PhysicsGeometry CreateTriangleMesh(
+            const std::vector<float>& vertices, 
+            const std::vector<uint32_t>& indices, 
+            size_t stride = sizeof(glm::vec3));
 
     public:
         PhysicsGeometry(physx::PxGeometryHolder& geometry) : m_handle(geometry) {};

@@ -5,6 +5,11 @@
 
 #include <functional>
 
+namespace physx
+{
+    class APHELION_API PxCooking;
+}
+
 namespace ap
 {
     struct PhysicsFoundationDesc

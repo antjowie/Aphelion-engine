@@ -85,6 +85,11 @@ namespace ap
         return m_buffers[index];
     }
 
+    const VertexBufferRef& OpenGLVertexArray::GetVertexBuffer(unsigned index) const
+    {
+        return m_buffers[index];
+    }
+
     const std::shared_ptr<IndexBuffer>& OpenGLVertexArray::GetIndexBuffer() const
     {
         return m_indexBuffer;

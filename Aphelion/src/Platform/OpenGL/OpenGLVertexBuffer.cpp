@@ -57,7 +57,8 @@ namespace ap
         {
             m_dirty = false;
             m_data.clear();
-            m_data.reserve(m_size / sizeof(float));
+            // We have to use resize or else the vector size var doesn't get updated
+            m_data.resize(m_size / sizeof(float));
 
             // Get data from GPU
             glGetNamedBufferSubData(m_id, 0, m_size, m_data.data());
@@ -72,11 +73,12 @@ namespace ap
     OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32_t* indices, uint32_t count)
         : m_count(count)
     {
-        glGenBuffers(1, &m_id);
+        //glGenBuffers(1, &m_id);
+        glCreateBuffers(1, &m_id);
         //Bind();
-        m_dirty = true;
         m_size = sizeof(uint32_t) * count;
         glNamedBufferData(m_id, m_size, indices, GL_STATIC_DRAW);
+        m_dirty = true;
     }
 
     OpenGLIndexBuffer::~OpenGLIndexBuffer()
@@ -100,7 +102,7 @@ namespace ap
         {
             m_dirty = false;
             m_data.clear();
-            m_data.reserve(m_size / sizeof(uint32_t));
+            m_data.resize(m_size / sizeof(uint32_t));
 
             // Get data from GPU
             glGetNamedBufferSubData(m_id, 0, m_size, m_data.data());

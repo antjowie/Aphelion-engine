@@ -137,40 +137,40 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
     {
         AP_TRACE("Building chunk {}", e.GetComponent<ap::GUIDComponent>());
 
+
         // Generate the chunk vao
         if (!e.HasComponent<ChunkMeshComponent>()) e.AddComponent<ChunkMeshComponent>();
-
-        // TEMP
+        // TEMP: Remove this so that chunks can be rebuilt
         else
         {
             e.RemoveComponent<ChunkModifiedComponent>();
             return;
         }
-        // Setup additional block data (rbs)
-        if (!e.HasComponent<ap::RigidBodyComponent>()) e.AddComponent<ap::RigidBodyComponent>();
-        auto& physics = e.GetComponent<ap::RigidBodyComponent>();
-        
-        auto material = ap::PhysicsMaterial(1.f, 1.f, 1.f);
-        //auto shape = ap::PhysicsShape(ap::PhysicsGeometry::CreateBox(glm::vec3(0.5f)), material, t);
-        //physics.CreateStatic(glm::translate(glm::identity<glm::mat4>(), chunk.pos + (glm::vec3)chunkDimensions / 2.f));
-
-        ap::PhysicsAggregate aggregate = ap::PhysicsAggregate::Create(chunkCount, false);
-
-        ForEach(chunk.chunk, [&](const BlockType& block, int x, int y, int z)
-            {
-                // TODO: Use a block library
-                if (block == BlockType::Air)
-                {
-                    auto t = glm::translate(glm::identity<glm::mat4>(), glm::vec3(x, y, z));
-                    //auto 
-
-                    //physics.GetRigidBody().AddShape(shape);
-                }
-            });
 
 
         auto& mesh = e.GetComponent<ChunkMeshComponent>();
         GenerateChunkMesh(chunk, mesh.vao);
+
+        // Generate rigid body
+        if (!e.HasComponent<ap::RigidBodyComponent>()) e.AddComponent<ap::RigidBodyComponent>();
+        auto& physics = e.GetComponent<ap::RigidBodyComponent>();
+
+        // Calculate stride of vbo
+        auto& vbo = mesh.vao->GetVertexBuffer(0);
+        auto& elements = vbo->GetElements();
+        unsigned stride = 0;
+        for (const auto& elem : elements)
+            stride += elem.size;
+
+        auto material = ap::PhysicsMaterial(1.f, 1.f, 1.f);
+        auto shape = ap::PhysicsShape(
+            ap::PhysicsGeometry::CreateTriangleMesh(
+                vbo->GetData(),
+                mesh.vao->GetIndexBuffer()->GetData(),
+                stride),
+                material);
+        physics.CreateStatic(glm::translate(glm::identity<glm::mat4>(), chunk.pos + (glm::vec3)chunkDimensions / 2.f));
+        physics.GetRigidBody().AddShape(shape);
 
         // We only do one chunk per frame for now
         e.RemoveComponent<ChunkModifiedComponent>();

@@ -44,12 +44,13 @@ void GenerateChunkMesh(const ChunkDataComponent& chunk, ap::VertexArrayRef& vao)
     //float chunkData[chunkElemCount];
 
     unsigned elemIndex = 0;
+    unsigned blockCount = 0;
     // Just generate every block in the chunk
     ForEach(chunk.chunk,[&](const BlockType& block, int x, int y, int z)
         {
+            if(block == BlockType::Air) return;
             for(int i = 0; i < FaceDir::Count; i++)
             {
-                if(block == BlockType::Air) continue;
 
                 auto vertices = GenerateFaceVertices(FaceDir(i),x,y,z,BlockLibrary::GetBlockData(block).texIndices[i]);
                 memcpy_s(
@@ -60,6 +61,7 @@ void GenerateChunkMesh(const ChunkDataComponent& chunk, ap::VertexArrayRef& vao)
                     );
                 elemIndex += faceElemCount;
             }
+            blockCount++;
         });
 
     // First time we generate this chunk
@@ -76,5 +78,5 @@ void GenerateChunkMesh(const ChunkDataComponent& chunk, ap::VertexArrayRef& vao)
     auto vbo = vao->GetVertexBuffer(0);
     vbo->SetData(chunkData.get(),elemIndex * sizeof(float));
 
-    vao->SetIndexBuffer(GenerateIndices(chunkCount*6u));
+    vao->SetIndexBuffer(GenerateIndices(blockCount*6u));
 }

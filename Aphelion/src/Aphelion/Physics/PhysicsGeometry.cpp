@@ -30,36 +30,47 @@ namespace ap
         // TODO: Verify if x should be y in our case (to stay consistent with coordinate systems)
         return physx::PxGeometryHolder(physx::PxBoxGeometry(halfSize.x,halfSize.y,halfSize.z));
     }
-    PhysicsGeometry PhysicsGeometry::CreateTriangleMesh(std::vector<glm::vec3>& vertices, std::vector<uint32_t>& indices, size_t stride = sizeof(glm::vec3))
+    PhysicsGeometry PhysicsGeometry::CreateTriangleMesh(
+        const std::vector<float>& vertices, 
+        const std::vector<uint32_t>& indices, 
+        size_t stride)
     {
         // https://gameworksdocs.nvidia.com/PhysX/4.0/documentation/PhysXGuide/Manual/Geometry.html
         using namespace physx;
         PxCookingParams params(PxGetPhysics().getTolerancesScale());
         // disable mesh cleaning - perform mesh validation on development configurations
-        params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
+        //params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
         // disable edge precompute, edges are set for each triangle, slows contact generation
-        params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_ACTIVE_EDGES_PRECOMPUTE;
-        // lower hierarchy for internal mesh
-        params.midphaseDesc.mBVH33Desc.meshCookingHint = PxMeshCookingHint::eCOOKING_PERFORMANCE;
+        //params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_ACTIVE_EDGES_PRECOMPUTE;
+        params.meshPreprocessParams = PxMeshPreprocessingFlag::eFORCE_32BIT_INDICES;
+        params.meshPreprocessParams |= PxMeshPreprocessingFlag::eWELD_VERTICES;
+        params.meshWeldTolerance = 1e-4f;
+            // lower hierarchy for internal mesh
+        //params.midphaseDesc.mBVH33Desc.meshCookingHint = PxMeshCookingHint::eCOOKING_PERFORMANCE;
         auto& cooking = ap::PhysicsFoundation::GetCooking();
         cooking.setParams(params);
 
         PxTriangleMeshDesc meshDesc;
-        meshDesc.points.count = vertices.size();
+        // The points count refers to the amount of vertices, not the amount of elements
+        meshDesc.points.count = vertices.size() / (stride / sizeof(float));
         meshDesc.points.stride = stride;
         meshDesc.points.data = vertices.data();
 
         meshDesc.triangles.count = indices.size();
         meshDesc.triangles.stride = 3 * sizeof(PxU32);
-        meshDesc.triangles.data = indices.data();;
+        meshDesc.triangles.data = indices.data();
 
-#ifdef AP_DEBUG
-        // mesh should be validated before cooked without the mesh cleaning
         bool res = cooking.validateTriangleMesh(meshDesc);
-        AP_CORE_ASSERT(res, "Cooking mesh is invalid!");
-#endif
+        //ap::Log::GetCoreLogger()->flush();
+        //AP_CORE_TRACE("Verified mesh");
+        //AP_CORE_ASSERT(res, "Cooking mesh is invalid!");
 
-        PxTriangleMesh* aTriangleMesh = cooking.createTriangleMesh(meshDesc,
+        // TODO: Verify if we need to delete this mesh
+        PxTriangleMesh* mesh = cooking.createTriangleMesh(meshDesc,
             PxGetPhysics().getPhysicsInsertionCallback());
+
+        PxTriangleMeshGeometry geom(mesh);
+
+        return PhysicsGeometry(PxGeometryHolder(geom));
     }
 }

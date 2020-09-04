@@ -65,6 +65,9 @@ namespace ap
                     type = "MaskAll";
                     AP_CORE_TRACE("Physics {} File: {} Line: {}] {}", type, file, line, message);
                     break;
+
+                default:
+                    AP_CORE_ASSERT(false, "You should not arrive here");
                 }
             };
             desc.cores = std::thread::hardware_concurrency();
