@@ -60,7 +60,7 @@ namespace ap
         meshDesc.triangles.stride = 3 * sizeof(PxU32);
         meshDesc.triangles.data = indices.data();
 
-        bool res = cooking.validateTriangleMesh(meshDesc);
+        //bool res = cooking.validateTriangleMesh(meshDesc);
         //ap::Log::GetCoreLogger()->flush();
         //AP_CORE_TRACE("Verified mesh");
         //AP_CORE_ASSERT(res, "Cooking mesh is invalid!");

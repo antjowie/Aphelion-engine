@@ -15,7 +15,7 @@ public:
         , m_shader(ap::Shader::Create("res/shader/Texture3DFlat.glsl"))
         , m_vao(ap::CreateCube())
     {
-        m_shader->SetVec4("aColor", glm::value_ptr(glm::vec4(0.5f)));
+        m_shader->SetVec4("aColor", glm::value_ptr(glm::vec4(1.f,1.f,1.f,0.5f)));
     }
 
     void operator() (ap::Scene& scene)

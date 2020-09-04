@@ -4,20 +4,31 @@ void GenerateChunk(ChunkDataComponent& chunk)
 {
     ForEach(chunk.chunk,[](BlockType& block, int x, int y, int z)
         {
-            if (x == 0 && z == 0)
+            if (x % 2 == 0 && y % 2 == 0 && z % 2 == 0)
             {
-                if (y == 4)
-                    block = BlockType::Grass;
-
-                if (y == 2)
-                    block = BlockType::Dirt;
-
-                if (y == 0)
-                    block = BlockType::Stone;
+                if (y < chunkDimensions.y / 3) block = BlockType::Grass;
+                if (y > chunkDimensions.y / 3 * 2) block = BlockType::Dirt;
+                else block = BlockType::Stone;
             }
             else
                 block = BlockType::Air;
+
             return;
+
+            //if (x == 0 && z == 0)
+            //{
+            //    if (y == 4)
+            //        block = BlockType::Grass;
+
+            //    if (y == 2)
+            //        block = BlockType::Dirt;
+
+            //    if (y == 0)
+            //        block = BlockType::Stone;
+            //}
+            //else
+            //    block = BlockType::Air;
+            //return;
 
             // TODO: Refactor to chunk strategy
             if(y > 25)
