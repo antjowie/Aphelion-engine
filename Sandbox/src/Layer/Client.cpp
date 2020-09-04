@@ -169,9 +169,10 @@ void ClientLayer::OnGuiRender()
 
                     if (ImGui::TreeNode((void*)(intptr_t)i, "%s", name.empty() ? "Entity" : name.c_str()))
                     {
-                        ImGui::Text("blah blah");
-                        ImGui::SameLine();
-                        if (ImGui::SmallButton("button")) {}
+                        auto& components = e.GetComponentIDs();
+                        std::set<unsigned> set(components.begin(),components.end());
+                        for (auto comp : set)
+                            ImGui::Text("%s", ap::Registry::GetComponentData().at(comp).name.data());
                         ImGui::TreePop();
                     }
                     ++i;

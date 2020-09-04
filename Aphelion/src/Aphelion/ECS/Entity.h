@@ -71,6 +71,20 @@ namespace ap
             return m_reg->get<Component>(m_handle);
         }
 
+        /**
+         * Returns the runtime id of components that the entity holds
+         */
+        std::vector<unsigned> GetComponentIDs() const
+        {
+            std::vector<unsigned> ids;
+            m_reg->visit(m_handle, [&](const auto componentID)
+                {
+                    ids.push_back(componentID);
+                }
+            );
+            return ids;
+        }
+
         template <typename Component>
         bool HasComponent() const
         {
