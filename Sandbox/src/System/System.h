@@ -110,6 +110,7 @@ public:
         //auto view = reg.Get().view<ap::TransformComponent, Sprite>();
 
         m_texture->Bind();
+            //m_shader->Bind();
 
         // TODO: Move BeginScene to Layer
         ap::Renderer::BeginScene(m_cam);
@@ -117,7 +118,6 @@ public:
         reg.View<ap::TransformComponent, Sprite>(
             [&](ap::Entity e, ap::TransformComponent& t, Sprite& s)
         {
-            m_shader->Bind();
             ap::Renderer::Submit(m_shader,m_vao,t.t.GetWorldMatrix());
 
             // Tint player light blue

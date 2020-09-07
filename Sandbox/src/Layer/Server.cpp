@@ -25,9 +25,9 @@ void ServerLayer::OnEvent(ap::Event& event)
             enet_address_get_host_ip(&e.GetPeer()->address, ip, 64);
 
             // Send all existing users to that player
-            //auto view = reg.Get().view<ap::Transform, Sprite, Health>();
-            reg.View<ap::Transform,Sprite,Health, ap::GUIDComponent>(
-                [&](ap::Entity entity, ap::Transform& t, Sprite& s, Health& h, ap::GUIDComponent& guid)
+            //auto view = reg.Get().view<ap::TransformComponent, Sprite, Health>();
+            reg.View<ap::TransformComponent,Sprite,Health, ap::GUIDComponent>(
+                [&](ap::Entity entity, ap::TransformComponent& t, Sprite& s, Health& h, ap::GUIDComponent& guid)
             {
                 app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(t, guid), e.GetPeer()));
                 app.OnEvent(ap::ServerSendPacketEvent(ap::Serialize(s, guid), e.GetPeer()));
@@ -146,8 +146,8 @@ void ServerLayer::OnUpdate(ap::Timestep ts)
     // TODO: Should or could be handled in systems
     auto& reg = m_scene.GetRegistry();
     //auto view = reg.view<ap::Transform>();
-    reg.View<ap::Transform, ap::GUIDComponent>(
-        [](ap::Entity e, ap::Transform& t, ap::GUIDComponent& guid)
+    reg.View<ap::TransformComponent, ap::GUIDComponent>(
+        [](ap::Entity e, ap::TransformComponent& t, ap::GUIDComponent& guid)
     {
         auto p = ap::Serialize(t, guid);
         ap::Application::Get().OnEvent(ap::ServerBroadcastPacketEvent(p));
