@@ -60,11 +60,15 @@ public:
                     static float cooldown = 0.f;
                     if (cooldown == 0.f && ap::Input::IsButtonPressed(ap::ButtonCode::Left))
                     {
-                        auto& data = chunk.GetComponent<ChunkDataComponent>();
-                        auto blockPos = posInBlock - data.pos;
-                        GetBlock(data.chunk, blockPos.x, blockPos.y, blockPos.z) = BlockType::Air;
+                        BlockMineComponent comp;// { posInBlock }
+                        comp.blockPos = posInBlock;
+                        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(comp, 0)));
 
-                        chunk.AddComponent<ChunkModifiedComponent>();
+                        //auto& data = chunk.GetComponent<ChunkDataComponent>();
+                        //auto blockPos = posInBlock - data.pos;
+                        //GetBlock(data.chunk, blockPos.x, blockPos.y, blockPos.z) = BlockType::Air;
+
+                        //chunk.AddComponent<ChunkModifiedComponent>();
                         cooldown = 0.2f;
                     }
 

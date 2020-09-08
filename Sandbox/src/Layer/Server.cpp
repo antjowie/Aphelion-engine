@@ -100,6 +100,7 @@ void ServerLayer::OnAttach()
     ap::Application::Get().OnEvent(ap::ServerHostRequestEvent(25565));
 
     m_scene.RegisterSystem(ChunkRequestResponseSystem);
+    m_scene.RegisterSystem(BlockMineResponseSystem);
 
     //// TEMP: Spawn some nice chunks here
     //auto& reg = m_scene.GetRegistry();

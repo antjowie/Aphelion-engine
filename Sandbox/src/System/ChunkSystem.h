@@ -59,73 +59,6 @@ inline void ChunkRequestCooldownSystem(ap::Scene& scene)
 }
 
 /**
- * A server side system to respond on chunk requests
- */
-inline void ChunkRequestResponseSystem(ap::Scene& scene)
-{
-    auto& reg = scene.GetRegistry();
-    
-    reg.View<ChunkSpawnComponent, SenderComponent>(
-        [&](ap::Entity e, ChunkSpawnComponent& spawnRequest, SenderComponent& sender)
-    {   
-        // Check if this chunk is already loaded
-        ChunkDataComponent* targetChunkData = nullptr;
-        ap::Entity targetChunkEntity;
-        //auto chunkView = reg.view<ChunkDataComponent>();
-
-        reg.View<ChunkDataComponent>(
-            [&](ap::Entity chunk, ChunkDataComponent& chunkData)
-        {
-            if (chunkData.pos == spawnRequest.pos)
-            {
-                targetChunkData = &chunkData;
-                targetChunkEntity = chunk;
-                return;
-            }
-        });
-
-        // If we can't find the chunk in our system, generate it
-        if (!targetChunkData)
-        {
-            targetChunkEntity = scene.GetRegistry().Create();
-            auto& chunkData = targetChunkEntity.AddComponent<ChunkDataComponent>();
-
-            // Generate block types
-            chunkData.chunk.resize(chunkCount);
-            chunkData.pos = spawnRequest.pos;
-            GenerateChunk(chunkData);
-
-            //// Setup additional block data (rbs)
-            //auto material = ap::PhysicsMaterial(1.f, 1.f, 1.f);
-            //auto shape = ap::PhysicsShape(ap::PhysicsGeometry::CreateBox(glm::vec3(0.5f)), material);
-
-            //ForEach(chunkData.chunk, [&](const BlockType& block, int x, int y, int z)
-            //    {
-            //        // TODO: Use a block library
-            //        if (block != BlockType::Air)
-            //        {
-            //            auto t = glm::translate(glm::identity<glm::mat4>(), glm::vec3(x, y, z));
-            //            auto rb = ap::RigidBody::CreateStatic(shape, t);
-
-            //            chunkData.rbs.push_back(rb);
-            //        }
-            //    });
-
-            targetChunkData = &chunkData;
-        }
-
-        auto& guid = targetChunkEntity.GetComponent<ap::GUIDComponent>().guid;
-        //AP_INFO("Server send chunk {}", guid);
-        ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(
-            *targetChunkData, guid),sender.peer));
-        ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(
-            ChunkModifiedComponent(), guid), sender.peer));
-
-        reg.Destroy(e);
-    });
-}
-
-/**
  * A client side system to create chunks and their data
  */
 inline void ChunkMeshBuilderSystem(ap::Scene& scene)
@@ -135,11 +68,15 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
     reg.View<ChunkDataComponent, ChunkModifiedComponent>(
         [&](ap::Entity e, ChunkDataComponent& chunk, ChunkModifiedComponent& modified)
     {
-        AP_TRACE("Building chunk {}", e.GetComponent<ap::GUIDComponent>());
 
         // Generate the chunk vao
         if (!e.HasComponent<ChunkMeshComponent>()) e.AddComponent<ChunkMeshComponent>();
         auto& mesh = e.GetComponent<ChunkMeshComponent>();
+
+        if (chunk.chunkIter == mesh.chunkIter)
+            return;
+
+        AP_TRACE("Building chunk {}", e.GetComponent<ap::GUIDComponent>());
         GenerateChunkMesh(chunk, mesh.vao);
 
         // Generate rigid body
@@ -219,3 +156,94 @@ private:
     ap::ShaderRef m_shader;
     ap::TextureRef m_texture;
 };
+
+/////////////////////////////////////////////////////////////
+// Server side
+/////////////////////////////////////////////////////////////
+/**
+ * A server side system to respond on chunk requests
+ */
+inline void ChunkRequestResponseSystem(ap::Scene& scene)
+{
+    auto& reg = scene.GetRegistry();
+
+    reg.View<ChunkSpawnComponent, SenderComponent>(
+        [&](ap::Entity e, ChunkSpawnComponent& spawnRequest, SenderComponent& sender)
+        {
+            // Check if this chunk is already loaded
+            ChunkDataComponent* targetChunkData = nullptr;
+            ap::Entity targetChunkEntity;
+            //auto chunkView = reg.view<ChunkDataComponent>();
+
+            reg.View<ChunkDataComponent>(
+                [&](ap::Entity chunk, ChunkDataComponent& chunkData)
+                {
+                    if (chunkData.pos == spawnRequest.pos)
+                    {
+                        targetChunkData = &chunkData;
+                        targetChunkEntity = chunk;
+                        return;
+                    }
+                });
+
+            // If we can't find the chunk in our system, generate it
+            if (!targetChunkData)
+            {
+                targetChunkEntity = scene.GetRegistry().Create();
+                auto& chunkData = targetChunkEntity.AddComponent<ChunkDataComponent>();
+
+                // Generate block types
+                chunkData.chunk.resize(chunkCount);
+                chunkData.pos = spawnRequest.pos;
+                chunkData.chunkIter = 0;
+                GenerateChunk(chunkData);
+
+                targetChunkData = &chunkData;
+            }
+
+            auto& guid = targetChunkEntity.GetComponent<ap::GUIDComponent>().guid;
+            //AP_INFO("Server send chunk {}", guid);
+            ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(
+                *targetChunkData, guid), sender.peer));
+            ap::Application::Get().OnEvent(ap::ServerSendPacketEvent(ap::Serialize(
+                ChunkModifiedComponent(), guid), sender.peer));
+
+            reg.Destroy(e);
+        });
+}
+
+inline void BlockMineResponseSystem(ap::Scene& scene)
+{
+    auto& reg = scene.GetRegistry();
+
+    reg.View<BlockMineComponent>(
+        [&](ap::Entity e, BlockMineComponent& minedBlock)
+        {
+            auto blockWorldPos = glm::ivec3(minedBlock.blockPos);
+            auto chunkPos = blockWorldPos - blockWorldPos % glm::ivec3(chunkDimensions);
+            // Get the correct chunk
+            reg.View<ChunkDataComponent>(
+                [&](ap::Entity chunk, ChunkDataComponent& chunkData)
+                {
+                    AP_CORE_TRACE("{} {} {} {} {} {}", (int)chunkData.pos.x, (int)chunkData.pos.y, (int)chunkData.pos.z, (int)
+                        chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
+                    if (chunkData.pos == glm::vec3(chunkPos))
+                    {
+                        AP_CORE_INFO("FOUND");
+                        auto blockPos = blockWorldPos - chunkPos;
+                        GetBlock(chunkData.chunk, blockPos.x, blockPos.y, blockPos.z) = BlockType::Air;
+                        chunkData.chunkIter++;
+
+                        // TODO: Only send this to interested parties
+                        ap::Application::Get().OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(
+                            chunkData, chunk.GetComponent<ap::GUIDComponent>().guid)));
+                        ap::Application::Get().OnEvent(ap::ServerBroadcastPacketEvent(ap::Serialize(
+                            ChunkModifiedComponent(), chunk.GetComponent<ap::GUIDComponent>().guid)));
+
+                        return;
+                    }
+                });
+            
+            reg.Destroy(e);
+        });
+}

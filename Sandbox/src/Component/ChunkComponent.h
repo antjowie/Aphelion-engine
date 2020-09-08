@@ -29,6 +29,7 @@ struct ChunkDataComponent
 
     glm::vec3 pos;
     ChunkContainer chunk;
+    int chunkIter;
 
     bool operator==(const ChunkDataComponent& rhs) const { return true; }
 };
@@ -38,6 +39,7 @@ void serialize(S& s, ChunkDataComponent& o)
 {
     serialize(s,o.pos);
     s.container1b(o.chunk, chunkCount);
+    s.value4b(o.chunkIter);
 }
 
 struct ChunkSpawnCooldownComponent
@@ -57,6 +59,7 @@ template <typename S> void serialize(S& s, ChunkSpawnComponent& o) { serialize(s
 struct ChunkMeshComponent
 {
     ap::VertexArrayRef vao;
+    int chunkIter = -1;
 };
 inline bool operator==(const ChunkMeshComponent& lhs, const ChunkMeshComponent& rhs) { return true; }
 template <typename S> void serialize(S& s, ChunkMeshComponent& o) {}
@@ -67,6 +70,29 @@ struct ChunkModifiedComponent
 };
 inline bool operator==(const ChunkModifiedComponent& lhs, const ChunkModifiedComponent& rhs) { return true; }
 template <typename S> void serialize(S& s, ChunkModifiedComponent& o) {}
+
+struct BlockMineComponent
+{
+    glm::vec3 blockPos;
+};
+inline bool operator==(const BlockMineComponent& lhs, const BlockMineComponent& rhs) { return true; }
+template <typename S> void serialize(S& s, BlockMineComponent& o) 
+{
+    serialize(s, o.blockPos);
+}
+
+inline void RegisterChunkComponents()
+{
+    ap::Registry::RegisterComponent<ChunkDataComponent>();
+    ap::Registry::RegisterComponent<ChunkMeshComponent>(
+        [](ap::Scene& scene, ap::Entity e) { AP_TRACE("Create mesh CB"); },
+        [](ap::Scene& scene, ap::Entity e) { AP_TRACE("Remove mesh CB"); }
+    );
+    ap::Registry::RegisterComponent<ChunkModifiedComponent>();
+    ap::Registry::RegisterComponent<ChunkSpawnCooldownComponent>();
+    ap::Registry::RegisterComponent<ChunkSpawnComponent>();
+    ap::Registry::RegisterComponent<BlockMineComponent>();
+}
 
 inline BlockType& GetBlock(ChunkContainer& chunk, unsigned x, unsigned y, unsigned z)
 {
@@ -99,16 +125,4 @@ void ForEach(const ChunkContainer& chunk, Callable& callable)
         for(auto y = 0; y < chunkDimensions.y; y++)
             for(auto z = 0; z < chunkDimensions.z; z++)
                 callable(GetBlock(chunk,x,y,z),x,y,z);
-}
-
-inline void RegisterChunkComponents()
-{
-    ap::Registry::RegisterComponent<ChunkDataComponent>();
-    ap::Registry::RegisterComponent<ChunkMeshComponent>(
-        [](ap::Scene& scene, ap::Entity e) { AP_TRACE("Create mesh CB");},
-        [](ap::Scene& scene, ap::Entity e) { AP_TRACE("Remove mesh CB");}
-    );
-    ap::Registry::RegisterComponent<ChunkModifiedComponent>();
-    ap::Registry::RegisterComponent<ChunkSpawnCooldownComponent>();
-    ap::Registry::RegisterComponent<ChunkSpawnComponent>();
 }
