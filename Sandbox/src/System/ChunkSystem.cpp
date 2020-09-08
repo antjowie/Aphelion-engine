@@ -13,7 +13,7 @@ void GenerateChunk(ChunkDataComponent& chunk)
             else
                 block = BlockType::Air;
 
-            return;
+            //return;
 
             //if (x == 0 && z == 0)
             //{
@@ -31,11 +31,11 @@ void GenerateChunk(ChunkDataComponent& chunk)
             //return;
 
             // TODO: Refactor to chunk strategy
-            if(y > 25)
+            if(y > 10)
                 block = BlockType::Air;
-            else if (y == 25)
+            else if (y == chunkDimensions.y - 1)
                 block = BlockType::Grass;
-            else if (y > 21)
+            else if (y > chunkDimensions.y - 4)
                 block = BlockType::Dirt;
             else
                 block = BlockType::Stone;

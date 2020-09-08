@@ -45,15 +45,31 @@ public:
                 {
                     //const auto& chunkPos = hit.first.GetComponent<ap::TransformComponent>().t.GetPosition();
 
+                    auto chunk = hit.first;
+
                     // Calculate block index in array based on hit coordinates
                     glm::vec3 posInBlock = hit.second.pos - hit.second.normal * 0.5f + glm::vec3(0.5f);
                     //posInBlock -= chunkPos;
                     posInBlock = glm::ivec3(posInBlock);
 
                     glm::mat4 translate = glm::translate(glm::identity<glm::mat4>(), posInBlock);
-                    ap::Renderer::Submit(m_shader, m_vao, glm::scale(translate,glm::vec3(1.1f)));
+                    ap::Renderer::Submit(m_shader, m_vao, glm::scale(translate, glm::vec3(1.1f)));
                     //AP_TRACE("{:.2f} {:.2f} {:.2f}", hit.second.pos.x, hit.second.pos.y, hit.second.pos.z);
                     //AP_TRACE("{} {} {}", chunkPos.x, chunkPos.y, chunkPos.z);
+
+                    static float cooldown = 0.f;
+                    if (cooldown == 0.f && ap::Input::IsButtonPressed(ap::ButtonCode::Left))
+                    {
+                        auto& data = chunk.GetComponent<ChunkDataComponent>();
+                        auto blockPos = posInBlock - data.pos;
+                        GetBlock(data.chunk, blockPos.x, blockPos.y, blockPos.z) = BlockType::Air;
+
+                        chunk.AddComponent<ChunkModifiedComponent>();
+                        cooldown = 0.2f;
+                    }
+
+                    cooldown -= ap::Time::dt;
+                    if (cooldown < 0.f) cooldown = 0.f;
                 }
                 ap::Renderer::EndScene();
             });

@@ -137,17 +137,8 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
     {
         AP_TRACE("Building chunk {}", e.GetComponent<ap::GUIDComponent>());
 
-
         // Generate the chunk vao
         if (!e.HasComponent<ChunkMeshComponent>()) e.AddComponent<ChunkMeshComponent>();
-        // TEMP: Remove this so that chunks can be rebuilt
-        else
-        {
-            e.RemoveComponent<ChunkModifiedComponent>();
-            return;
-        }
-
-
         auto& mesh = e.GetComponent<ChunkMeshComponent>();
         GenerateChunkMesh(chunk, mesh.vao);
 
