@@ -12,6 +12,7 @@ namespace ap
     PerspectiveCameraController::PerspectiveCameraController(float fovYRadians, float aspectRatio, float zNear, float zFar)
         : m_camera(fovYRadians, aspectRatio,zNear,zFar)
         , m_isRotating(false)
+        , m_oldCursorPos(0)
     {
     }
 
@@ -41,14 +42,13 @@ namespace ap
     void PerspectiveCameraController::OnEvent(Event& e)
     {
         EventDispatcher d(e);
-        static glm::dvec2 oldCursorPos(0);
 
         if (m_isRotating)
         {
             d.Dispatch<MouseMovedEvent>([&](MouseMovedEvent& e)
                 {
                     // TODO: Add a sensitivity variable for offset
-                    auto offset = glm::dvec2(e.GetX(), e.GetY()) - oldCursorPos;
+                    auto offset = glm::dvec2(e.GetX(), e.GetY()) - m_oldCursorPos;
                     offset = offset / 25. * glm::two_pi<double>();
 
                     // rhs coordinates
@@ -63,26 +63,39 @@ namespace ap
                     return false;
                 });
         }
+        //d.Dispatch<MouseButtonPressedEvent>([&](MouseButtonPressedEvent& e)
+        //    {
+        //        if (e.GetButton() == ButtonCode::Right)
+        //        {
+        //            Input::EnableCursor(false);
+        //            m_isRotating = true;
+        //        }
+        //        return false;
+        //    });
+        //d.Dispatch<MouseButtonReleasedEvent>([&](MouseButtonReleasedEvent& e)
+        //    {
+        //        if (e.GetButton() == ButtonCode::Right)
+        //        {
+        //            Input::EnableCursor(true);
+        //            m_isRotating = false;
+        //        }
+        //        return false;
+        //    });
 
-        d.Dispatch<MouseButtonPressedEvent>([&](MouseButtonPressedEvent& e)
-            {
-                if (e.GetButton() == ButtonCode::Right)
-                {
-                    Input::EnableCursor(false);
-                    m_isRotating = true;
-                }
-                return false;
-            });
-        d.Dispatch<MouseButtonReleasedEvent>([&](MouseButtonReleasedEvent& e)
-            {
-                if (e.GetButton() == ButtonCode::Right)
-                {
-                    Input::EnableCursor(true);
-                    m_isRotating = false;
-                }
-                return false;
-            });
-
-        oldCursorPos = Input::GetCursorPos();
+        m_oldCursorPos = Input::GetCursorPos();
+    }
+    
+    void PerspectiveCameraController::Enable(bool enable)
+    {
+        if(enable)
+        {
+            Input::EnableCursor(false);
+            m_isRotating = true;
+        }
+        else
+        {
+            Input::EnableCursor(true);
+            m_isRotating = false;
+        }
     }
 }

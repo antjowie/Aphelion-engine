@@ -195,26 +195,30 @@ inline void ChunkRequestResponseSystem(ap::Scene& scene)
         });
 }
 
-inline void BlockMineResponseSystem(ap::Scene& scene)
+inline void InputResponseSystem(ap::Scene& scene)
 {
     auto& reg = scene.GetRegistry();
 
-    reg.View<BlockMineComponent>(
-        [&](ap::Entity e, BlockMineComponent& minedBlock)
+    reg.View<InputComponent>(
+        [&](ap::Entity e, InputComponent& input)
         {
-            auto blockWorldPos = glm::ivec3(minedBlock.blockPos);
+            auto blockWorldPos = glm::ivec3(input.blockPos);
             auto chunkPos = blockWorldPos - blockWorldPos % glm::ivec3(chunkDimensions);
             // Get the correct chunk
             reg.View<ChunkDataComponent>(
                 [&](ap::Entity chunk, ChunkDataComponent& chunkData)
                 {
-                    AP_CORE_TRACE("{} {} {} {} {} {}", (int)chunkData.pos.x, (int)chunkData.pos.y, (int)chunkData.pos.z, (int)
-                        chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
+                    //AP_CORE_TRACE("{} {} {} {} {} {}", (int)chunkData.pos.x, (int)chunkData.pos.y, (int)chunkData.pos.z, (int)
+                    //    chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
                     if (chunkData.pos == glm::vec3(chunkPos))
                     {
-                        AP_CORE_INFO("FOUND");
+                        //AP_CORE_INFO("FOUND");
                         auto blockPos = blockWorldPos - chunkPos;
-                        GetBlock(chunkData.chunk, blockPos.x, blockPos.y, blockPos.z) = BlockType::Air;
+                        
+                        if(input.mine)
+                            GetBlock(chunkData.chunk, blockPos.x, blockPos.y, blockPos.z) = BlockType::Air;
+                        else
+                            GetBlock(chunkData.chunk, blockPos.x, blockPos.y, blockPos.z) = BlockType::Stone;
                         chunkData.chunkIter++;
 
                         // TODO: Only send this to interested parties

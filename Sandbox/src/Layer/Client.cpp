@@ -6,6 +6,7 @@
 #include "System/ChunkSystem.h"
 #include "System/PlayerSystem.h"
 
+#include "Aphelion/Core/Event/MouseEvent.h"
 #include "Aphelion/Core/Application.h"
 #include "Aphelion/Core/Event/NetEvent.h"
 #include "Aphelion/Net/Client.h"
@@ -50,6 +51,7 @@ void ClientLayer::OnAttach()
 #endif
 
     m_camera.GetCamera().transform.Move(ap::Transform::GetWorldForward() * 5.f);
+    m_camera.Enable(true);
 }
 
 void ClientLayer::OnDetach()
@@ -68,9 +70,18 @@ bool clientIsReconciling = false;
 
 void ClientLayer::OnEvent(ap::Event& event)
 {
-    m_camera.OnEvent(event);
-
     ap::EventDispatcher d(event);
+    //d.Dispatch<ap::MouseButtonPressedEvent>([&](ap::MouseButtonPressedEvent& e)
+    //    {
+    //        if (e.GetButton() == ap::ButtonCode::Right)
+    //            m_camera.Enable(true);
+    //    });
+    //d.Dispatch<ap::MouseButtonReleasedEvent>([&](ap::MouseButtonReleasedEvent& e)
+    //    {
+    //        if (e.GetButton() == ap::ButtonCode::Right)
+    //            m_camera.Enable(false);
+    //    });
+    m_camera.OnEvent(event);
 
     if (d.Dispatch<ap::ClientReceivePacketEvent>([&](ap::ClientReceivePacketEvent& e)
         {

@@ -71,14 +71,18 @@ struct ChunkModifiedComponent
 inline bool operator==(const ChunkModifiedComponent& lhs, const ChunkModifiedComponent& rhs) { return true; }
 template <typename S> void serialize(S& s, ChunkModifiedComponent& o) {}
 
-struct BlockMineComponent
+struct InputComponent
 {
-    glm::vec3 blockPos;
+    bool mine = false;
+    bool place = false;
+    glm::vec3 blockPos = glm::vec3(0);
 };
-inline bool operator==(const BlockMineComponent& lhs, const BlockMineComponent& rhs) { return true; }
-template <typename S> void serialize(S& s, BlockMineComponent& o) 
+inline bool operator==(const InputComponent& lhs, const InputComponent& rhs) { return true; }
+template <typename S> void serialize(S& s, InputComponent& o) 
 {
     serialize(s, o.blockPos);
+    s.value1b(o.mine);
+    s.value1b(o.place);
 }
 
 inline void RegisterChunkComponents()
@@ -91,7 +95,7 @@ inline void RegisterChunkComponents()
     ap::Registry::RegisterComponent<ChunkModifiedComponent>();
     ap::Registry::RegisterComponent<ChunkSpawnCooldownComponent>();
     ap::Registry::RegisterComponent<ChunkSpawnComponent>();
-    ap::Registry::RegisterComponent<BlockMineComponent>();
+    ap::Registry::RegisterComponent<InputComponent>();
 }
 
 inline BlockType& GetBlock(ChunkContainer& chunk, unsigned x, unsigned y, unsigned z)

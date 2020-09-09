@@ -44,7 +44,6 @@ public:
                 for (const auto& hit : hits)
                 {
                     //const auto& chunkPos = hit.first.GetComponent<ap::TransformComponent>().t.GetPosition();
-
                     auto chunk = hit.first;
 
                     // Calculate block index in array based on hit coordinates
@@ -54,21 +53,24 @@ public:
 
                     glm::mat4 translate = glm::translate(glm::identity<glm::mat4>(), posInBlock);
                     ap::Renderer::Submit(m_shader, m_vao, glm::scale(translate, glm::vec3(1.1f)));
-                    //AP_TRACE("{:.2f} {:.2f} {:.2f}", hit.second.pos.x, hit.second.pos.y, hit.second.pos.z);
-                    //AP_TRACE("{} {} {}", chunkPos.x, chunkPos.y, chunkPos.z);
 
+                    InputComponent input;
                     static float cooldown = 0.f;
-                    if (cooldown == 0.f && ap::Input::IsButtonPressed(ap::ButtonCode::Left))
+
+                    // Check if player places a block
+                    if (ap::Input::IsButtonPressed(ap::ButtonCode::Right))
                     {
-                        BlockMineComponent comp;// { posInBlock }
-                        comp.blockPos = posInBlock;
-                        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(comp, 0)));
+                        input.place = true;
+                        input.blockPos = posInBlock + hit.second.normal;
+                        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(input, 0)));
+                    }
+                    // Check if player breaks a block
+                    else if (cooldown == 0.f && ap::Input::IsButtonPressed(ap::ButtonCode::Left))
+                    {
+                        input.mine = true;
+                        input.blockPos = posInBlock;
+                        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(input, 0)));
 
-                        //auto& data = chunk.GetComponent<ChunkDataComponent>();
-                        //auto blockPos = posInBlock - data.pos;
-                        //GetBlock(data.chunk, blockPos.x, blockPos.y, blockPos.z) = BlockType::Air;
-
-                        //chunk.AddComponent<ChunkModifiedComponent>();
                         cooldown = 0.2f;
                     }
 
