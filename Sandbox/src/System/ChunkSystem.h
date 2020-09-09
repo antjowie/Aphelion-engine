@@ -41,23 +41,6 @@ inline void ChunkStrategySystem(ap::Scene& scene)
     //}
 }
 
-/// A client system that makes sure that we don't request the same chunk every frame
-/// Maybe we want to refactor the chunk system to not rely on the ECS or be one object
-inline void ChunkRequestCooldownSystem(ap::Scene& scene)
-{
-    auto& reg = scene.GetRegistry();
-
-    reg.View<ChunkSpawnCooldownComponent>(
-        [](ap::Entity e, ChunkSpawnCooldownComponent& cooldown)
-    {
-        cooldown.time += ap::Time::dt;
-
-        // TODO: Should make this based on framerate or rtt I think
-        if(cooldown.time > 0.1f)
-            e.RemoveComponent<ChunkSpawnCooldownComponent>();
-    });
-}
-
 /**
  * A client side system to create chunks and their data
  */
@@ -76,8 +59,9 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
         if (chunk.chunkIter == mesh.chunkIter)
             return;
 
-        AP_TRACE("Building chunk {}", e.GetComponent<ap::GUIDComponent>());
+        AP_TRACE("Building chunk new:{} old:{} {}", chunk.chunkIter, mesh.chunkIter, e.GetComponent<ap::GUIDComponent>());
         GenerateChunkMesh(chunk, mesh.vao);
+        mesh.chunkIter = chunk.chunkIter;
 
         // Generate rigid body
         if (!e.HasComponent<ap::RigidBodyComponent>()) e.AddComponent<ap::RigidBodyComponent>();
@@ -102,9 +86,6 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
         physics.GetRigidBody().AddShape(shape);
 
         e.GetComponent<ap::TagComponent>().tag = "Chunk";
-        // We only do one chunk per frame for now
-        e.RemoveComponent<ChunkModifiedComponent>();
-        //e.AddComponent<ChunkSpawnCooldownComponent>();
 
         // TODO: This is a temp fix but once we build the chunk we remove any 
         // spawn request component. We probably want to add receive callbacks
@@ -118,6 +99,8 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
             }
         });
 
+        // We only do one chunk per frame for now
+        e.RemoveComponent<ChunkModifiedComponent>();
         return;
     }, ap::typeList<ChunkSpawnCooldownComponent>);
 }
