@@ -11,6 +11,7 @@ namespace ap
     {
     public:
         PerspectiveCameraController(float fovYRadians, float aspectRatio, float zNear = 0.1f, float zFar = 1000.f);
+        ~PerspectiveCameraController() { Enable(false); }
 
         void OnUpdate(Timestep ts);
         void OnEvent(Event& e);

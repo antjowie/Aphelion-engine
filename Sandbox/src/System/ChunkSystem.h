@@ -14,13 +14,59 @@
 void GenerateChunk(ChunkDataComponent& chunk);
 void GenerateChunkMesh(const ChunkDataComponent& chunk, ap::VertexArrayRef& vao);
 
+// Hash func for all vec3 types
+namespace std
+{   
+    template<typename T> struct hash<glm::vec<3,T>>
+    {
+        std::size_t operator()(T const& v) const noexcept
+        {
+            std::size_t h1 = std::hash<T>{}(v.x);
+            std::size_t h2 = std::hash<T>{}(v.y);
+            std::size_t h3 = std::hash<T>{}(v.z);
+            return h1 ^ (h2 << 1) ^ (h3 << 10); // or use boost::hash_combine
+        }
+    };
+}
+
+class ChunkProxy
+{
+    ap::Entity chunkID;
+
+    union
+    {
+        ChunkProxy* v[6];
+        struct
+        {
+            ChunkProxy* top;
+            ChunkProxy* left;
+            ChunkProxy* front;
+            ChunkProxy* bottom;
+            ChunkProxy* right;
+            ChunkProxy* back;
+        };
+    }neighbor;
+    unsigned neighborCount = 0;
+};
+
 /**
  * A system that decides which chunks to generate (and to remove)
  */
 inline void ChunkStrategySystem(ap::Scene& scene)
 {
     auto& reg = scene.GetRegistry();
+
     //auto view = reg.view<ChunkSpawnComponent>();
+    static std::unordered_map<glm::ivec3, ChunkProxy> chunks;
+    static std::list<std::reference_wrapper<ChunkProxy>> chunksNotFilled;
+
+    // Sync chunk proxies with actual chunks
+    // TODO: We should add a callback for when we receive certain components
+    reg.View<ChunkDataComponent>(
+        [](ap::Entity e, ChunkDataComponent& data)
+        {
+            //data.pos
+        });
 
     reg.View<ChunkSpawnComponent>(
         [](ap::Entity e, ChunkSpawnComponent& spawnComp)
@@ -82,7 +128,7 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
                 stride),
                 material/*,
                 glm::translate(glm::identity<glm::mat4>(), -chunk.pos)*/);
-        physics.CreateStatic(glm::translate(glm::identity<glm::mat4>(), chunk.pos /*+ (glm::vec3)chunkDimensions / 2.f*/));
+        physics.CreateStatic(glm::translate(glm::identity<glm::mat4>(), glm::vec3(chunk.pos) /*+ (glm::vec3)chunkDimensions / 2.f*/));
         physics.GetRigidBody().AddShape(shape);
 
         e.GetComponent<ap::TagComponent>().tag = "Chunk";
@@ -127,7 +173,7 @@ public:
             [&](ap::Entity e, ChunkDataComponent& chunk, ChunkMeshComponent& mesh)
         {
             if(mesh.vao)
-            ap::Renderer::Submit(m_shader,mesh.vao,glm::translate(glm::identity<glm::mat4>(),chunk.pos));
+            ap::Renderer::Submit(m_shader,mesh.vao,glm::translate(glm::identity<glm::mat4>(),glm::vec3(chunk.pos)));
         }
         //,ap::typeList<ChunkModifiedComponent>
         );
@@ -210,7 +256,7 @@ inline void InputResponseSystem(ap::Scene& scene)
                 {
                     //AP_CORE_TRACE("{} {} {} {} {} {}", (int)chunkData.pos.x, (int)chunkData.pos.y, (int)chunkData.pos.z, (int)
                     //    chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
-                    if (chunkData.pos == glm::vec3(chunkPos))
+                    if (chunkData.pos == chunkPos)
                     {
                         //AP_CORE_INFO("FOUND");
                         auto blockPos = blockWorldPos - chunkPos;

@@ -11,7 +11,7 @@
 #include <bitsery/traits/array.h>
 
 /// IVec so that we can use it easily in calculations
-constexpr glm::uvec3 chunkDimensions {8,8,8};
+constexpr glm::ivec3 chunkDimensions {8,8,8};
 constexpr unsigned chunkCount = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
 /// TODO: Instead of using default alloc, create a ChunkAlloc
 //template <typename T>
@@ -20,14 +20,18 @@ using ChunkContainer = std::vector<BlockType>;
     //ChunkSlice<ChunkSlice<ChunkSlice<BlockType,chunkDimensions.z>,chunkDimensions.y>, chunkDimensions.x>;
     //ChunkSlice<ChunkSlice<ChunkSlice<BlockType>>>;
 
+// Send over the net
 struct ChunkDataComponent
 {
     ChunkDataComponent()
         : pos(0)
+        , chunkIter(-1) 
     {
+        //for (int i = 0; i < 6; i++) neighbor.v[i] = 0;
+        //memset(neighbor.v, 0, sizeof(neighbor));
     }
-
-    glm::vec3 pos;
+    
+    glm::ivec3 pos;
     ChunkContainer chunk;
     int chunkIter;
 
@@ -51,7 +55,7 @@ template <typename S> void serialize(S& s, ChunkSpawnCooldownComponent& o) { s.v
 
 struct ChunkSpawnComponent
 {
-    glm::vec3 pos;
+    glm::ivec3 pos;
 };
 inline bool operator==(const ChunkSpawnComponent& lhs, const ChunkSpawnComponent& rhs) { return true; }
 template <typename S> void serialize(S& s, ChunkSpawnComponent& o) { serialize(s, o.pos); }

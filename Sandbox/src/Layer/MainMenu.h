@@ -20,8 +20,19 @@ public:
         ap::EventDispatcher d(event);
         d.Dispatch<ap::KeyPressedEvent>([&](ap::KeyPressedEvent& e)
             {
-            if (e.GetKeyCode() == ap::KeyCode::Escape)
-                ap::Application::Get().Exit();
+                if (e.GetKeyCode() == ap::KeyCode::Escape)
+                {
+                    if (m_client)
+                    {
+                        ap::Application::Get().GetLayerStack().PopLayer(m_client);
+                        delete m_client;
+                        m_client = nullptr;
+                    }
+                    else
+                    {
+                        ap::Application::Get().Exit();
+                    }
+                }
             return false;
             });
     }

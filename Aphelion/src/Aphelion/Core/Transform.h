@@ -62,8 +62,8 @@ namespace bitsery
 {
 
 /// TODO: Move these to a serialize system and figure out if we can wrap it
-template <typename S>
-void serialize(S& s, glm::vec3& v)
+template <typename S, typename T>
+void serialize(S& s, glm::vec<3,T>& v)
 {
     s.value4b(v.x);
     s.value4b(v.y);

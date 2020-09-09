@@ -30,13 +30,17 @@ namespace ap
     class APHELION_API Entity
     {
     public:
-        Entity() {}
+        Entity()
+            : m_handle(entt::null)
+            , m_reg(nullptr)
+            , m_createCb(nullptr)
+            , m_removeCb(nullptr) {}
+
         Entity(const entt::entity handle, entt::registry& registry, ComponentCb createCb, ComponentCb removeCb)
             : m_handle(handle)
             , m_reg(&registry)
             , m_createCb(createCb)
-            , m_removeCb(removeCb)
-        {}
+            , m_removeCb(removeCb) {}
 
         template <typename Component, typename... Args>
         Component& AddComponent(Args&&... args)

@@ -7,6 +7,7 @@
 #include "System/PlayerSystem.h"
 
 #include "Aphelion/Core/Event/MouseEvent.h"
+#include "Aphelion/Core/Event/KeyEvent.h"
 #include "Aphelion/Core/Application.h"
 #include "Aphelion/Core/Event/NetEvent.h"
 #include "Aphelion/Net/Client.h"

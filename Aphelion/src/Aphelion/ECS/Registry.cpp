@@ -119,7 +119,8 @@ namespace ap
                 // ignore these details since I don't think we'll need them
 
                 auto newE = m_reg.create(e);
-                AP_CORE_VERIFY(e == newE, "Could not copy entity from registry");
+
+                AP_CORE_ASSERT(e == newE, "Could not copy entity from registry");
                 //AP_CORE_VERIFY(entt::to_integral(Get().create(e)) == entt::to_integral(e), "Could not copy entity from registry");
                 //entt::to_integral(Get().create(e)) == entt::to_integral(e);
 
