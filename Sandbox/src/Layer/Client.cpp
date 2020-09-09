@@ -83,6 +83,19 @@ void ClientLayer::OnEvent(ap::Event& event)
     //    });
     m_camera.OnEvent(event);
 
+    if (d.Dispatch<ap::WindowFocusEvent>([&](ap::WindowFocusEvent& e)
+        {
+            m_camera.Enable(e.IsFocused());
+            return false;
+        }));
+
+
+    if (d.Dispatch<ap::WindowIconifyEvent>([&](ap::WindowIconifyEvent& e)
+        {
+            m_camera.Enable(!e.IsIconified());
+            return false;
+        }));
+
     if (d.Dispatch<ap::ClientReceivePacketEvent>([&](ap::ClientReceivePacketEvent& e)
         {
             m_packets.Push(e.GetPacket(),true);

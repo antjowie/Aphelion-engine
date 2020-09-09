@@ -43,6 +43,34 @@ namespace ap
             data.eventCallback(event);
         });
 
+        glfwSetWindowPosCallback(m_window, [](GLFWwindow* window, int xpos, int ypos)
+            {
+                WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
+
+                WindowMoveEvent event(xpos, ypos);
+                data.eventCallback(event);
+            }
+        );
+
+        glfwSetWindowIconifyCallback(m_window, [](GLFWwindow* window, int iconify)
+            {
+                WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
+
+                WindowIconifyEvent event(iconify);
+                data.eventCallback(event);
+            }
+        );
+
+        glfwSetWindowFocusCallback(m_window, [](GLFWwindow* window, int focused)
+            {
+                WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
+
+                WindowFocusEvent event(focused);
+                data.eventCallback(event);
+
+            }
+        );
+
         glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
             {
                 WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);

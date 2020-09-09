@@ -12,6 +12,8 @@ namespace ap
         None = 0,
         // Window events
         WindowClose, WindowResize,
+        WindowMove, WindowIconify,
+        WindowFocus,
 
         // Input events
         KeyPressed, KeyReleased, KeyTyped,
