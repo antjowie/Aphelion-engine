@@ -53,7 +53,7 @@ public:
 
                     glm::mat4 translate = glm::translate(glm::identity<glm::mat4>(), posInBlock);
                     ap::Renderer::Submit(m_shader, m_vao, glm::scale(translate, glm::vec3(1.1f)));
-
+                    //AP_INFO("HIT");
                     InputComponent input;
                     static float cooldown = 0.f;
 

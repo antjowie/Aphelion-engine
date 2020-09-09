@@ -13,13 +13,19 @@
 #include "Aphelion/Net/Client.h"
 #include "Aphelion/Net/ClientLayer.h"
 
+//#define ChunkStrat
+
 void ClientLayer::OnAttach()
 {
     m_scene.RegisterSystem(InputSystem(m_camera.GetCamera()));
     m_scene.RegisterSystem(DeathSystem);
     m_scene.RegisterSystem(DrawSystem(m_camera.GetCamera()));
 
-    m_scene.RegisterSystem(ChunkStrategySystem);
+#ifdef ChunkStrat
+    ChunkStrategy::m_scene = &m_scene;
+    ChunkStrategy::m_radius = 4;
+    m_scene.RegisterSystem(ChunkStrategy());
+#endif // ChunkStrat
     m_scene.RegisterSystem(ChunkMeshBuilderSystem);
     m_scene.RegisterSystem(ChunkRenderSystem(m_camera.GetCamera()));
 
@@ -30,6 +36,8 @@ void ClientLayer::OnAttach()
     //m_camera.GetCamera().transform.LookAt(glm::vec3(1, 0, 0));
 
     // TEMP: Spawn some nice chunks here
+#ifndef ChunkStrat
+    m_scene.RegisterSystem(ChunkStrategySystem);
     auto& reg = m_scene.GetRegistry();
     for(int x = -2; x < 5; x++)
         for(int z = -2; z < 2; z++)
@@ -39,6 +47,7 @@ void ClientLayer::OnAttach()
             
             data.pos = glm::vec3(x * chunkDimensions.x, 0, z * chunkDimensions.z);
         }    
+#endif // !ChunkStrat
 
 #ifdef AP_DEBUG
     m_scene.SetOnEntityCreateCb([](ap::Entity entity)

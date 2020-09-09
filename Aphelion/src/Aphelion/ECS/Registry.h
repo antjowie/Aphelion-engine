@@ -118,6 +118,7 @@ namespace ap
         bool Has(unsigned guid) const { return m_idToHandle.count(guid) == 1; }
 
         size_t Count() const { return m_reg.size(); }
+        template<typename Component> size_t Count() const { return m_reg.size<Component>(); }
         std::vector<Entity> GetEntities();
 
         template<typename... Component, typename... Exclude, typename CB>

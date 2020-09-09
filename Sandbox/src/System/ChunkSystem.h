@@ -19,35 +19,73 @@ namespace std
 {   
     template<typename T> struct hash<glm::vec<3,T>>
     {
-        std::size_t operator()(T const& v) const noexcept
+        std::size_t operator()(glm::vec<3, T> const& v) const noexcept
         {
-            std::size_t h1 = std::hash<T>{}(v.x);
-            std::size_t h2 = std::hash<T>{}(v.y);
-            std::size_t h3 = std::hash<T>{}(v.z);
+            std::size_t h1 = /*std::hash<T>*/(v.x);
+            std::size_t h2 = /*std::hash<T>*/(v.y);
+            std::size_t h3 = /*std::hash<T>*/(v.z);
             return h1 ^ (h2 << 1) ^ (h3 << 10); // or use boost::hash_combine
         }
     };
 }
 
-class ChunkProxy
+/**
+ * The strategy is responsible for setting up the neigbors of a chunk
+ * All new chunks and removed chunks are forwarded to here
+ * Then it adds chunk modified components when needed
+ * and it makes chunk spawn requests
+ * 
+ * It does not generate mesh data
+ * This is handled by the ChunkMeshGenerateSystem
+ */
+class ChunkStrategy
 {
-    ap::Entity chunkID;
-
-    union
+public:
+    struct ChunkProxy
     {
-        ChunkProxy* v[6];
-        struct
+        unsigned chunkGUID;
+
+        union
         {
-            ChunkProxy* top;
-            ChunkProxy* left;
-            ChunkProxy* front;
-            ChunkProxy* bottom;
-            ChunkProxy* right;
-            ChunkProxy* back;
-        };
-    }neighbor;
-    unsigned neighborCount = 0;
+            ChunkProxy* v[6];
+            struct
+            {
+                ChunkProxy* top;
+                ChunkProxy* left;
+                ChunkProxy* front;
+                ChunkProxy* bottom;
+                ChunkProxy* right;
+                ChunkProxy* back;
+            };
+        }neighbor;
+        unsigned neighborCount = 0;
+
+        //bool operator== (const ChunkProxy& rhs) const { return chunkGUID == rhs.chunkGUID;}
+    };
+
+    ChunkStrategy()
+    {
+        m_chunks.clear();
+        m_chunksNotFilled.clear();
+    }
+
+    static void AddChunk(ap::Entity& chunk);
+    // This WILL remove the chunk entity
+    static void RemoveChunk(ap::Entity& chunk);
+    void operator() (ap::Scene& scene);
+
+    /// Radius in chunk units
+    static float m_radius;
+    // This has to be set up in the client
+    static ap::Scene* m_scene;
+
+private:
+    static std::unordered_map<glm::ivec3, ChunkProxy> m_chunks;
+    static std::list<std::reference_wrapper<ChunkProxy>> m_chunksNotFilled;
 };
+
+inline bool operator== (const ChunkStrategy::ChunkProxy& lhs,const ChunkStrategy::ChunkProxy& rhs) { return lhs.chunkGUID == rhs.chunkGUID; }
+
 
 /**
  * A system that decides which chunks to generate (and to remove)
@@ -57,16 +95,19 @@ inline void ChunkStrategySystem(ap::Scene& scene)
     auto& reg = scene.GetRegistry();
 
     //auto view = reg.view<ChunkSpawnComponent>();
-    static std::unordered_map<glm::ivec3, ChunkProxy> chunks;
-    static std::list<std::reference_wrapper<ChunkProxy>> chunksNotFilled;
+
 
     // Sync chunk proxies with actual chunks
     // TODO: We should add a callback for when we receive certain components
-    reg.View<ChunkDataComponent>(
-        [](ap::Entity e, ChunkDataComponent& data)
-        {
-            //data.pos
-        });
+    //reg.View<ChunkDataComponent>(
+    //    [](ap::Entity e, ChunkDataComponent& data)
+    //    {
+    //        if (chunks.count(data.pos) == 0)
+    //        {
+    //            chunks[data.pos].chunkID = e.GetComponent<ap::GUIDComponent>();
+    //        }
+    //        //data.pos
+    //    });
 
     reg.View<ChunkSpawnComponent>(
         [](ap::Entity e, ChunkSpawnComponent& spawnComp)
@@ -96,58 +137,66 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
     
     reg.View<ChunkDataComponent, ChunkModifiedComponent>(
         [&](ap::Entity e, ChunkDataComponent& chunk, ChunkModifiedComponent& modified)
-    {
-
-        // Generate the chunk vao
-        if (!e.HasComponent<ChunkMeshComponent>()) e.AddComponent<ChunkMeshComponent>();
-        auto& mesh = e.GetComponent<ChunkMeshComponent>();
-
-        if (chunk.chunkIter == mesh.chunkIter)
-            return;
-
-        AP_TRACE("Building chunk new:{} old:{} {}", chunk.chunkIter, mesh.chunkIter, e.GetComponent<ap::GUIDComponent>());
-        GenerateChunkMesh(chunk, mesh.vao);
-        mesh.chunkIter = chunk.chunkIter;
-
-        // Generate rigid body
-        if (!e.HasComponent<ap::RigidBodyComponent>()) e.AddComponent<ap::RigidBodyComponent>();
-        auto& physics = e.GetComponent<ap::RigidBodyComponent>();
-
-        // Calculate stride of vbo
-        auto& vbo = mesh.vao->GetVertexBuffer(0);
-        auto& elements = vbo->GetElements();
-        unsigned stride = 0;
-        for (const auto& elem : elements)
-            stride += elem.size;
-
-        auto material = ap::PhysicsMaterial(1.f, 1.f, 1.f);
-        auto shape = ap::PhysicsShape(
-            ap::PhysicsGeometry::CreateTriangleMesh(
-                vbo->GetData(),
-                mesh.vao->GetIndexBuffer()->GetData(),
-                stride),
-                material/*,
-                glm::translate(glm::identity<glm::mat4>(), -chunk.pos)*/);
-        physics.CreateStatic(glm::translate(glm::identity<glm::mat4>(), glm::vec3(chunk.pos) /*+ (glm::vec3)chunkDimensions / 2.f*/));
-        physics.GetRigidBody().AddShape(shape);
-
-        e.GetComponent<ap::TagComponent>().tag = "Chunk";
-
-        // TODO: This is a temp fix but once we build the chunk we remove any 
-        // spawn request component. We probably want to add receive callbacks
-        reg.View<ChunkSpawnComponent>(
-            [&](ap::Entity spawnEntity, ChunkSpawnComponent& spawnComp)
         {
-            if (spawnComp.pos == chunk.pos) 
+
+            // Generate the chunk vao
+            if (!e.HasComponent<ChunkMeshComponent>()) e.AddComponent<ChunkMeshComponent>();
+            auto& mesh = e.GetComponent<ChunkMeshComponent>();
+
+            if (!modified.force && chunk.chunkIter == mesh.chunkIter)
             {
-                reg.Destroy(spawnEntity);
+                //AP_TRACE("Old chunk new:{} old:{} {}", chunk.chunkIter, mesh.chunkIter, e.GetComponent<ap::GUIDComponent>());
                 return;
             }
-        });
 
-        // We only do one chunk per frame for now
-        e.RemoveComponent<ChunkModifiedComponent>();
-        return;
+            //ChunkStrategy::AddChunk(e);
+            mesh.chunkIter = chunk.chunkIter;
+            e.GetComponent<ap::TagComponent>().tag = "Chunk";
+
+            AP_TRACE("Building chunk new:{} old:{} {}", chunk.chunkIter, mesh.chunkIter, e.GetComponent<ap::GUIDComponent>());
+
+            if (chunk.isAir)
+                return;
+        
+            GenerateChunkMesh(chunk, mesh.vao);
+
+            // Generate rigid body
+            if (!e.HasComponent<ap::RigidBodyComponent>()) e.AddComponent<ap::RigidBodyComponent>();
+            auto& physics = e.GetComponent<ap::RigidBodyComponent>();
+
+            // Calculate stride of vbo
+            auto& vbo = mesh.vao->GetVertexBuffer(0);
+            auto& elements = vbo->GetElements();
+            unsigned stride = 0;
+            for (const auto& elem : elements)
+                stride += elem.size;
+
+            auto material = ap::PhysicsMaterial(1.f, 1.f, 1.f);
+            auto shape = ap::PhysicsShape(
+                ap::PhysicsGeometry::CreateTriangleMesh(
+                    vbo->GetData(),
+                    mesh.vao->GetIndexBuffer()->GetData(),
+                    stride),
+                    material/*,
+                    glm::translate(glm::identity<glm::mat4>(), -chunk.pos)*/);
+            physics.CreateStatic(glm::translate(glm::identity<glm::mat4>(), glm::vec3(chunk.pos) /*+ (glm::vec3)chunkDimensions / 2.f*/));
+            physics.GetRigidBody().AddShape(shape);
+
+            // TODO: This is a temp fix but once we build the chunk we remove any 
+            // spawn request component. We probably want to add receive callbacks
+            reg.View<ChunkSpawnComponent>(
+                [&](ap::Entity spawnEntity, ChunkSpawnComponent& spawnComp)
+            {
+                if (spawnComp.pos == chunk.pos) 
+                {
+                    reg.Destroy(spawnEntity);
+                    return;
+                }
+            });
+
+            // We only do one chunk per frame for now
+            e.RemoveComponent<ChunkModifiedComponent>();
+            return;
     }, ap::typeList<ChunkSpawnCooldownComponent>);
 }
 
@@ -172,7 +221,7 @@ public:
         reg.View<ChunkDataComponent, ChunkMeshComponent>(
             [&](ap::Entity e, ChunkDataComponent& chunk, ChunkMeshComponent& mesh)
         {
-            if(mesh.vao)
+            if(!chunk.isAir && mesh.vao)
             ap::Renderer::Submit(m_shader,mesh.vao,glm::translate(glm::identity<glm::mat4>(),glm::vec3(chunk.pos)));
         }
         //,ap::typeList<ChunkModifiedComponent>

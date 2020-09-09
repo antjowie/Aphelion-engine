@@ -46,6 +46,7 @@ namespace ap
         Component& AddComponent(Args&&... args)
         {
             AP_CORE_ASSERT(*this, "Entity is not valid");
+            AP_CORE_ASSERT(!HasComponent<Component>(), "Entity already has component");
             auto& comp = m_reg->emplace<Component>(m_handle, std::forward<Args>(args)...);
             m_createCb(*this, entt::type_info<Component>::id());
             return comp;

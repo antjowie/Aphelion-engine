@@ -34,6 +34,7 @@ struct ChunkDataComponent
     glm::ivec3 pos;
     ChunkContainer chunk;
     int chunkIter;
+    bool isAir;
 
     bool operator==(const ChunkDataComponent& rhs) const { return true; }
 };
@@ -44,6 +45,7 @@ void serialize(S& s, ChunkDataComponent& o)
     serialize(s,o.pos);
     s.container1b(o.chunk, chunkCount);
     s.value4b(o.chunkIter);
+    s.value1b(o.isAir);
 }
 
 struct ChunkSpawnCooldownComponent
@@ -70,7 +72,8 @@ template <typename S> void serialize(S& s, ChunkMeshComponent& o) {}
 
 struct ChunkModifiedComponent
 {
-    char empty;
+    // When the local chunk is surrounded we want to force a rebuild
+    bool force = false;
 };
 inline bool operator==(const ChunkModifiedComponent& lhs, const ChunkModifiedComponent& rhs) { return true; }
 template <typename S> void serialize(S& s, ChunkModifiedComponent& o) {}
@@ -93,8 +96,8 @@ inline void RegisterChunkComponents()
 {
     ap::Registry::RegisterComponent<ChunkDataComponent>();
     ap::Registry::RegisterComponent<ChunkMeshComponent>(
-        [](ap::Scene& scene, ap::Entity e) { AP_TRACE("Create mesh CB"); },
-        [](ap::Scene& scene, ap::Entity e) { AP_TRACE("Remove mesh CB"); }
+        //[](ap::Scene& scene, ap::Entity e) { AP_TRACE("Create mesh CB"); },
+        //[](ap::Scene& scene, ap::Entity e) { AP_TRACE("Remove mesh CB"); }
     );
     ap::Registry::RegisterComponent<ChunkModifiedComponent>();
     ap::Registry::RegisterComponent<ChunkSpawnCooldownComponent>();

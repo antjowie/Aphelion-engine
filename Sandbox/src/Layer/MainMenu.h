@@ -45,7 +45,7 @@ public:
 
         // TODO: If server or client fails this doesn't get updated
         // it should be communicated via events
-        static bool client = false;
+        bool client = m_client;
         static char serverIP[32] = "127.0.0.1";
         if (ImGui::Checkbox("Client", &client))
         {
@@ -66,7 +66,7 @@ public:
         ImGui::SameLine(); ImGui::Text("ip ");
         ImGui::SameLine(); ImGui::InputText("#IP", serverIP, 32);
 
-        static bool server = false;
+        bool server = m_server;
         if (ImGui::Checkbox("Server", &server))
         {
             if (server)
