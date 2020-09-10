@@ -41,6 +41,7 @@ namespace ap
     void PhysicsScene::RemoveActor(RigidBody& actor)
     {
         m_handle->removeActor(*actor.GetHandle());
+        actor = {};
     }
 
     void PhysicsScene::AddAggregate(PhysicsAggregate& aggregate)

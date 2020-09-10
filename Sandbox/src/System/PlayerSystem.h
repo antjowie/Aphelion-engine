@@ -39,19 +39,22 @@ public:
                 const auto& dir = -t.t.GetForward(); // Camera faces opposite of view
                 const auto& distance = 10.f;
 
+                m_shader->Bind();
                 ap::Renderer::BeginScene(m_cam);
+
                 auto hits = scene.Raycast(orig, dir, distance);
                 for (const auto& hit : hits)
                 {
-                    //const auto& chunkPos = hit.first.GetComponent<ap::TransformComponent>().t.GetPosition();
-                    auto chunk = hit.first;
+                    // Get block player is looking at
+                    glm::vec3 blockWorldPos = hit.second.pos - hit.second.normal * 0.5f + glm::vec3(0.5f);
+                    blockWorldPos = glm::floor(blockWorldPos);
 
                     // Calculate block index in array based on hit coordinates
-                    glm::vec3 posInBlock = hit.second.pos - hit.second.normal * 0.5f + glm::vec3(0.5f);
+                    //glm::vec3 posInBlock = hit.second.pos - hit.second.normal * 0.5f + glm::vec3(0.5f);
                     //posInBlock -= chunkPos;
-                    posInBlock = glm::ivec3(posInBlock);
+                    //posInBlock = glm::ivec3(posInBlock);
 
-                    glm::mat4 translate = glm::translate(glm::identity<glm::mat4>(), posInBlock);
+                    glm::mat4 translate = glm::translate(glm::identity<glm::mat4>(), blockWorldPos);
                     ap::Renderer::Submit(m_shader, m_vao, glm::scale(translate, glm::vec3(1.1f)));
                     //AP_INFO("HIT");
                     InputComponent input;
@@ -61,14 +64,14 @@ public:
                     if (ap::Input::IsButtonPressed(ap::ButtonCode::Right))
                     {
                         input.place = true;
-                        input.blockPos = posInBlock + hit.second.normal;
+                        input.blockPos = blockWorldPos + hit.second.normal;
                         ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(input, 0)));
                     }
                     // Check if player breaks a block
                     else if (cooldown == 0.f && ap::Input::IsButtonPressed(ap::ButtonCode::Left))
                     {
                         input.mine = true;
-                        input.blockPos = posInBlock;
+                        input.blockPos = blockWorldPos;
                         ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(input, 0)));
 
                         cooldown = 0.2f;

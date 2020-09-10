@@ -82,7 +82,7 @@ struct InputComponent
 {
     bool mine = false;
     bool place = false;
-    glm::vec3 blockPos = glm::vec3(0);
+    glm::ivec3 blockPos{ 0 };
 };
 inline bool operator==(const InputComponent& lhs, const InputComponent& rhs) { return true; }
 template <typename S> void serialize(S& s, InputComponent& o) 

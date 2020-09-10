@@ -166,9 +166,9 @@ void ClientLayer::OnUpdate(ap::Timestep ts)
     }
     clientIsReconciling = false;
 
-    m_scene.Simulate(ts);
     m_chunks.Update();
     m_chunks.Render(m_camera.GetCamera());
+    m_scene.Simulate(ts);
 }
 
 void ClientLayer::OnGuiRender()

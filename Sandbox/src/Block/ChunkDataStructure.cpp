@@ -59,6 +59,7 @@ void GenerateChunkRb(ChunkData& chunk)
 {
     // Generate rigid body
     auto& physics = chunk.rb;
+    AP_ASSERT(!physics.Valid(), "Previous rb not deleted sucsessfully");
     //static unsigned nullGUID = 0;
     //physics.SetUserData(&nullGUID);
 
@@ -77,7 +78,6 @@ void GenerateChunkRb(ChunkData& chunk)
             stride),
         material/*,
         glm::translate(glm::identity<glm::mat4>(), -chunk.pos)*/);
-    AP_INFO(chunk.pos.x);
     physics = ap::RigidBody::CreateStatic(glm::translate(glm::identity<glm::mat4>(), glm::vec3(chunk.pos) /*+ (glm::vec3)chunkDimensions / 2.f*/));
     physics.AddShape(shape);
 }
@@ -116,10 +116,13 @@ void ChunkDataStructure::AddChunk(const ChunkDataComponent& chunk)
 
     // Generate the chunk vao
     AP_TRACE("Building chunk {} {} {}", chunk.pos.x, chunk.pos.y, chunk.pos.z);
+
+    if (data.rb.Valid())
+        m_scene.RemoveActor(data.rb);
+
     if (chunk.isAir)
     {
-        data.vao = nullptr;
-        data.rb = {};
+        data.vao = nullptr;        
     }
     else
     {

@@ -227,23 +227,28 @@ inline void InputResponseSystem(ap::Scene& scene)
     reg.View<InputComponent>(
         [&](ap::Entity e, InputComponent& input)
         {
-            auto blockWorldPos = glm::ivec3(input.blockPos);
-            auto chunkPos = blockWorldPos - blockWorldPos % glm::ivec3(chunkDimensions);
+            auto blockWorldPos = input.blockPos;
+            // NOTE: Negative mod returns a positive number. I'd expect a negative, so because of that. We want to subract in case of negative values
+            auto mod = blockWorldPos % glm::ivec3(chunkDimensions);
+            // For example block pos -13 mod 8 returns 5 but I want -5 so update the sign
+            // -13 - -5 = -8 which is our chunk pos
+            //mod *= (blockWorldPos / glm::abs(blockWorldPos)); // Make sure to retain the sign
+            auto chunkWorldPos = blockWorldPos - mod;
             // Get the correct chunk
             reg.View<ChunkDataComponent>(
                 [&](ap::Entity chunk, ChunkDataComponent& chunkData)
                 {
                     //AP_CORE_TRACE("{} {} {} {} {} {}", (int)chunkData.pos.x, (int)chunkData.pos.y, (int)chunkData.pos.z, (int)
                     //    chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
-                    if (chunkData.pos == chunkPos)
+                    if (chunkData.pos == chunkWorldPos)
                     {
                         //AP_CORE_INFO("FOUND");
-                        auto blockPos = blockWorldPos - chunkPos;
+                        auto blockChunkPos = blockWorldPos - chunkWorldPos;
                         
                         if(input.mine)
-                            GetBlock(chunkData.chunk, blockPos.x, blockPos.y, blockPos.z) = BlockType::Air;
+                            GetBlock(chunkData.chunk, blockChunkPos.x, blockChunkPos.y, blockChunkPos.z) = BlockType::Air;
                         else
-                            GetBlock(chunkData.chunk, blockPos.x, blockPos.y, blockPos.z) = BlockType::Stone;
+                            GetBlock(chunkData.chunk, blockChunkPos.x, blockChunkPos.y, blockChunkPos.z) = BlockType::Stone;
                         chunkData.chunkIter++;
 
                         // TODO: Only send this to interested parties
