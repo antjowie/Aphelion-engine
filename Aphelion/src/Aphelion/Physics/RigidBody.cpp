@@ -128,13 +128,11 @@ namespace ap
     
     void RigidBody::SetUserData(void* data)
     {
-        AP_CORE_ASSERT(Valid(), "Rigidbody has no valid handle");
-        m_handle->userData = data;
+        if(Valid()) m_handle->userData = data;
     }
     
     void* RigidBody::GetUserData()
     {
-        AP_CORE_ASSERT(Valid(), "Rigidbody has no valid handle");
-        return m_handle->userData;
+        return Valid() ? m_handle->userData : nullptr;
     }
 }

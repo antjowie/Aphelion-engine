@@ -4,6 +4,7 @@
 #include "Component/Component.h"
 #include "Primitives.h"
 #include "Component/ServerComponent.h"
+#include "Block/ChunkDataStructure.h"
 
 #include <Aphelion/Core/Application.h>
 #include <Aphelion/ECS/Scene.h>
@@ -12,121 +13,51 @@
 #include <Aphelion/Core/Event/NetEvent.h>
 
 void GenerateChunk(ChunkDataComponent& chunk);
-void GenerateChunkMesh(const ChunkDataComponent& chunk, ap::VertexArrayRef& vao);
-
-// Hash func for all vec3 types
-namespace std
-{   
-    template<typename T> struct hash<glm::vec<3,T>>
-    {
-        std::size_t operator()(glm::vec<3, T> const& v) const noexcept
-        {
-            std::size_t h1 = /*std::hash<T>*/(v.x);
-            std::size_t h2 = /*std::hash<T>*/(v.y);
-            std::size_t h3 = /*std::hash<T>*/(v.z);
-            return h1 ^ (h2 << 1) ^ (h3 << 10); // or use boost::hash_combine
-        }
-    };
-}
-
-/**
- * The strategy is responsible for setting up the neigbors of a chunk
- * All new chunks and removed chunks are forwarded to here
- * Then it adds chunk modified components when needed
- * and it makes chunk spawn requests
- * 
- * It does not generate mesh data
- * This is handled by the ChunkMeshGenerateSystem
- */
-class ChunkStrategy
-{
-public:
-    struct ChunkProxy
-    {
-        unsigned chunkGUID;
-
-        union
-        {
-            ChunkProxy* v[6];
-            struct
-            {
-                ChunkProxy* top;
-                ChunkProxy* left;
-                ChunkProxy* front;
-                ChunkProxy* bottom;
-                ChunkProxy* right;
-                ChunkProxy* back;
-            };
-        }neighbor;
-        unsigned neighborCount = 0;
-
-        //bool operator== (const ChunkProxy& rhs) const { return chunkGUID == rhs.chunkGUID;}
-    };
-
-    ChunkStrategy()
-    {
-        m_chunks.clear();
-        m_chunksNotFilled.clear();
-    }
-
-    static void AddChunk(ap::Entity& chunk);
-    // This WILL remove the chunk entity
-    static void RemoveChunk(ap::Entity& chunk);
-    void operator() (ap::Scene& scene);
-
-    /// Radius in chunk units
-    static float m_radius;
-    // This has to be set up in the client
-    static ap::Scene* m_scene;
-
-private:
-    static std::unordered_map<glm::ivec3, ChunkProxy> m_chunks;
-    static std::list<std::reference_wrapper<ChunkProxy>> m_chunksNotFilled;
-};
-
-inline bool operator== (const ChunkStrategy::ChunkProxy& lhs,const ChunkStrategy::ChunkProxy& rhs) { return lhs.chunkGUID == rhs.chunkGUID; }
-
-
+//void GenerateChunkMesh(const ChunkDataComponent& chunk, ap::VertexArrayRef& vao);
 /**
  * A system that decides which chunks to generate (and to remove)
  */
-inline void ChunkStrategySystem(ap::Scene& scene)
+class ChunkHandlerSystem
 {
-    auto& reg = scene.GetRegistry();
+public:
+    ChunkHandlerSystem(ChunkDataStructure& chunks)
+        : m_chunks(chunks) {}
 
-    //auto view = reg.view<ChunkSpawnComponent>();
-
-
-    // Sync chunk proxies with actual chunks
-    // TODO: We should add a callback for when we receive certain components
-    //reg.View<ChunkDataComponent>(
-    //    [](ap::Entity e, ChunkDataComponent& data)
-    //    {
-    //        if (chunks.count(data.pos) == 0)
-    //        {
-    //            chunks[data.pos].chunkID = e.GetComponent<ap::GUIDComponent>();
-    //        }
-    //        //data.pos
-    //    });
-
-    reg.View<ChunkSpawnComponent>(
-        [](ap::Entity e, ChunkSpawnComponent& spawnComp)
+    void operator() (ap::Scene& scene)
     {
-        // TODO: These should not be stored as entities
-        // Client will keep requesting entities
-        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(spawnComp, 0)));
-    });
+        auto& reg = scene.GetRegistry();
+        reg.View<ChunkDataComponent>(
+            [&](ap::Entity e, ChunkDataComponent& data)
+            {
+                m_chunks.AddChunk(data);
 
-    //auto& player = reg.view<ap::Transform,Player>().get<ap::Transform>();
-    //auto playerView = reg.view<ap::Transform,Player>();
-    //if(!playerView.empty())
-    //{
-    //    auto& player = playerView.get<ap::Transform>(playerView.front());
+                // TEMP: Spawn will be a command, should not be in ecs
+                reg.View<ChunkSpawnComponent>(
+                    [&](ap::Entity spawnEntity, ChunkSpawnComponent& spawnComp)
+                    {
+                        if (spawnComp.pos == data.pos)
+                        {
+                            reg.Destroy(spawnEntity);
+                            return;
+                        }
+                    });
 
-    //    // Generate chunks around player
-    //    // TODO: Write this, for now I just manually spawn some chunks
-    //}
-}
+                reg.Destroy(e);
+            });
+
+        // TEMP: This will normally be done by the chunk data structure
+        reg.View<ChunkSpawnComponent>(
+            [](ap::Entity e, ChunkSpawnComponent& spawnComp)
+            {
+                // TODO: These should not be stored as entities
+                // Client will keep requesting entities
+                ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(spawnComp, 0)));
+            });
+    }
+
+private:
+    ChunkDataStructure& m_chunks;
+};
 
 /**
  * A client side system to create chunks and their data
@@ -157,7 +88,7 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
             if (chunk.isAir)
                 return;
         
-            GenerateChunkMesh(chunk, mesh.vao);
+            //GenerateChunkMesh(chunk, mesh.vao);
 
             // Generate rigid body
             if (!e.HasComponent<ap::RigidBodyComponent>()) e.AddComponent<ap::RigidBodyComponent>();

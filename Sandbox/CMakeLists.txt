@@ -9,6 +9,8 @@ add_executable(Sandbox
     src/Block/BlockLibrary.h
     src/Block/BlockType.cpp
     src/Block/BlockType.h
+    src/Block/ChunkDataStructure.cpp
+    src/Block/ChunkDataStructure.h
 
     src/Component/ChunkComponent.h
     src/Component/Component.h

@@ -72,7 +72,8 @@ target_precompile_headers(
         <glm/gtc/matrix_transform.hpp>
         <glm/gtc/type_ptr.hpp>
         <glm/gtx/quaternion.hpp>
-        
+        <glm/gtx/hash.hpp>
+
         Log.h
 )
 

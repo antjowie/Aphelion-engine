@@ -19,17 +19,18 @@ void ClientLayer::OnAttach()
     m_scene.RegisterSystem(DeathSystem);
     m_scene.RegisterSystem(DrawSystem(m_camera.GetCamera()));
 
-    m_scene.RegisterSystem(ChunkMeshBuilderSystem);
-    m_scene.RegisterSystem(ChunkRenderSystem(m_camera.GetCamera()));
+    m_scene.RegisterSystem(ChunkHandlerSystem(m_chunks));
+    //m_scene.RegisterSystem(ChunkMeshBuilderSystem);
+    //m_scene.RegisterSystem(ChunkRenderSystem(m_camera.GetCamera()));
 
     m_scene.RegisterSystem(PlayerView(m_camera.GetCamera()));
-
+    
     //m_camera.GetCamera().transform.SetPosition(glm::vec3(30, -5, 100));
     m_camera.GetCamera().transform.SetPosition(glm::vec3(3, 8, 16));
     //m_camera.GetCamera().transform.LookAt(glm::vec3(1, 0, 0));
 
     // TEMP: Spawn some nice chunks here
-    m_scene.RegisterSystem(ChunkStrategySystem);
+    //m_scene.RegisterSystem(ChunkStrategySystem);
     auto& reg = m_scene.GetRegistry();
     for(int x = -2; x < 5; x++)
         for(int z = -2; z < 2; z++)
@@ -50,8 +51,7 @@ void ClientLayer::OnAttach()
         //AP_WARN("Destroyed {}", entity.GetComponent<ap::GUIDComponent>());    
     });
 #endif
-
-    m_camera.GetCamera().transform.Move(ap::Transform::GetWorldForward() * 5.f);
+    //m_camera.GetCamera().transform.Move(ap::Transform::GetWorldForward() * 5.f);
     m_camera.Enable(true);
 }
 
@@ -167,6 +167,8 @@ void ClientLayer::OnUpdate(ap::Timestep ts)
     clientIsReconciling = false;
 
     m_scene.Simulate(ts);
+    m_chunks.Update();
+    m_chunks.Render(m_camera.GetCamera());
 }
 
 void ClientLayer::OnGuiRender()

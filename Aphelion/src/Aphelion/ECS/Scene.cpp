@@ -58,7 +58,11 @@ namespace ap
         std::vector<std::pair<Entity,PhysicsRaycastHit>> vec;
         if (hit)
         {
-            vec.emplace_back(GetRegistry(0).Get(*reinterpret_cast<unsigned*>(hit.rb.GetUserData())), hit);
+            void* userData = hit.rb.GetUserData();
+            Entity e;
+            if (userData) e = GetRegistry(0).Get(*reinterpret_cast<unsigned*>(userData));
+
+            vec.emplace_back(e, hit);
         }
 
         return vec;

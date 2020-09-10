@@ -24,6 +24,7 @@ namespace ap
         Scene();
 
         Registry& GetRegistry(unsigned rollback = 0);
+        PhysicsScene& GetPhysicsScene() { return m_physicsScene; }
 
         unsigned GetSimulationCount() const { return m_simulationCount; }
         unsigned GetCurrentSimulationIndex() const { return m_currentSimulation; }

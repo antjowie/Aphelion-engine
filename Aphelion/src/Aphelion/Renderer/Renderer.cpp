@@ -43,7 +43,7 @@ namespace ap
 
     void Renderer::Submit(const ShaderRef& shader, const VertexArrayRef& vertexArray, const glm::mat4& transform)
     {
-        shader->Bind();
+        //shader->Bind();
 
         shader->SetMat4("aTransform", glm::value_ptr(transform));
         shader->SetMat4("aVP", glm::value_ptr(data.projection * data.view));
