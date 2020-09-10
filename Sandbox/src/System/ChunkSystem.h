@@ -149,7 +149,6 @@ inline void ChunkMeshBuilderSystem(ap::Scene& scene)
                 return;
             }
 
-            //ChunkStrategy::AddChunk(e);
             mesh.chunkIter = chunk.chunkIter;
             e.GetComponent<ap::TagComponent>().tag = "Chunk";
 
