@@ -169,10 +169,7 @@ void ClientLayer::OnGuiRender()
 {
     if (ImGui::Begin("Stats"))
     {
-
-
-
-        if(ImGui::CollapsingHeader("Client"))
+        if(ImGui::CollapsingHeader("Client", ImGuiTreeNodeFlags_DefaultOpen))
         {
             DrawSceneStats(m_scene);
             ImGui::Text("Chunk request count %i", m_chunks.ChunkRequestCount());

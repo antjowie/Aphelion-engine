@@ -174,6 +174,9 @@ void ChunkDataStructure::AddChunk(const ChunkDataComponent& chunk)
             if (!n)
             {
                 if (chunk.isSolid && i == Dir::Bottom) break;
+                // NOTE: this is gonna make it so that blocks in the air are not spawned
+                // It's gonna look pretty weird
+                if (chunk.isAir && i == Dir::Top) break;
                 
                 auto nPos = GetNeighborWorldPos(data.pos, i);
                 //AP_INFO("Requesting {} {} {}", nPos.x, nPos.y, nPos.z);
@@ -242,7 +245,13 @@ void ChunkDataStructure::SetPos(const glm::vec3& playerPos)
     if (m_playerChunkPos != oldPos)
     {
         // TODO: Resort request queue
-        m_chunksToRequest.clear();
+        //m_chunksToRequest.clear();
+        std::sort(m_chunksToRequest.begin(), m_chunksToRequest.end(), [&](const glm::ivec3& lhs, const glm::ivec3& rhs)
+            {
+                auto dis1 = glm::distance2(glm::vec3(lhs), glm::vec3(m_playerChunkPos));
+                auto dis2 = glm::distance2(glm::vec3(lhs), glm::vec3(m_playerChunkPos));
+                return dis1 < dis2;
+            });
     }
 }
 
