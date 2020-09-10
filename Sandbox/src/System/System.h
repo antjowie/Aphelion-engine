@@ -42,13 +42,43 @@ public:
     {
         auto& reg = scene.GetRegistry();
 
-        reg.View<ap::TransformComponent, Player, ap::GUIDComponent>(
-            [&](ap::Entity e, ap::TransformComponent& t, Player&, ap::GUIDComponent& guid)
-        {
-            t.t = m_cam.get().transform;
-            auto packet = ap::Serialize(t, guid);
-            ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(packet));
-        });
+        reg.View<ap::TransformComponent, ap::RigidBodyComponent, Player, ap::GUIDComponent>(
+            [&](ap::Entity e, ap::TransformComponent& t, ap::RigidBodyComponent& rb, Player&, ap::GUIDComponent& guid)
+            {
+                t.t = m_cam.get().transform;
+                
+                if (ap::Input::IsKeyPressed(ap::KeyCode::R))
+                {
+                    auto ball = reg.Create();
+                    auto& rb = ball.AddComponent<ap::RigidBodyComponent>();
+                    rb.CreateDynamic(10.f,t.t.GetWorldMatrix());
+                    rb.GetRigidBody().AddShape(ap::PhysicsShape{ ap::PhysicsGeometry::CreateSphere(1.f), ap::PhysicsMaterial(1,1,1) });
+                }
+
+                return;
+
+                //if (!rb.GetRigidBody()) return;
+
+                //t.t = m_cam.get().transform;
+                glm::vec2 offset{ 0 };
+                if (ap::Input::IsKeyPressed(ap::KeyCode::W)) offset.y -= 1.f;
+                if (ap::Input::IsKeyPressed(ap::KeyCode::A)) offset.x -= 1.f;
+                if (ap::Input::IsKeyPressed(ap::KeyCode::S)) offset.y += 1.f;
+                if (ap::Input::IsKeyPressed(ap::KeyCode::D)) offset.x += 1.f;
+
+                if (ap::Input::IsKeyPressed(ap::KeyCode::Space)) rb.GetRigidBody().SetLinearVelocity(glm::vec3(0,10.f,0));
+
+
+                //t.t.SetRotation(m_cam.get().transform.GetRotation());
+                //auto newT = t.t;
+                //newT.Move(glm::vec3(offset.x, 0, offset.y));
+                //
+                auto rbT = rb.GetRigidBody().GetWorldTransform();
+                m_cam.get().transform.SetPosition(rbT[3]);
+
+                auto packet = ap::Serialize(t, guid);
+                ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(packet));
+            });
     }
 
 private:
@@ -60,10 +90,31 @@ inline void DeathSystem(ap::Scene& scene)
     auto& reg = scene.GetRegistry();
 
     reg.View<Health>([&](ap::Entity e, Health& h)
-    {
-        if(h.health <= 0)
-            reg.Destroy(e);
-    });
+        {
+            // TODO: Very bad but only players have health so if they don't have a phyiscs component we add that here
+            if (!e.HasComponent<ap::RigidBodyComponent>())
+            {
+                e.GetComponent<ap::TagComponent>().tag = "Player";
+                auto& rb = e.AddComponent<ap::RigidBodyComponent>();
+                auto& t = e.GetComponent<ap::TransformComponent>();
+
+                rb.CreateDynamic(1.f, t.t.GetWorldMatrix());
+
+                auto hb = ap::PhysicsGeometry::CreateBox(glm::vec3(0.3f, 0.8f, 0.3f));
+                auto mat = ap::PhysicsMaterial(0.5f, 0.5f, 0.5f);
+                rb.GetRigidBody().AddShape(ap::PhysicsShape(hb, mat));
+
+                // TODO: Add axis locking to interface
+                reinterpret_cast<physx::PxRigidDynamic*>(rb.GetRigidBody().GetHandle())
+                    ->setRigidDynamicLockFlags(
+                        physx::PxRigidDynamicLockFlag::eLOCK_LINEAR_Z | 
+                        physx::PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | 
+                        physx::PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
+            }
+
+            if(h.health <= 0)
+                reg.Destroy(e);
+        });
 }
 
 class DrawSystem

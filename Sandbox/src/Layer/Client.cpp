@@ -105,8 +105,11 @@ void ClientLayer::OnEvent(ap::Event& event)
         })) return;
 }
 
+static bool pause = false;
 void ClientLayer::OnUpdate(ap::Timestep ts)
 {
+    if (pause) return;
+
     auto& client = ap::NetClient::Get();
     if (!client.IsConnected()) return;
 
@@ -148,11 +151,11 @@ void ClientLayer::OnUpdate(ap::Timestep ts)
             entity.HasComponent<Player>() && p.clientSimulation != -1 && 
             !m_scene.GetRegistry(delta).HandleAndReconcilePacket(guid, p))
         {
-            auto newT = ap::Deserialize<ap::Transform>(p);
+            auto newT = ap::Deserialize<ap::TransformComponent>(p);
 
             AP_WARN("Reconciliation!!!");
             // TODO: Reconciliate subsequent registries
-            auto player = entity.GetComponent<ap::Transform>() = newT;
+            auto player = entity.GetComponent<ap::TransformComponent>() = newT;
             //m_scene.GetRegistry().HandlePacket(local, p);
         }
     }
@@ -177,6 +180,7 @@ void ClientLayer::OnGuiRender()
             DrawSceneStats(m_scene);
             ImGui::Text("Delta entities %i", delta);
             ImGui::Text("Chunk request count %i", m_chunks.ChunkRequestCount());
+            ImGui::Checkbox("Pause ", &pause);
 
             static int tick = 60;
             ImGui::SliderInt("Tickrate", &tick, 1, 200);

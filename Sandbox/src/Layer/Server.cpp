@@ -40,6 +40,7 @@ void ServerLayer::OnEvent(ap::Event& event)
 
             auto& guid = entity.GetComponent<ap::GUIDComponent>().guid;
             auto& t = entity.GetComponent<ap::TransformComponent>();
+            t.t.SetPosition(glm::vec3(0, 100, 0));
             auto& s = entity.AddComponent<Sprite>();
             s.image = "res/image.png";
             s.LoadTexture();

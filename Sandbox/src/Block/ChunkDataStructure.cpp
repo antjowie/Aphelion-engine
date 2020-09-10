@@ -61,10 +61,15 @@ void GenerateChunkMesh(ChunkData& chunk)
 void GenerateChunkRb(ChunkData& chunk)
 {
     // Generate rigid body
-    auto& physics = chunk.rb;
-    AP_ASSERT(!physics.Valid(), "Previous rb not deleted sucsessfully");
+    auto& rb = chunk.rb;
+    rb = ap::RigidBody::CreateStatic(glm::translate(glm::identity<glm::mat4>(), glm::vec3(chunk.pos) /*+ (glm::vec3)chunkDimensions / 2.f*/));
+    rb.AddShape(ap::PhysicsShape{ ap::PhysicsGeometry::CreateBox(chunkDimensions/2), ap::PhysicsMaterial(1.f, 1.f, 1.f) });
+
+    return;
+
+    AP_ASSERT(!rb.Valid(), "Previous rb not deleted sucsessfully");
     //static unsigned nullGUID = 0;
-    //physics.SetUserData(&nullGUID);
+    //rb.SetUserData(&nullGUID);
 
     // Calculate stride of vbo
     auto& vbo = chunk.vao->GetVertexBuffer(0);
@@ -81,8 +86,8 @@ void GenerateChunkRb(ChunkData& chunk)
             stride),
         material/*,
         glm::translate(glm::identity<glm::mat4>(), -chunk.pos)*/);
-    physics = ap::RigidBody::CreateStatic(glm::translate(glm::identity<glm::mat4>(), glm::vec3(chunk.pos) /*+ (glm::vec3)chunkDimensions / 2.f*/));
-    physics.AddShape(shape);
+    rb = ap::RigidBody::CreateStatic(glm::translate(glm::identity<glm::mat4>(), glm::vec3(chunk.pos) /*+ (glm::vec3)chunkDimensions / 2.f*/));
+    rb.AddShape(shape);
 }
 
 
