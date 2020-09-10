@@ -9,6 +9,7 @@
 
 #include <glm/gtx/hash.hpp>
 #include <unordered_map>
+#include <queue>
 
 struct ChunkData
 {
@@ -33,7 +34,23 @@ public:
     void Render(const ap::PerspectiveCamera& cam);
 
 private:
+    enum Dir
+    {
+        Top,
+        Left,
+        Front,
+        Bottom,
+        Right,
+        Back
+    };
+
+    std::array<ChunkData*,6> GetNeighbors(const glm::ivec3& chunkWorldPos);
+
+    unsigned m_radius = 4;
+    glm::ivec3 m_playerChunkPos{ 0 };
+
     std::unordered_map<glm::ivec3, ChunkData> m_chunks;
+    std::deque<glm::ivec3> m_chunksToRequest;
 
     ap::ShaderRef m_shader;
     ap::TextureRef m_texture;

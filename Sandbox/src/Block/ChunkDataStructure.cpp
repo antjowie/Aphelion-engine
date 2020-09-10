@@ -2,6 +2,9 @@
 #include "Block/BlockLibrary.h"
 #include "Primitives.h"
 #include <Aphelion/Renderer/Renderer.h>
+#include <Aphelion/Core/Application.h>
+#include <Aphelion/Core/Event/NetEvent.h>
+
 
 void GenerateChunkMesh(ChunkData& chunk)
 {
@@ -90,6 +93,26 @@ void BuildChunk(ChunkData& chunk)
     GenerateChunkRb(chunk);
 }
 
+glm::ivec3 GetNeighborWorldPos(const glm::ivec3& chunkWorldPos, int dir)
+{
+    glm::ivec3 offset(0);
+    if (dir == 0) offset.y = (int)chunkDimensions.y;
+    else if (dir == 1) offset.x = -(int)chunkDimensions.x;
+    else if (dir == 2) offset.z = (int)chunkDimensions.z;
+    else if (dir == 3) offset.y = -(int)chunkDimensions.y;
+    else if (dir == 4) offset.x = (int)chunkDimensions.x;
+    else if (dir == 5) offset.z = -(int)chunkDimensions.z;
+
+    return chunkWorldPos + offset;
+}
+
+bool FullyPopulated(const std::array<ChunkData*, 6>& neighbors)
+{
+    for (auto n : neighbors)
+        if (!n) return false;
+    return true;
+}
+
 ChunkDataStructure::ChunkDataStructure(ap::PhysicsScene& scene)
     : m_shader(ap::Shader::Create("res/shader/Voxel.glsl"))
     , m_texture(ap::ArrayTexture2D::Create(2, 2, "res/texture.png"))
@@ -102,9 +125,14 @@ ChunkDataStructure::ChunkDataStructure(ap::PhysicsScene& scene)
 
 void ChunkDataStructure::AddChunk(const ChunkDataComponent& chunk)
 {
+    AP_INFO("Got {} {} {}", chunk.pos.x, chunk.pos.y, chunk.pos.z);
     // Check if chunk already exists and is not received again
     if (m_chunks.count(chunk.pos) == 1)
     {
+        // Remove from chunks to request
+        auto request = std::find(m_chunksToRequest.begin(), m_chunksToRequest.end(), chunk.pos);
+        if (request != m_chunksToRequest.end()) m_chunksToRequest.erase(request);
+
         auto& current = m_chunks.at(chunk.pos);
         if (current.chunkIter == chunk.chunkIter) return;
     }
@@ -115,7 +143,7 @@ void ChunkDataStructure::AddChunk(const ChunkDataComponent& chunk)
     data.pos = chunk.pos;
 
     // Generate the chunk vao
-    AP_TRACE("Building chunk {} {} {}", chunk.pos.x, chunk.pos.y, chunk.pos.z);
+    //AP_TRACE("Building chunk {} {} {}", chunk.pos.x, chunk.pos.y, chunk.pos.z);
 
     if (data.rb.Valid())
         m_scene.RemoveActor(data.rb);
@@ -129,10 +157,80 @@ void ChunkDataStructure::AddChunk(const ChunkDataComponent& chunk)
         BuildChunk(data);
         m_scene.AddActor(data.rb);
     }
+
+    // Remove from chunks to request
+    auto request = std::find(m_chunksToRequest.begin(), m_chunksToRequest.end(), data.pos);
+    if (request != m_chunksToRequest.end()) m_chunksToRequest.erase(request);
+
+    // If inside radius, request neighbor chunks
+    const auto distance = glm::length2(glm::vec3(data.pos - m_playerChunkPos) / glm::vec3(chunkDimensions));
+    if (distance < m_radius * m_radius)
+    {
+        auto neighbors = GetNeighbors(data.pos);
+
+        for (int i = 0; i < 6; i++)
+        {
+            auto& n = neighbors[i];
+            if (!n)
+            {
+                auto nPos = GetNeighborWorldPos(data.pos, i);
+                AP_INFO("Requesting {} {} {}", nPos.x, nPos.y, nPos.z);
+                m_chunksToRequest.push_back(nPos);
+            }
+        }
+    }
 }
 
 void ChunkDataStructure::Update()
 {
+    //for (int x = -2; x < 5; x++)
+    //    for (int z = -2; z < 2; z++)
+    //    {
+    //        ChunkSpawnComponent spawn;
+
+    //        spawn.pos = glm::vec3(x * chunkDimensions.x, 0, z * chunkDimensions.z);
+
+    //        if(m_chunks.count(spawn.pos) == 0)
+    //        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(spawn, 0)));
+    //    }
+
+    /*
+    How to implement prioritized chunk loading
+    I will just load in a circular pattern. It seems the easiest for now. 
+    In a fifo queue load the initial chunk. 
+    For each chunk without full neighbors
+        If in render distance
+        Add all neighboring chunks to the list.
+
+    Do the following every t seconds.
+    Check if we can remove chunks that are outside of radius.
+    Check if center chunk still has full neighbors
+        else sort non full neighbors based on distance from center
+    Get the chunks without fully populated neighbors and request their chunks if inside radius.
+    */
+
+    if (m_chunks.count(m_playerChunkPos) == 0)
+    {
+        ChunkSpawnComponent spawn;
+        spawn.pos = m_playerChunkPos;
+        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(spawn, 0)));
+        return;
+    }
+
+    //AP_TRACE(m_chunksToRequest.size());
+
+    int iter = 1;
+    for (const auto& request : m_chunksToRequest)
+    {
+        AP_WARN("Waiting for {} {} {}", request.x, request.y, request.z);
+
+        ChunkSpawnComponent spawn;
+        spawn.pos = request;
+        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(spawn, 0)));
+
+        iter--;
+        if (iter <= 0) return;
+    }
 }
 
 void ChunkDataStructure::Render(const ap::PerspectiveCamera& cam)
@@ -149,4 +247,20 @@ void ChunkDataStructure::Render(const ap::PerspectiveCamera& cam)
     }
 
     ap::Renderer::EndScene();
+}
+
+std::array<ChunkData*, 6> ChunkDataStructure::GetNeighbors(const glm::ivec3& chunkWorldPos)
+{
+    std::array<ChunkData*, 6> ret;
+   
+    for (int i = 0; i < 6; i++)
+    {
+        auto neighborPos = GetNeighborWorldPos(chunkWorldPos, i);
+
+        ret[i] = nullptr;
+        if (m_chunks.count(neighborPos) == 1)
+            ret[i] = &m_chunks.at(neighborPos);
+    }
+
+    return ret;
 }

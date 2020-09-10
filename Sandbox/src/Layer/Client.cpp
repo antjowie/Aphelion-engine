@@ -29,18 +29,6 @@ void ClientLayer::OnAttach()
     m_camera.GetCamera().transform.SetPosition(glm::vec3(3, 8, 16));
     //m_camera.GetCamera().transform.LookAt(glm::vec3(1, 0, 0));
 
-    // TEMP: Spawn some nice chunks here
-    //m_scene.RegisterSystem(ChunkStrategySystem);
-    auto& reg = m_scene.GetRegistry();
-    for(int x = -2; x < 5; x++)
-        for(int z = -2; z < 2; z++)
-        {
-            auto entity = reg.Create();
-            auto& data = entity.AddComponent<ChunkSpawnComponent>();
-            
-            data.pos = glm::vec3(x * chunkDimensions.x, 0, z * chunkDimensions.z);
-        }    
-
 #ifdef AP_DEBUG
     m_scene.SetOnEntityCreateCb([](ap::Entity entity)
     {
@@ -52,6 +40,7 @@ void ClientLayer::OnAttach()
     });
 #endif
     //m_camera.GetCamera().transform.Move(ap::Transform::GetWorldForward() * 5.f);
+    ap::Input::SetCursorPos(glm::vec2(0));
     m_camera.Enable(true);
 }
 

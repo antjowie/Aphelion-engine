@@ -115,6 +115,20 @@ inline const BlockType& GetBlock(const ChunkContainer& chunk, unsigned x, unsign
     return chunk.at((x * chunkDimensions.x * chunkDimensions.y) + (y * chunkDimensions.y) + z);
 }
 
+inline glm::ivec3 WorldToChunkCoordinates(const glm::ivec3& worldPos)
+{
+    auto mod = worldPos % glm::ivec3(chunkDimensions);
+    // When we pass -2 we get back -2.
+    // The problem here is that -2 is part or chunk -8
+    // chunk pos = -2 - -2 is 0. It should be -8
+
+     //To fix this, I add additional chunk offset to negative chunk coordinates
+    if (mod.x < 0) mod.x = chunkDimensions.x + mod.x;
+    if (mod.y < 0) mod.y = chunkDimensions.y + mod.y;
+    if (mod.z < 0) mod.z = chunkDimensions.z + mod.z;
+
+    return worldPos - mod;
+}
 /**
  * Expected parameters
  * block& x y z

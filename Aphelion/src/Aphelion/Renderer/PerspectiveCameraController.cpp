@@ -43,13 +43,21 @@ namespace ap
     {
         EventDispatcher d(e);
 
+        static bool initial = true;
         if (m_isRotating)
         {
+            // For some reason camera tends to jump on first frame when capturing, so we ignore first frame
             d.Dispatch<MouseMovedEvent>([&](MouseMovedEvent& e)
                 {
                     // TODO: Add a sensitivity variable for offset
                     auto offset = glm::dvec2(e.GetX(), e.GetY()) - m_oldCursorPos;
                     offset = offset / 25. * glm::two_pi<double>();
+
+                    if (initial)
+                    {
+                        offset = glm::dvec2(0);
+                    //AP_CORE_ERROR("{:.2f}{:.2f}", offset.x, offset.y);
+                    }
 
                     // rhs coordinates
                     // positive x is ccw rotation
@@ -60,8 +68,14 @@ namespace ap
                     // Move cursor up with 10 px == +y rotation
                     // Cursor up is - offset, so negate y
                     m_camera.transform.Rotate(Radians(glm::vec3(-offset.y, -offset.x, 0)));
+                    initial = false;
                     return false;
                 });
+
+        }
+        else
+        {
+            initial = true;
         }
         //d.Dispatch<MouseButtonPressedEvent>([&](MouseButtonPressedEvent& e)
         //    {
@@ -90,6 +104,7 @@ namespace ap
         if(enable)
         {
             Input::EnableCursor(false);
+            m_oldCursorPos = Input::GetCursorPos();
             m_isRotating = true;
         }
         else

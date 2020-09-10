@@ -30,28 +30,7 @@ public:
             [&](ap::Entity e, ChunkDataComponent& data)
             {
                 m_chunks.AddChunk(data);
-
-                // TEMP: Spawn will be a command, should not be in ecs
-                reg.View<ChunkSpawnComponent>(
-                    [&](ap::Entity spawnEntity, ChunkSpawnComponent& spawnComp)
-                    {
-                        if (spawnComp.pos == data.pos)
-                        {
-                            reg.Destroy(spawnEntity);
-                            return;
-                        }
-                    });
-
                 reg.Destroy(e);
-            });
-
-        // TEMP: This will normally be done by the chunk data structure
-        reg.View<ChunkSpawnComponent>(
-            [](ap::Entity e, ChunkSpawnComponent& spawnComp)
-            {
-                // TODO: These should not be stored as entities
-                // Client will keep requesting entities
-                ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(spawnComp, 0)));
             });
     }
 
@@ -227,13 +206,11 @@ inline void InputResponseSystem(ap::Scene& scene)
     reg.View<InputComponent>(
         [&](ap::Entity e, InputComponent& input)
         {
-            auto blockWorldPos = input.blockPos;
-            // NOTE: Negative mod returns a positive number. I'd expect a negative, so because of that. We want to subract in case of negative values
-            auto mod = blockWorldPos % glm::ivec3(chunkDimensions);
-            // For example block pos -13 mod 8 returns 5 but I want -5 so update the sign
-            // -13 - -5 = -8 which is our chunk pos
-            //mod *= (blockWorldPos / glm::abs(blockWorldPos)); // Make sure to retain the sign
-            auto chunkWorldPos = blockWorldPos - mod;
+            auto& blockWorldPos = input.blockPos;
+            auto chunkWorldPos = WorldToChunkCoordinates(blockWorldPos);
+            //AP_TRACE("Mining {} {} {} Chunk {} {} {}",
+            //    blockWorldPos.x, blockWorldPos.y, blockWorldPos.z,
+            //    chunkWorldPos.x, chunkWorldPos.y, chunkWorldPos.z);
             // Get the correct chunk
             reg.View<ChunkDataComponent>(
                 [&](ap::Entity chunk, ChunkDataComponent& chunkData)
