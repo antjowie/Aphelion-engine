@@ -114,8 +114,10 @@ void createStack(const glm::mat4& t, unsigned size, float halfExtent)
 				* halfExtent);
 
 			auto body = ap::RigidBody::CreateDynamic(shape,1.f,tm * t);
-
-			//physx::PxRigidBodyExt::updateMassAndInertia(body.GetHandle(), 10.0f);
+			//physx::PxRigidBodyExt::updateMassAndInertia(*reinterpret_cast<physx::PxRigidBody*>(body.GetHandle()), 10.0f);
+			//auto body = ap::RigidBody::CreateStatic(shape, tm * t);
+			//auto body = ap::RigidBody::CreateStatic(tm * t);
+			//body.AddShape(shape);
 			scene->AddActor(body);
 		}
 	}
@@ -134,6 +136,7 @@ PhysicsDemoLayer::PhysicsDemoLayer() :
 
 void PhysicsDemoLayer::OnAttach()
 {
+	m_camera.Enable(true);
 	AP_WARN("Attaching");
 	ap::Timer timer;
 #ifdef USE_PX
@@ -184,7 +187,7 @@ void PhysicsDemoLayer::OnAttach()
 	sceneDesc.gravity = glm::vec3(0.f, -9.81f, 0.f);
 
 	scene = new ap::PhysicsScene(sceneDesc);
-	material = new ap::PhysicsMaterial(0.5f, 0.5f, 0.6f);
+	material = new ap::PhysicsMaterial(1,1,1);
 	
 	// Rigid bodies, volumes and collision triggers are actors. They are built from shapes which are built from geometry.
 	// (The shape can be compared to collider component in Unity (I think))
@@ -320,7 +323,9 @@ void PhysicsDemoLayer::OnUpdate(ap::Timestep ts)
 	static auto shader = ap::Shader::Create("res/shader/Texture3D.glsl");
 	static auto texture = ap::Texture2D::Create(1,1);
 	static auto textureSleep = ap::Texture2D::Create(1, 1);
-
+	static const auto lightDir = glm::normalize(glm::vec3(0.1f, -1.f, -0.4f));
+	shader->SetVec3("aLightDir", glm::value_ptr(lightDir));
+	shader->SetFloat("aAmbient", 0.2f);
 	unsigned white = 0xccccccff;
 	unsigned grey = 0x505050ff;
 	texture->SetData(reinterpret_cast<void*>(&white), sizeof(white));
@@ -332,6 +337,7 @@ void PhysicsDemoLayer::OnUpdate(ap::Timestep ts)
 	//AP_TRACE("Simulated scene {}", timer.Reset());
 
 	ap::Renderer::BeginScene(m_camera.GetCamera());
+	shader->Bind();
 	//ap::Renderer::Submit(shader, cube);
 	//texture->Bind();
 
@@ -346,7 +352,8 @@ void PhysicsDemoLayer::OnUpdate(ap::Timestep ts)
 		//float scale = 4.f;
 		auto bounds = actor.GetWorldBounds();
 		
-		ap::Renderer::Submit(shader, cube, actor.GetWorldTransform() * glm::scale(glm::mat4(1),bounds.GetDimensions()));	
+		ap::Renderer::Submit(shader, cube, actor.GetWorldTransform() * glm::scale(glm::mat4(1),glm::vec3(4.f)));	
+		//ap::Renderer::Submit(shader, cube, actor.GetWorldTransform());
 	}
 
 	ap::Renderer::EndScene();
