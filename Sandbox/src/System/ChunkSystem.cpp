@@ -1,54 +1,40 @@
 #include "System/ChunkSystem.h"
+#include <glm/gtc/noise.hpp>
 
 void GenerateChunk(ChunkDataComponent& chunk)
 {
     auto pos = chunk.pos;
     bool isAir = true;
     bool isSolid = true;
-    ForEach(chunk.chunk,[&](BlockType& block, int x, int y, int z)
+    ForEach(chunk.chunk, [&](BlockType& block, int x, int y, int z)
         {
-            //if (x % 2 == 0 && y % 2 == 0 && z % 2 == 0)
-            //{
-            //    if (y < chunkDimensions.y / 3) block = BlockType::Grass;
-            //    if (y > chunkDimensions.y / 3 * 2) block = BlockType::Dirt;
-            //    else block = BlockType::Stone;
-            //}
-            //else
-            //    block = BlockType::Air;
-
-            //return;
-
-            //if (x == 0 && z == 0)
-            //{
-            //    if (y == 4)
-            //        block = BlockType::Grass;
-
-            //    if (y == 2)
-            //        block = BlockType::Dirt;
-
-            //    if (y == 0)
-            //        block = BlockType::Stone;
-            //}
-            //else
-            //    block = BlockType::Air;
-            //return;
 
             // TODO: Refactor to chunk strategy
             x += pos.x;
             y += pos.y;
             z += pos.z;
 
-            if (y > 6)
+            // Top noise value
+            auto noisePos = glm::vec2(x, z);
+            constexpr float distrib = 0.25f; // Lower is more flat
+            noisePos *= distrib;
+            noisePos.x /= float(chunkDimensions.x);
+            noisePos.y /= float(chunkDimensions.z);
+            auto noise = glm::perlin(noisePos, glm::vec2(4));
+
+            int heigth = noise * 10.f;
+
+            if (y > heigth)
             {
                 block = BlockType::Air;
                 isSolid = false;
             }
-            else if (y == 6)
+            else if (y == heigth)
             {
                 block = BlockType::Grass;
                 isAir = false;
             }
-            else if (y > 2)
+            else if (y > heigth - 2)
             {
                 block = BlockType::Dirt;
                 isAir = false;

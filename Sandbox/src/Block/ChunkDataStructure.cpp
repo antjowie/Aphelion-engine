@@ -176,7 +176,7 @@ void ChunkDataStructure::AddChunk(const ChunkDataComponent& chunk)
                 if (chunk.isSolid && i == Dir::Bottom) break;
                 // NOTE: this is gonna make it so that blocks in the air are not spawned
                 // It's gonna look pretty weird
-                if (chunk.isAir && i == Dir::Top) break;
+                if (chunk.isAir && i != Dir::Bottom) break;
                 
                 auto nPos = GetNeighborWorldPos(data.pos, i);
                 //AP_INFO("Requesting {} {} {}", nPos.x, nPos.y, nPos.z);

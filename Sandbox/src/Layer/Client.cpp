@@ -13,6 +13,7 @@
 #include "Aphelion/Net/Client.h"
 #include "Aphelion/Net/ClientLayer.h"
 
+static int delta = 0;
 void ClientLayer::OnAttach()
 {
     m_scene.RegisterSystem(InputSystem(m_camera.GetCamera()));
@@ -32,11 +33,13 @@ void ClientLayer::OnAttach()
 #ifdef AP_DEBUG
     m_scene.SetOnEntityCreateCb([](ap::Entity entity)
     {
-        //AP_INFO("Created {}", entity.GetComponent<ap::GUIDComponent>());
+            delta++;
+            AP_INFO("Created {}", entity.GetComponent<ap::TagComponent>().tag.c_str());
     });
     m_scene.SetOnEntityDestroyCb([](ap::Entity entity)
     {
-        //AP_WARN("Destroyed {}", entity.GetComponent<ap::GUIDComponent>());    
+            delta--;
+            AP_WARN("Destroyed {}", entity.GetComponent<ap::TagComponent>().tag.c_str());    
     });
 #endif
     //m_camera.GetCamera().transform.Move(ap::Transform::GetWorldForward() * 5.f);
@@ -172,6 +175,7 @@ void ClientLayer::OnGuiRender()
         if(ImGui::CollapsingHeader("Client", ImGuiTreeNodeFlags_DefaultOpen))
         {
             DrawSceneStats(m_scene);
+            ImGui::Text("Delta entities %i", delta);
             ImGui::Text("Chunk request count %i", m_chunks.ChunkRequestCount());
 
             static int tick = 60;
