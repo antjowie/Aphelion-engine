@@ -35,6 +35,7 @@ struct ChunkDataComponent
     ChunkContainer chunk;
     int chunkIter;
     bool isAir;
+    bool isSolid;
 
     bool operator==(const ChunkDataComponent& rhs) const { return true; }
 };
@@ -46,6 +47,7 @@ void serialize(S& s, ChunkDataComponent& o)
     s.container1b(o.chunk, chunkCount);
     s.value4b(o.chunkIter);
     s.value1b(o.isAir);
+    s.value1b(o.isSolid);
 }
 
 struct ChunkSpawnCooldownComponent

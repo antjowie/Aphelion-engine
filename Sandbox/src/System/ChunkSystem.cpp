@@ -3,7 +3,8 @@
 void GenerateChunk(ChunkDataComponent& chunk)
 {
     auto pos = chunk.pos;
-    bool isSolid = false;
+    bool isAir = true;
+    bool isSolid = true;
     ForEach(chunk.chunk,[&](BlockType& block, int x, int y, int z)
         {
             //if (x % 2 == 0 && y % 2 == 0 && z % 2 == 0)
@@ -37,20 +38,30 @@ void GenerateChunk(ChunkDataComponent& chunk)
             y += pos.y;
             z += pos.z;
 
-            if (y <= 6)
-                isSolid = true;
-
             if (y > 6)
+            {
                 block = BlockType::Air;
+                isSolid = false;
+            }
             else if (y == 6)
+            {
                 block = BlockType::Grass;
+                isAir = false;
+            }
             else if (y > 2)
+            {
                 block = BlockType::Dirt;
+                isAir = false;
+            }
             else
+            {
                 block = BlockType::Stone;
+                isAir = false;
+            }
         });
 
-    chunk.isAir = !isSolid;
+    chunk.isAir = isAir;
+    chunk.isSolid = isSolid;
 }
 
 //void GenerateChunkMesh(const ChunkDataComponent& chunk, ap::VertexArrayRef& vao)

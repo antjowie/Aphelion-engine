@@ -29,9 +29,12 @@ public:
     ChunkDataStructure(ap::PhysicsScene& scene);
 
     void AddChunk(const ChunkDataComponent& chunk);
-    void Update();
+    void Update(float dt);
+    void SetPos(const glm::vec3& playerPos);
 
     void Render(const ap::PerspectiveCamera& cam);
+
+    unsigned ChunkRequestCount() const { return m_chunksToRequest.size(); }
 
 private:
     enum Dir

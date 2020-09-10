@@ -222,10 +222,16 @@ inline void InputResponseSystem(ap::Scene& scene)
                         //AP_CORE_INFO("FOUND");
                         auto blockChunkPos = blockWorldPos - chunkWorldPos;
                         
-                        if(input.mine)
+                        if (input.mine)
+                        {
                             GetBlock(chunkData.chunk, blockChunkPos.x, blockChunkPos.y, blockChunkPos.z) = BlockType::Air;
+                            chunkData.isSolid = false;
+                        }
                         else
+                        {
                             GetBlock(chunkData.chunk, blockChunkPos.x, blockChunkPos.y, blockChunkPos.z) = BlockType::Stone;
+                            chunkData.isAir = false;
+                        }
                         chunkData.chunkIter++;
 
                         // TODO: Only send this to interested parties

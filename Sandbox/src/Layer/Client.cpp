@@ -155,7 +155,12 @@ void ClientLayer::OnUpdate(ap::Timestep ts)
     }
     clientIsReconciling = false;
 
-    m_chunks.Update();
+    m_scene.GetRegistry(0).View<ap::TransformComponent, Player>([&](ap::Entity& e, ap::TransformComponent& t, Player&)
+        {
+            m_chunks.SetPos(t.t.GetPosition());
+        });
+
+    m_chunks.Update(ts);
     m_chunks.Render(m_camera.GetCamera());
     m_scene.Simulate(ts);
 }
@@ -170,10 +175,12 @@ void ClientLayer::OnGuiRender()
         if(ImGui::CollapsingHeader("Client"))
         {
             DrawSceneStats(m_scene);
+            ImGui::Text("Chunk request count %i", m_chunks.ChunkRequestCount());
 
             static int tick = 60;
             ImGui::SliderInt("Tickrate", &tick, 1, 200);
             ap::NetClientLayer::m_config.rate = 1.f / (float)tick;
+
 
 #ifdef AP_DEBUG
             if (ImGui::CollapsingHeader("Inspector"))

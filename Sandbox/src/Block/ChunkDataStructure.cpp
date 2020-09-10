@@ -125,7 +125,7 @@ ChunkDataStructure::ChunkDataStructure(ap::PhysicsScene& scene)
 
 void ChunkDataStructure::AddChunk(const ChunkDataComponent& chunk)
 {
-    AP_INFO("Got {} {} {}", chunk.pos.x, chunk.pos.y, chunk.pos.z);
+    //AP_INFO("Got {} {} {}", chunk.pos.x, chunk.pos.y, chunk.pos.z);
     // Check if chunk already exists and is not received again
     if (m_chunks.count(chunk.pos) == 1)
     {
@@ -173,30 +173,21 @@ void ChunkDataStructure::AddChunk(const ChunkDataComponent& chunk)
             auto& n = neighbors[i];
             if (!n)
             {
+                if (chunk.isSolid && i == Dir::Bottom) break;
+                
                 auto nPos = GetNeighborWorldPos(data.pos, i);
-                AP_INFO("Requesting {} {} {}", nPos.x, nPos.y, nPos.z);
-                m_chunksToRequest.push_back(nPos);
+                //AP_INFO("Requesting {} {} {}", nPos.x, nPos.y, nPos.z);
+                m_chunksToRequest.push_back(nPos);                
             }
         }
     }
 }
 
-void ChunkDataStructure::Update()
+void ChunkDataStructure::Update(float dt)
 {
-    //for (int x = -2; x < 5; x++)
-    //    for (int z = -2; z < 2; z++)
-    //    {
-    //        ChunkSpawnComponent spawn;
-
-    //        spawn.pos = glm::vec3(x * chunkDimensions.x, 0, z * chunkDimensions.z);
-
-    //        if(m_chunks.count(spawn.pos) == 0)
-    //        ap::Application::Get().OnEvent(ap::ClientSendPacketEvent(ap::Serialize(spawn, 0)));
-    //    }
-
     /*
     How to implement prioritized chunk loading
-    I will just load in a circular pattern. It seems the easiest for now. 
+    I will just load in a circular pattern. It seems the easiest for now. No prio at all
     In a fifo queue load the initial chunk. 
     For each chunk without full neighbors
         If in render distance
@@ -209,6 +200,16 @@ void ChunkDataStructure::Update()
     Get the chunks without fully populated neighbors and request their chunks if inside radius.
     */
 
+    // Request 10 times a second
+    static float cooldown = 0.f;
+    if (cooldown <= 0.f)
+        cooldown = 0.05f;
+    else
+    {
+        cooldown -= dt;
+        return;
+    }
+
     if (m_chunks.count(m_playerChunkPos) == 0)
     {
         ChunkSpawnComponent spawn;
@@ -219,10 +220,10 @@ void ChunkDataStructure::Update()
 
     //AP_TRACE(m_chunksToRequest.size());
 
-    int iter = 1;
+    int iter = 6;
     for (const auto& request : m_chunksToRequest)
     {
-        AP_WARN("Waiting for {} {} {}", request.x, request.y, request.z);
+        //AP_WARN("Waiting for {} {} {}", request.x, request.y, request.z);
 
         ChunkSpawnComponent spawn;
         spawn.pos = request;
@@ -230,6 +231,18 @@ void ChunkDataStructure::Update()
 
         iter--;
         if (iter <= 0) return;
+    }
+}
+
+void ChunkDataStructure::SetPos(const glm::vec3& playerPos)
+{
+    auto oldPos = m_playerChunkPos;
+    m_playerChunkPos = WorldToChunkCoordinates(glm::ivec3(playerPos));
+
+    if (m_playerChunkPos != oldPos)
+    {
+        // TODO: Resort request queue
+        m_chunksToRequest.clear();
     }
 }
 

@@ -25,7 +25,7 @@ namespace ap
         // direction. We want to transform relatively among the camera view dir. Camera view dir and transform forward are not the same
         const glm::vec3 forward(-m_camera.transform.GetForward());
         const glm::vec3 right(m_camera.transform.GetRight());
-        const glm::vec3 up(m_camera.transform.GetUp());
+        const glm::vec3 up(m_camera.transform.GetWorldUp());
 
         if (Input::IsKeyPressed(KeyCode::W)) offset += forward;
         if (Input::IsKeyPressed(KeyCode::A)) offset += -right;
