@@ -1,6 +1,8 @@
 #include "Aphelion/ECS/Scene.h"
 #include "Aphelion/Core/Time.h"
 
+#include <glm/gtx/matrix_decompose.hpp>
+
 namespace ap
 {
     /**
@@ -45,6 +47,25 @@ namespace ap
 
         // Execute simulation
         m_physicsScene.Simulate(ts);
+
+        // Update all transforms with physics transforms
+        //GetRegistry(0).View<ap::TransformComponent, ap::RigidBodyComponent>(
+        //    [](ap::Entity& e, ap::TransformComponent& t, ap::RigidBodyComponent& r)
+        //    {
+        //        if (!r.GetRigidBody()) return;
+
+        //        auto rbT = r.GetRigidBody().GetWorldTransform();
+
+        //        glm::vec3 scale;
+        //        glm::quat rotation;
+        //        glm::vec3 translation;
+        //        glm::vec3 skew;
+        //        glm::vec4 perspective;
+        //        glm::decompose(rbT, scale, rotation, translation, skew, perspective);
+
+        //        t.t.SetPosition(translation);
+        //        //t.t.SetRotation(rotation);
+        //    });
 
         for (auto& system : m_systems)
             system(*this);

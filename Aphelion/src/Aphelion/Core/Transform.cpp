@@ -52,4 +52,8 @@ namespace ap
     {
         return m_euler;
     }
+    glm::quat Transform::GetRotation() const
+    {
+        return glm::quat(m_euler);
+    }
 }

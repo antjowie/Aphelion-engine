@@ -41,6 +41,7 @@ namespace ap
         void Rotate(const glm::quat& quat);
         void Rotate(const glm::vec3& euler);
         const glm::vec3& GetEulerRotation() const;
+        glm::quat GetRotation() const;
 
         glm::mat4 GetWorldMatrix() const;
 
