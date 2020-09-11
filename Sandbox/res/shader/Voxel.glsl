@@ -17,8 +17,10 @@ void main()
 {
     gl_Position =  aVP * aTransform * vec4(aPos, 1.0f);
     tex = aTex;
-    normal = aNormal;
     texIndex = aIndex;
+
+    normal = vec3(aTransform * vec4(aNormal,0));
+    normal = normalize(normal);
 }
 
 #type fragment

@@ -110,7 +110,7 @@ public:
         //auto view = reg.Get().view<ap::TransformComponent, Sprite>();
 
         m_texture->Bind();
-            //m_shader->Bind();
+        m_shader->Bind();
 
         // TODO: Move BeginScene to Layer
         ap::Renderer::BeginScene(m_cam);

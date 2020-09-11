@@ -148,11 +148,11 @@ void ClientLayer::OnUpdate(ap::Timestep ts)
             entity.HasComponent<Player>() && p.clientSimulation != -1 && 
             !m_scene.GetRegistry(delta).HandleAndReconcilePacket(guid, p))
         {
-            auto newT = ap::Deserialize<ap::Transform>(p);
+            auto newT = ap::Deserialize<ap::TransformComponent>(p);
 
             AP_WARN("Reconciliation!!!");
             // TODO: Reconciliate subsequent registries
-            auto player = entity.GetComponent<ap::Transform>() = newT;
+            auto player = entity.GetComponent<ap::TransformComponent>() = newT;
             //m_scene.GetRegistry().HandlePacket(local, p);
         }
     }
