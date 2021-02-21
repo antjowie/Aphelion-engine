@@ -10,7 +10,7 @@ set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "")
 
 # Set some global variables since these have to be consistent amongst all targets
 
-# Normally you can set this during build time. But PhysX is build during configure timeout
+# Normally you can set this during build time. But PhysX is build during configure time
 # so we have to set it already
 set(MSVC_EXTENSION ${CMAKE_BUILD_TYPE})
 if(CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
@@ -24,6 +24,10 @@ message(STATUS "CRT: ${CMAKE_MSVC_RUNTIME_LIBRARY}")
 
 project(Application)
 
+# Build all the systems
+set(CMAKE_FOLDER Aphelion)
 add_subdirectory(Aphelion)
-add_subdirectory(Sandbox)
-add_subdirectory(Demo/Physics)
+
+set(CMAKE_FOLDER Demo)
+add_subdirectory(Sandbox/VoxelCraft)
+add_subdirectory(Sandbox/PhysicsDemo)

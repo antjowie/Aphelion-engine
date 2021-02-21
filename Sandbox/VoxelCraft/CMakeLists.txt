@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(Sandbox VERSION 1.0
+project(VoxelCraft VERSION 1.0
                 LANGUAGES CXX
 )
 
-add_executable(Sandbox
+add_executable(VoxelCraft
     src/Block/BlockLibrary.cpp
     src/Block/BlockLibrary.h
     src/Block/BlockType.cpp
@@ -34,16 +34,16 @@ add_executable(Sandbox
     src/Primitives.h
 )
 
-target_include_directories(Sandbox PUBLIC src)
+target_include_directories(VoxelCraft PUBLIC src)
 
 add_custom_command(
-    TARGET Sandbox
+    TARGET VoxelCraft
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} 
     -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/res/
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/res/
-    COMMENT "Copying Sandbox resources to output dir"
+    COMMENT "Copying VoxelCraft resources to output dir"
 )
 
-target_link_libraries(Sandbox PUBLIC Aphelion::Runtime)
+target_link_libraries(VoxelCraft PUBLIC Aphelion::Runtime)
