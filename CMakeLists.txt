@@ -29,5 +29,6 @@ set(CMAKE_FOLDER Aphelion)
 add_subdirectory(Aphelion)
 
 set(CMAKE_FOLDER Demo)
+add_subdirectory(Sandbox/2DPlatformer)
 add_subdirectory(Sandbox/VoxelCraft)
 add_subdirectory(Sandbox/PhysicsDemo)
