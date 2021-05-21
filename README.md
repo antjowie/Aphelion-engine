@@ -1,4 +1,6 @@
 # Aphelion Engine
+> I am redesigning this engine with support to target WebGL. See it [here (AphelionWeb)](https://github.com/antjowie/AphelionWeb)
+
 A cross platform game engine written, made as an educational passion project.  
 You can follow the development of this project on the [Trello page](https://trello.com/b/XO0iYUhz/voxelcraft)
 
